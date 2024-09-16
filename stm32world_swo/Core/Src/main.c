@@ -57,21 +57,24 @@ static void MX_USART1_UART_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
-// Send printf to uart1
+// Send stdout to USART1 and stderr to SWO
 int _write(int fd, char *ptr, int len) {
-    HAL_StatusTypeDef hstatus;
 
-    if (fd == 1 || fd == 2) {
+    if (fd == 1) {
+        HAL_StatusTypeDef hstatus;
         hstatus = HAL_UART_Transmit(&huart1, (uint8_t*) ptr, len, HAL_MAX_DELAY);
         if (hstatus == HAL_OK)
             return len;
         else
             return -1;
+    } else if (fd == 2) {
+        for (int i = 0; i < len; i++) {
+            ITM_SendChar(ptr[i]); /* core_cm4.h */
+        }
+        return len;
     }
     return -1;
-
 }
-
 inline uint32_t HAL_GetTick(void) {
     return uwTick;
 }
@@ -117,7 +120,9 @@ int main(void)
     /* Infinite loop */
     /* USER CODE BEGIN WHILE */
 
-    uint32_t now = 0, next_tick = 1000, loop_cnt = 0;
+    volatile uint32_t now = 0;
+    volatile uint32_t next_tick = 1000;
+    volatile uint32_t loop_cnt = 0;
 
     while (1) {
 
@@ -125,7 +130,8 @@ int main(void)
 
         if (now >= next_tick) {
 
-            printf("Tick %lu (loop = %lu)\n", now / 1000, loop_cnt);
+            fprintf(stdout, "Tick %lu (loop = %lu)\n", now / 1000, loop_cnt);
+            fprintf(stderr, "Tick %lu (loop = %lu)\n", now / 1000, loop_cnt);
 
             loop_cnt = 0;
 
