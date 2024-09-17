@@ -43,7 +43,9 @@
 UART_HandleTypeDef huart1;
 
 /* USER CODE BEGIN PV */
-
+//uint32_t now = 0;
+//uint32_t next_tick = 1000;
+//uint32_t loop_cnt = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -75,6 +77,8 @@ int _write(int fd, char *ptr, int len) {
     }
     return -1;
 }
+
+// Override the weak HAL_GetTick function to declare it inline
 inline uint32_t HAL_GetTick(void) {
     return uwTick;
 }
@@ -120,9 +124,9 @@ int main(void)
     /* Infinite loop */
     /* USER CODE BEGIN WHILE */
 
-    volatile uint32_t now = 0;
-    volatile uint32_t next_tick = 1000;
-    volatile uint32_t loop_cnt = 0;
+    uint32_t now = 0;
+    uint32_t next_tick = 1000;
+    uint32_t loop_cnt = 0;
 
     while (1) {
 
@@ -130,8 +134,7 @@ int main(void)
 
         if (now >= next_tick) {
 
-            fprintf(stdout, "Tick %lu (loop = %lu)\n", now / 1000, loop_cnt);
-            fprintf(stderr, "Tick %lu (loop = %lu)\n", now / 1000, loop_cnt);
+            printf("Tick %lu (loop = %lu)\n", now / 1000, loop_cnt);
 
             loop_cnt = 0;
 

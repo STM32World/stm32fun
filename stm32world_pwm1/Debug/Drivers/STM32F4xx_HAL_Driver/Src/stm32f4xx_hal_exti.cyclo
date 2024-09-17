@@ -5,5 +5,5 @@
 ../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_exti.c:394:19:HAL_EXTI_GetHandle	2
 ../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_exti.c:434:6:HAL_EXTI_IRQHandler	3
 ../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_exti.c:466:10:HAL_EXTI_GetPending	1
-../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_exti.c:495:6:HAL_EXTI_ClearPending	1
-../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_exti.c:516:6:HAL_EXTI_GenerateSWI	1
+../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_exti.c:498:6:HAL_EXTI_ClearPending	1
+../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_exti.c:522:6:HAL_EXTI_GenerateSWI	1
