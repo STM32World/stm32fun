@@ -1,0 +1,14 @@
+../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rng.c:155:19:HAL_RNG_Init	3
+../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rng.c:216:19:HAL_RNG_DeInit	2
+../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rng.c:262:13:HAL_RNG_MspInit	1
+../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rng.c:277:13:HAL_RNG_MspDeInit	1
+../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rng.c:536:19:HAL_RNG_GenerateRandomNumber	6
+../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rng.c:594:19:HAL_RNG_GenerateRandomNumber_IT	3
+../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rng.c:629:10:HAL_RNG_GetRandomNumber	2
+../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rng.c:648:10:HAL_RNG_GetRandomNumber_IT	2
+../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rng.c:689:6:HAL_RNG_IRQHandler	6
+../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rng.c:764:10:HAL_RNG_ReadLastRandomNumber	1
+../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rng.c:776:13:HAL_RNG_ReadyDataCallback	1
+../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rng.c:792:13:HAL_RNG_ErrorCallback	1
+../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rng.c:826:22:HAL_RNG_GetState	1
+../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rng.c:836:10:HAL_RNG_GetError	1
