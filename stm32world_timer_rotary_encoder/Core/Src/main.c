@@ -1,20 +1,20 @@
 /* USER CODE BEGIN Header */
 /**
-  ******************************************************************************
-  * @file           : main.c
-  * @brief          : Main program body
-  ******************************************************************************
-  * @attention
-  *
-  * Copyright (c) 2024 STMicroelectronics.
-  * All rights reserved.
-  *
-  * This software is licensed under terms that can be found in the LICENSE file
-  * in the root directory of this software component.
-  * If no LICENSE file comes with this software, it is provided AS-IS.
-  *
-  ******************************************************************************
-  */
+ ******************************************************************************
+ * @file           : main.c
+ * @brief          : Main program body
+ ******************************************************************************
+ * @attention
+ *
+ * Copyright (c) 2024 STMicroelectronics.
+ * All rights reserved.
+ *
+ * This software is licensed under terms that can be found in the LICENSE file
+ * in the root directory of this software component.
+ * If no LICENSE file comes with this software, it is provided AS-IS.
+ *
+ ******************************************************************************
+ */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
@@ -82,6 +82,16 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim) {
     }
 }
 
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
+    if (GPIO_Pin == BTN_Pin) { // If the button
+        if (htim3.Instance->CNT != 0) {
+            htim3.Instance->CNT = 0;
+            r = 0;
+            r_change = 1;
+        }
+    }
+}
+
 /* USER CODE END 0 */
 
 /**
@@ -117,39 +127,39 @@ int main(void)
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
 
-  printf("\n\n\n\n--------\nStarting\n");
+    printf("\n\n\n\n--------\nStarting\n");
 
-  HAL_TIM_Encoder_Start_IT(&htim3, TIM_CHANNEL_ALL);
+    HAL_TIM_Encoder_Start_IT(&htim3, TIM_CHANNEL_ALL);
 
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 
-  uint32_t next_tick = 1000, now = 0, loop_cnt = 0;
+    uint32_t next_tick = 1000, now = 0, loop_cnt = 0;
 
-  while (1)
-  {
+    while (1)
+    {
 
-      now = HAL_GetTick();
-      if (now  >= next_tick) {
-          //printf("Encoder counter = %-3ld\n", (int32_t)TIM3->CNT);
-          printf("Tick %lu (loop = %lu)\n", now / 1000, loop_cnt);
-          loop_cnt = 0;
-          next_tick = now + 1000;
-      }
+        now = HAL_GetTick();
+        if (now >= next_tick) {
+            //printf("Encoder counter = %-3ld\n", (int32_t)TIM3->CNT);
+            printf("Tick %lu (loop = %lu)\n", now / 1000, loop_cnt);
+            loop_cnt = 0;
+            next_tick = now + 1000;
+        }
 
-      if (r_change) {
-          printf("Rotation: %d\n", r);
-          r_change = 0;
-      }
+        if (r_change) {
+            printf("Rotation: %d\n", r);
+            r_change = 0;
+        }
 
-      ++loop_cnt;
+        ++loop_cnt;
 
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-  }
+    }
   /* USER CODE END 3 */
 }
 
@@ -321,11 +331,11 @@ static void MX_GPIO_Init(void)
 void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
-  /* User can add his own implementation to report the HAL error return state */
-  __disable_irq();
-  while (1)
-  {
-  }
+    /* User can add his own implementation to report the HAL error return state */
+    __disable_irq();
+    while (1)
+    {
+    }
   /* USER CODE END Error_Handler_Debug */
 }
 

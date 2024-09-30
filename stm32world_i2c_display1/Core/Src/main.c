@@ -130,9 +130,9 @@ int main(void)
 
     lcd_init ();
     lcd_put_cur(0, 0);
-    lcd_send_string ("Hello World!");
-    lcd_put_cur(1, 0);
-    lcd_send_string("from STM32World");
+    lcd_send_string ("STM32World!");
+    //lcd_put_cur(1, 0);
+    //lcd_send_string("from STM32World");
 
   /* USER CODE END 2 */
 
