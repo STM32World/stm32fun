@@ -54,6 +54,8 @@ UART_HandleTypeDef huart1;
 
 /* USER CODE BEGIN PV */
 uint16_t buffer[2 * BUFFER_SIZE];
+uint16_t last_adc;
+uint32_t last_seed;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -94,8 +96,10 @@ void do_adc(uint16_t *buf) {
         if (i != BUFFER_SIZE - 1) seed = seed << 1;
     }
 
-    printf("New seed: 0x%08lx\n", seed);
+    //printf("New seed: 0x%08lx\n", seed);
     srandom(seed);
+    last_adc = buf[0];
+    last_seed = seed;
 
 }
 
@@ -151,14 +155,12 @@ int main(void)
   HAL_TIM_Base_Start_IT(&htim8);
   HAL_ADC_Start_DMA(&hadc3, (uint32_t *)&buffer, 2 * BUFFER_SIZE);
 
-  //trng_init();
-
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 
-  uint32_t loop_cnt = 0, now = 0, next_tick = 1000;
+  uint32_t loop_cnt = 0, now = 0, next_tick = 1100;
 
   while (1) {
 
@@ -175,7 +177,7 @@ int main(void)
           // To get the full 32 bit we only use the lower 16 bit but use it twice - RAND_MAX is 0x7fffffff
           uint32_t r2 = (uint32_t)( ((random() & 0xffff) << 16) | ( random() & 0xffff) );
 
-          printf("Tick %lu loop = %lu r1 = 0x%08lx r2 = 0x%08lx\n", now / 1000, loop_cnt, r1, r2);
+          printf("Tick %5lu loop=%7lu la=0x%04x ls=0x%08lx r1=0x%08lx r2=0x%08lx\n", now / 1000, loop_cnt, last_adc, last_seed, r1, r2);
 
           loop_cnt = 0;
           next_tick = now + 1000;
