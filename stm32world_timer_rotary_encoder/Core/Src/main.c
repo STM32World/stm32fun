@@ -52,8 +52,8 @@ uint8_t r_change = 0;
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
-static void MX_TIM3_Init(void);
 static void MX_USART1_UART_Init(void);
+static void MX_TIM3_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -123,8 +123,8 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_TIM3_Init();
   MX_USART1_UART_Init();
+  MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
 
     printf("\n\n\n\n--------\nStarting\n");
@@ -143,14 +143,13 @@ int main(void)
 
         now = HAL_GetTick();
         if (now >= next_tick) {
-            //printf("Encoder counter = %-3ld\n", (int32_t)TIM3->CNT);
-            printf("Tick %lu (loop = %lu)\n", now / 1000, loop_cnt);
+            printf("Tick %lu (loop = %lu rot = %lu)\n", now / 1000, loop_cnt, TIM3->CNT);
             loop_cnt = 0;
             next_tick = now + 1000;
         }
 
         if (r_change) {
-            printf("Rotation: %d\n", r);
+            printf("Rotation = %d\n", r);
             r_change = 0;
         }
 
