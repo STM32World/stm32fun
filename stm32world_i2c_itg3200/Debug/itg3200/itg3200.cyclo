@@ -1,0 +1,5 @@
+../itg3200/itg3200.c:27:18:itg3200_write	2
+../itg3200/itg3200.c:38:18:itg3200_read	2
+../itg3200/itg3200.c:48:18:itg3200_read_register	3
+../itg3200/itg3200.c:63:18:itg3200_init	3
+../itg3200/itg3200.c:87:18:itg3200_get_temp	2
