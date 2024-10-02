@@ -40,6 +40,7 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
+TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim3;
 
 UART_HandleTypeDef huart1;
@@ -47,6 +48,7 @@ UART_HandleTypeDef huart1;
 /* USER CODE BEGIN PV */
 int16_t r = 0;
 uint8_t r_change = 0;
+uint32_t r_cnt = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -54,6 +56,7 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_USART1_UART_Init(void);
 static void MX_TIM3_Init(void);
+static void MX_TIM2_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -78,6 +81,8 @@ int _write(int fd, char *ptr, int len) {
 void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim) {
     if (htim->Instance == TIM3) {
         r = htim->Instance->CNT;
+        r_cnt = TIM2->CNT;
+        TIM2->CNT = 0;
         r_change = 1;
     }
 }
@@ -87,6 +92,8 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
         if (htim3.Instance->CNT != 0) {
             htim3.Instance->CNT = 0;
             r = 0;
+            r_cnt = 0;
+            TIM2->CNT = 0;
             r_change = 1;
         }
     }
@@ -125,10 +132,12 @@ int main(void)
   MX_GPIO_Init();
   MX_USART1_UART_Init();
   MX_TIM3_Init();
+  MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
 
     printf("\n\n\n\n--------\nStarting\n");
 
+    HAL_TIM_Base_Start(&htim2);
     HAL_TIM_Encoder_Start_IT(&htim3, TIM_CHANNEL_ALL);
 
   /* USER CODE END 2 */
@@ -143,13 +152,13 @@ int main(void)
 
         now = HAL_GetTick();
         if (now >= next_tick) {
-            printf("Tick %lu (loop = %lu rot = %lu)\n", now / 1000, loop_cnt, TIM3->CNT);
+            printf("Tick %lu (loop = %lu rot = %lu tim = %lu)\n", now / 1000, loop_cnt, TIM3->CNT, TIM2->CNT);
             loop_cnt = 0;
             next_tick = now + 1000;
         }
 
         if (r_change) {
-            printf("Rotation = %d\n", r);
+            printf("Rotation = %d (speed = %lu)\n", r, r_cnt);
             r_change = 0;
         }
 
@@ -208,6 +217,58 @@ void SystemClock_Config(void)
 }
 
 /**
+  * @brief TIM2 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM2_Init(void)
+{
+
+  /* USER CODE BEGIN TIM2_Init 0 */
+
+  /* USER CODE END TIM2_Init 0 */
+
+  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+  TIM_SlaveConfigTypeDef sSlaveConfig = {0};
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+  /* USER CODE BEGIN TIM2_Init 1 */
+
+  /* USER CODE END TIM2_Init 1 */
+  htim2.Instance = TIM2;
+  htim2.Init.Prescaler = 84 - 1;
+  htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim2.Init.Period = 4294967295;
+  htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim2, &sClockSourceConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sSlaveConfig.SlaveMode = TIM_SLAVEMODE_DISABLE;
+  sSlaveConfig.InputTrigger = TIM_TS_ITR2;
+  if (HAL_TIM_SlaveConfigSynchro(&htim2, &sSlaveConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_ENABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim2, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM2_Init 2 */
+
+  /* USER CODE END TIM2_Init 2 */
+
+}
+
+/**
   * @brief TIM3 Initialization Function
   * @param None
   * @retval None
@@ -244,7 +305,7 @@ static void MX_TIM3_Init(void)
   {
     Error_Handler();
   }
-  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_UPDATE;
   sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
   if (HAL_TIMEx_MasterConfigSynchronization(&htim3, &sMasterConfig) != HAL_OK)
   {
