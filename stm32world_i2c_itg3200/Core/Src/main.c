@@ -134,10 +134,10 @@ int main(void)
         printf("Error\n");
     }
 
-    printf("Getting temperature\n");
-    if (itg3200_get_temp(&itg) != ITG3200_OK) {
-        printf("Error\n");
-    }
+//    printf("Getting temperature\n");
+//    if (itg3200_get_temp(&itg) != ITG3200_OK) {
+//        printf("Error\n");
+//    }
 
   /* USER CODE END 2 */
 
@@ -151,9 +151,10 @@ int main(void)
 
         if (now >= next_tick) {
 
-            itg3200_get_temp(&itg);
+            float temperature;
+            itg3200_get_temp(&itg, &temperature);
 
-            //printf("Tick %lu (loop = %lu)\n", now / 1000, loop_cnt);
+            printf("Tick %lu (loop = %lu temp = %0.2f)\n", now / 1000, loop_cnt, temperature);
 
             loop_cnt = 0;
             next_tick = now + 1000;

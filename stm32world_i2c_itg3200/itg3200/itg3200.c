@@ -18,11 +18,7 @@
 #include "main.h"
 #include "itg3200.h"
 
-static const float GYRO_TEMP_SENSITIVITY = 280.0;
-static const int GYRO_TEMP_OFFSET = -13200;
-static const float GYRO_TEMP_OFFSET_CELSIUS = 35.0;
-
-// Private functions
+// Private i2c read/write functions
 
 ITG3200_result_t itg3200_write(ITG3200_HandleTypeDef *itg, uint8_t *data, uint16_t len) {
 
@@ -69,6 +65,7 @@ ITG3200_result_t itg3200_init(ITG3200_HandleTypeDef *itg, I2C_HandleTypeDef *i2c
     HAL_Delay(50);
 
     uint8_t addr;
+    uint8_t w_buf[2];
 
     if (itg3200_read_register(itg, ITG3200_REG_WHO_AM_I, &addr, 1) != ITG3200_OK) {
         return ITG3200_Err;
@@ -81,21 +78,42 @@ ITG3200_result_t itg3200_init(ITG3200_HandleTypeDef *itg, I2C_HandleTypeDef *i2c
         return ITG3200_Err;
     }
 
+    // Set sample rate
+    w_buf[0] = ITG3200_REG_SMPLRT_DIV;
+    w_buf[1] = 125;
+    if (itg3200_write(itg, (uint8_t*) &w_buf, 2) != ITG3200_OK) {
+        ITG_DBG("Write error\n");
+    }
+
+    // Set DLPF, Full Scale
+    w_buf[0] = ITG3200_REG_DLPF_FS;
+    w_buf[1] = 0b00011110;
+    if (itg3200_write(itg, (uint8_t*) &w_buf, 2) != ITG3200_OK) {
+        ITG_DBG("Write error\n");
+    }
+
+    // Set power
+    w_buf[0] = ITG3200_REG_PWR_MGM;
+    w_buf[1] = 0b00000001;
+    if (itg3200_write(itg, (uint8_t*) &w_buf, 2) != ITG3200_OK) {
+        ITG_DBG("Write error\n");
+    }
+
     return ITG3200_OK;
 }
 
-ITG3200_result_t itg3200_get_temp(ITG3200_HandleTypeDef *itg) {
-    ITG_DBG("itg_get_temp\n");
+ITG3200_result_t itg3200_get_temp(ITG3200_HandleTypeDef *itg, float *temperature) {
+    //ITG_DBG("itg_get_temp\n");
 
     uint8_t temp_data[2];
 
-    if (itg3200_read_register(itg, ITG3200_REG_TEMP_DATA, (uint8_t *)&temp_data, sizeof(temp_data)) != ITG3200_OK) {
+    if (itg3200_read_register(itg, ITG3200_REG_TEMP_DATA, (uint8_t*) &temp_data, sizeof(temp_data)) != ITG3200_OK) {
         return ITG3200_Err;
     }
 
-    float t = (((float)((temp_data[0] | temp_data[1]<<8) + GYRO_TEMP_OFFSET))/GYRO_TEMP_SENSITIVITY) + GYRO_TEMP_OFFSET_CELSIUS;
+    *temperature = 35.0 + ((float) (((int8_t) temp_data[0] << 8) | temp_data[1]) + 13200.0) / 280.0;
 
-    ITG_DBG("temp hi = %d, temp lo = %d full = %f\n", temp_data[0], temp_data[1], t);
+    //ITG_DBG("temp hi = %d, temp lo = %d temp = %f\n", temp_data[0], temp_data[1], t);
 
     return ITG3200_OK;
 }

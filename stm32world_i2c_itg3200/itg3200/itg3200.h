@@ -58,6 +58,6 @@ typedef enum {
 } ITG3200_result_t;
 
 ITG3200_result_t itg3200_init(ITG3200_HandleTypeDef *itg, I2C_HandleTypeDef *i2c, uint16_t i2c_addr);
-ITG3200_result_t itg3200_get_temp(ITG3200_HandleTypeDef *itg);
+ITG3200_result_t itg3200_get_temp(ITG3200_HandleTypeDef *itg, float *temperature);
 
 #endif /* ITG3200_H_ */

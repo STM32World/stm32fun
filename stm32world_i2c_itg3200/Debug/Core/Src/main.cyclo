@@ -1,7 +1,7 @@
-../Core/Src/main.c:289:13:MX_GPIO_Init	1
+../Core/Src/main.c:290:13:MX_GPIO_Init	1
 ../Core/Src/main.c:65:5:_write	3
-../Core/Src/main.c:311:6:Error_Handler	1
-../Core/Src/main.c:256:13:MX_USART1_UART_Init	1
-../Core/Src/main.c:222:13:MX_I2C2_Init	1
-../Core/Src/main.c:176:6:SystemClock_Config	1
-../Core/Src/main.c:84:5:main	8
+../Core/Src/main.c:312:6:Error_Handler	1
+../Core/Src/main.c:257:13:MX_USART1_UART_Init	1
+../Core/Src/main.c:223:13:MX_I2C2_Init	1
+../Core/Src/main.c:177:6:SystemClock_Config	1
+../Core/Src/main.c:84:5:main	7
