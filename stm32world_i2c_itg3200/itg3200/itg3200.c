@@ -80,7 +80,7 @@ ITG3200_result_t itg3200_init(ITG3200_HandleTypeDef *itg, I2C_HandleTypeDef *i2c
 
     // Set sample rate
     w_buf[0] = ITG3200_REG_SMPLRT_DIV;
-    w_buf[1] = 125;
+    w_buf[1] = 7;
     if (itg3200_write(itg, (uint8_t*) &w_buf, 2) != ITG3200_OK) {
         ITG_DBG("Write error\n");
     }
@@ -105,15 +105,30 @@ ITG3200_result_t itg3200_init(ITG3200_HandleTypeDef *itg, I2C_HandleTypeDef *i2c
 ITG3200_result_t itg3200_get_temp(ITG3200_HandleTypeDef *itg, float *temperature) {
     //ITG_DBG("itg_get_temp\n");
 
-    uint8_t temp_data[2];
+    ITG3200_Temp_TypeDef raw;
 
-    if (itg3200_read_register(itg, ITG3200_REG_TEMP_DATA, (uint8_t*) &temp_data, sizeof(temp_data)) != ITG3200_OK) {
+    if (itg3200_read_register(itg, ITG3200_REG_TEMP_DATA, (uint8_t*)&raw, sizeof(raw)) != ITG3200_OK) {
         return ITG3200_Err;
     }
 
-    *temperature = 35.0 + ((float) (((int8_t) temp_data[0] << 8) | temp_data[1]) + 13200.0) / 280.0;
+    *temperature = 35.0 + (((raw.temp_hi << 8) | raw.temp_lo) + 13200.0) / 280.0;
 
     //ITG_DBG("temp hi = %d, temp lo = %d temp = %f\n", temp_data[0], temp_data[1], t);
+
+    return ITG3200_OK;
+}
+
+ITG3200_result_t itg3200_get_rot(ITG3200_HandleTypeDef *itg, float *x, float *y, float *z) {
+
+    ITG3200_Gyro_TypeDef raw;
+
+    if (itg3200_read_register(itg, ITG3200_REG_GYRO_DATA, (uint8_t*) &raw, sizeof(raw)) != ITG3200_OK) {
+        return ITG3200_Err;
+    }
+
+    *x = (raw.gyro_x_hi << 8 | raw.gyro_x_lo) / 14.375;
+    *y = (raw.gyro_y_hi << 8 | raw.gyro_y_lo) / 14.375;
+    *z = (raw.gyro_z_hi << 8 | raw.gyro_z_lo) / 14.375;
 
     return ITG3200_OK;
 }

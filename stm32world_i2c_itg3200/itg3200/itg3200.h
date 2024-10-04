@@ -37,15 +37,18 @@
 #define ITG3200_REG_PWR_MGM      0x3e
 
 typedef struct {
-    uint8_t temp_hi;
+    int8_t temp_hi;
     uint8_t temp_lo;
-    uint8_t gyro_x_hi;
+} ITG3200_Temp_TypeDef;
+
+typedef struct {
+    int8_t gyro_x_hi;
     uint8_t gyro_x_lo;
-    uint8_t gyro_y_hi;
+    int8_t gyro_y_hi;
     uint8_t gyro_y_lo;
-    uint8_t gyro_z_hi;
+    int8_t gyro_z_hi;
     uint8_t gyro_z_lo;
-} ITG3200_Data_TypeDef;
+} ITG3200_Gyro_TypeDef;
 
 typedef struct {
     I2C_HandleTypeDef *i2c;
@@ -59,5 +62,6 @@ typedef enum {
 
 ITG3200_result_t itg3200_init(ITG3200_HandleTypeDef *itg, I2C_HandleTypeDef *i2c, uint16_t i2c_addr);
 ITG3200_result_t itg3200_get_temp(ITG3200_HandleTypeDef *itg, float *temperature);
+ITG3200_result_t itg3200_get_rot(ITG3200_HandleTypeDef *itg, float *x, float *y, float *z);
 
 #endif /* ITG3200_H_ */

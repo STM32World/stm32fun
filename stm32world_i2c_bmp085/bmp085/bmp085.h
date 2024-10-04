@@ -25,6 +25,8 @@
 #define BMP085_DBG(...)
 #endif
 
+#define BMP085_DEFAULT_ADDR 0x77
+
 typedef struct {
     int16_t ac1;
     int16_t ac2;
@@ -50,7 +52,7 @@ typedef enum {
     BMP085_Err
 } BMP085_result_t;
 
-BMP085_result_t BMP085_init(BMP085_HandleTypeDef *bmp085, I2C_HandleTypeDef *i2c, uint16_t i2c_addr);
-BMP085_result_t BMP085_get_temp(BMP085_HandleTypeDef *bmp085, long *temp);
+BMP085_result_t bmp085_init(BMP085_HandleTypeDef *bmp085, I2C_HandleTypeDef *i2c, uint16_t i2c_addr);
+BMP085_result_t bmp085_get_temp(BMP085_HandleTypeDef *bmp085, long *temp);
 
 #endif /* BMP085_H_ */
