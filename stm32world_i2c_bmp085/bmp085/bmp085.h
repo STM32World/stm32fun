@@ -27,6 +27,21 @@
 
 #define BMP085_DEFAULT_ADDR 0x77
 
+// BMP085 Registers
+#define BMP085_REG_CALIB_START 0xAA
+#define BMP085_REG_CONTROL     0xF4
+#define BMP085_REG_RESULT      0xF6
+
+// Commands for temperature and pressure readings
+#define BMP085_CMD_TEMP        0x2E
+#define BMP085_CMD_PRESSURE    0x34
+
+// Oversampling modes
+#define BMP085_OSS_ULTRALOW    0
+#define BMP085_OSS_STANDARD    1
+#define BMP085_OSS_HIGH        2
+#define BMP085_OSS_ULTRAHIGH   3
+
 typedef struct {
     int16_t ac1;
     int16_t ac2;
@@ -53,6 +68,6 @@ typedef enum {
 } BMP085_result_t;
 
 BMP085_result_t bmp085_init(BMP085_HandleTypeDef *bmp085, I2C_HandleTypeDef *i2c, uint16_t i2c_addr);
-BMP085_result_t bmp085_get_temp(BMP085_HandleTypeDef *bmp085, long *temp);
+BMP085_result_t bmp085_get_temp(BMP085_HandleTypeDef *bmp085, float *temp);
 
 #endif /* BMP085_H_ */

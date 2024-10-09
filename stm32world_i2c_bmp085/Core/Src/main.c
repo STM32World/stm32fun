@@ -150,7 +150,13 @@ int main(void)
 
         if (now >= next_tick) {
 
-            printf("Tick %lu (loop = %lu)\n", now / 1000, loop_cnt);
+            float temp;
+
+            if (bmp085_get_temp(&bmp085, &temp) != BMP085_Ok) {
+                printf("Err\n");
+            }
+
+            printf("Tick %lu (loop = %lu temp = %0.2f)\n", now / 1000, loop_cnt, temp);
 
             loop_cnt = 0;
             next_tick = now + 1000;
