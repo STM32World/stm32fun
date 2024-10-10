@@ -43,17 +43,18 @@
 #define BMP085_OSS_ULTRAHIGH   3
 
 typedef struct {
-    int16_t ac1;
-    int16_t ac2;
-    int16_t ac3;
-    uint16_t ac4;
-    uint16_t ac5;
-    uint16_t ac6;
-    int16_t b1;
-    int16_t b2;
-    int16_t mb;
-    int16_t mc;
-    int16_t md;
+    short ac1;
+    short ac2;
+    short ac3;
+    unsigned short ac4;
+    unsigned short ac5;
+    unsigned short ac6;
+    short b1;
+    short b2;
+    short mb;
+    short mc;
+    short md;
+    long b5;
 } BMP085_Calibration_TypeDef;
 
 typedef struct {
@@ -68,6 +69,7 @@ typedef enum {
 } BMP085_result_t;
 
 BMP085_result_t bmp085_init(BMP085_HandleTypeDef *bmp085, I2C_HandleTypeDef *i2c, uint16_t i2c_addr);
-BMP085_result_t bmp085_get_temp(BMP085_HandleTypeDef *bmp085, float *temp);
+BMP085_result_t bmp085_get_temperature(BMP085_HandleTypeDef *bmp085, float *temperature);
+BMP085_result_t bmp085_get_pressure(BMP085_HandleTypeDef *bmp085, float *pressure);
 
 #endif /* BMP085_H_ */

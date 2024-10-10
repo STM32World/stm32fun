@@ -43,6 +43,7 @@
 /* Private variables ---------------------------------------------------------*/
 I2C_HandleTypeDef hi2c1;
 I2C_HandleTypeDef hi2c2;
+I2C_HandleTypeDef hi2c3;
 
 UART_HandleTypeDef huart1;
 
@@ -56,6 +57,7 @@ static void MX_GPIO_Init(void);
 static void MX_USART1_UART_Init(void);
 static void MX_I2C1_Init(void);
 static void MX_I2C2_Init(void);
+static void MX_I2C3_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -111,15 +113,16 @@ int main(void)
     MX_USART1_UART_Init();
     MX_I2C1_Init();
     MX_I2C2_Init();
+    MX_I2C3_Init();
     /* USER CODE BEGIN 2 */
 
     printf("\n\n\n--------\nStarting\n");
 
-    printf("Scan i2c2\n");
+    printf("Scan i2c3\n");
     // Go through all possible i2c addresses
     for (uint8_t i = 0; i < 128; i++) {
 
-        if (HAL_I2C_IsDeviceReady(&hi2c2, (uint16_t) (i << 1), 3, 5) == HAL_OK) {
+        if (HAL_I2C_IsDeviceReady(&hi2c1, (uint16_t) (i << 1), 3, 5) == HAL_OK) {
             // We got an ack
             printf("%2x ", i);
         } else {
@@ -133,7 +136,7 @@ int main(void)
 
     printf("\n");
 
-    if (bmp085_init(&bmp085, &hi2c2, BMP085_DEFAULT_ADDR) != BMP085_Ok) {
+    if (bmp085_init(&bmp085, &hi2c1, BMP085_DEFAULT_ADDR) != BMP085_Ok) {
         printf("BMP095 Error!\n");
     }
 
@@ -150,13 +153,19 @@ int main(void)
 
         if (now >= next_tick) {
 
-            float temp;
+            float temperature;
 
-            if (bmp085_get_temp(&bmp085, &temp) != BMP085_Ok) {
+            if (bmp085_get_temperature(&bmp085, &temperature) != BMP085_Ok) {
                 printf("Err\n");
             }
 
-            printf("Tick %lu (loop = %lu temp = %0.2f)\n", now / 1000, loop_cnt, temp);
+            float pressure;
+
+            if (bmp085_get_pressure(&bmp085, &pressure) != BMP085_Ok) {
+                printf("Err\n");
+            }
+
+            printf("Tick %lu (loop = %lu temp = %0.2f)\n", now / 1000, loop_cnt, temperature);
 
             loop_cnt = 0;
             next_tick = now + 1000;
@@ -286,6 +295,40 @@ static void MX_I2C2_Init(void)
 }
 
 /**
+ * @brief I2C3 Initialization Function
+ * @param None
+ * @retval None
+ */
+static void MX_I2C3_Init(void)
+{
+
+    /* USER CODE BEGIN I2C3_Init 0 */
+
+    /* USER CODE END I2C3_Init 0 */
+
+    /* USER CODE BEGIN I2C3_Init 1 */
+
+    /* USER CODE END I2C3_Init 1 */
+    hi2c3.Instance = I2C3;
+    hi2c3.Init.ClockSpeed = 400000;
+    hi2c3.Init.DutyCycle = I2C_DUTYCYCLE_2;
+    hi2c3.Init.OwnAddress1 = 0;
+    hi2c3.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
+    hi2c3.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
+    hi2c3.Init.OwnAddress2 = 0;
+    hi2c3.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
+    hi2c3.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
+    if (HAL_I2C_Init(&hi2c3) != HAL_OK)
+            {
+        Error_Handler();
+    }
+    /* USER CODE BEGIN I2C3_Init 2 */
+
+    /* USER CODE END I2C3_Init 2 */
+
+}
+
+/**
  * @brief USART1 Initialization Function
  * @param None
  * @retval None
@@ -332,6 +375,7 @@ static void MX_GPIO_Init(void)
     /* GPIO Ports Clock Enable */
     __HAL_RCC_GPIOH_CLK_ENABLE();
     __HAL_RCC_GPIOB_CLK_ENABLE();
+    __HAL_RCC_GPIOC_CLK_ENABLE();
     __HAL_RCC_GPIOA_CLK_ENABLE();
 
     /*Configure GPIO pin Output Level */
