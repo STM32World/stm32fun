@@ -134,6 +134,9 @@ BMP085_result_t bmp085_get_pressure(BMP085_HandleTypeDef *bmp085, float *pressur
 
     //BMP085_DBG("buf[0] = %d buf[1] = %d buf[2] = %d\n", buf[0], buf[1], buf[2]);
 
+    // Got the raw pressure
+    long up = (((long)buf[0] << 16) + ((long)buf[1] << 8) + buf[2]) >> (8 - BMP085_OSS_HIGH);
+
     long b6 = bmp085->calibration_data.b5 - 4000;
     long x1 = (bmp085->calibration_data.b2 * (b6 * b6 / pow(2, 12))) / pow(2, 11);
     long x2 = bmp085->calibration_data.ac2 * b6 / pow(2, 11);
@@ -143,17 +146,19 @@ BMP085_result_t bmp085_get_pressure(BMP085_HandleTypeDef *bmp085, float *pressur
     x2 = (bmp085->calibration_data.b1 * (b6 * b6 / pow(2, 12))) / pow(2, 16);
     x3 = ((x1 + x2) + 2) / pow(2, 2);
     unsigned long b4 = bmp085->calibration_data.ac4 * (unsigned long)(x3 + 32768) / pow(2, 15);
-    //unsigned long b7 = (unsigned long)()
+    unsigned long b7 = (unsigned long)(up - b3) * (50000 - BMP085_OSS_HIGH);
+    long p;
+    if (b7 < 0x80000000) {
+        p = (b7 * 2) / b4;
+    } else {
+        p = (b7 / b4) * 2;
+    }
+    x1 = (p / pow(2, 8)) * (p / pow(2, 8));
+    x1 = (x1 * 3038) / pow(2, 16);
+    x2 = (-7357 * p) / pow(2, 16);
+    p = p + (x1 + x2 + 3791) / pow(2, 4);
 
-//    // Got raw temperature
-//    int32_t ut = (buf[0] << 8 | buf[1]);
-//
-//    // Apply calibration data retrieved earlier
-//    int32_t x1 = (ut - bmp085->calibration_data.ac6) * bmp085->calibration_data.ac5 / pow(2, 15);
-//    int32_t x2 = bmp085->calibration_data.mc * pow(2, 11) / (x1 + bmp085->calibration_data.md);
-//    int32_t b5 = x1 + x2;
-//
-//    *temperature = (b5 + 8) / pow(2, 4) / 10;
+    *pressure = p;
 
     return BMP085_Ok;
 

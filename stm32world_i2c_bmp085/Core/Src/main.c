@@ -118,7 +118,7 @@ int main(void)
 
     printf("\n\n\n--------\nStarting\n");
 
-    printf("Scan i2c3\n");
+    printf("Scan i2c1\n");
     // Go through all possible i2c addresses
     for (uint8_t i = 0; i < 128; i++) {
 
@@ -145,7 +145,7 @@ int main(void)
     /* Infinite loop */
     /* USER CODE BEGIN WHILE */
 
-    uint32_t now = 0, loop_cnt = 0, next_tick = 1000;
+    uint32_t now = 0, next_tick = 1000;
 
     while (1) {
 
@@ -165,14 +165,11 @@ int main(void)
                 printf("Err\n");
             }
 
-            printf("Tick %lu (loop = %lu temp = %0.2f)\n", now / 1000, loop_cnt, temperature);
+            printf("Tick %lu - temp = %0.1f°C / %0.1f°F pres = %0.0f Pa / %0.1f mbar %0.2f inHg\n", now / 1000, temperature, temperature * 1.8 + 32, pressure, pressure * 0.01, pressure * 0.00029529983071445);
 
-            loop_cnt = 0;
             next_tick = now + 1000;
 
         }
-
-        ++loop_cnt;
 
         /* USER CODE END WHILE */
 
