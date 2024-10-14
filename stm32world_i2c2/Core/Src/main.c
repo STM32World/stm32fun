@@ -63,7 +63,7 @@ UART_HandleTypeDef huart1;
 
 /* USER CODE BEGIN PV */
 
-BMP085_Calibration_TypeDef calibratio_data;
+BMP085_Calibration_TypeDef calibration_data;
 
 /* USER CODE END PV */
 
@@ -116,7 +116,17 @@ void read_calibration_data() {
         Error_Handler();
     }
 
-    calibratio_data.ac1 = buf[0] << 8 + buf[1];
+    calibration_data.ac1 = (int8_t) buf[0] << 8 | buf[1];
+    calibration_data.ac2 = (int8_t) buf[2] << 8 | buf[3];
+    calibration_data.ac3 = (int8_t) buf[4] << 8 | buf[5];
+    calibration_data.ac4 = buf[6] << 8 | buf[7];
+    calibration_data.ac5 = buf[8] << 8 | buf[9];
+    calibration_data.ac6 = buf[10] << 8 | buf[11];
+    calibration_data.b1 = (int8_t) buf[12] << 8 | buf[13];
+    calibration_data.b2 = (int8_t) buf[14] << 8 | buf[15];
+    calibration_data.mb = (int8_t) buf[16] << 8 | buf[17];
+    calibration_data.mc = (int8_t) buf[18] << 8 | buf[19];
+    calibration_data.md = (int8_t) buf[20] << 8 | buf[21];
 
 }
 
