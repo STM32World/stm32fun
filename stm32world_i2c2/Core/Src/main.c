@@ -22,16 +22,33 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
+#include <math.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
 
+typedef struct {
+    short ac1;
+    short ac2;
+    short ac3;
+    unsigned short ac4;
+    unsigned short ac5;
+    unsigned short ac6;
+    short b1;
+    short b2;
+    short mb;
+    short mc;
+    short md;
+    long b5;
+} BMP085_Calibration_TypeDef;
+
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
+#define DEVICE_ADDRESS 0x77
+#define CALIBRATION_ADDRESS 0xAA
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -45,6 +62,8 @@ I2C_HandleTypeDef hi2c2;
 UART_HandleTypeDef huart1;
 
 /* USER CODE BEGIN PV */
+
+BMP085_Calibration_TypeDef calibratio_data;
 
 /* USER CODE END PV */
 
@@ -79,6 +98,26 @@ int _write(int fd, char *ptr, int len) {
         return -1;
     }
     return -1;
+}
+
+void read_calibration_data() {
+
+    uint8_t buf[22] = {0};
+
+//    buf[0] = CALIBRATION_ADDRESS;
+//    if (HAL_I2C_Master_Transmit(&hi2c2, DEVICE_ADDRESS << 1, &buf, 1, HAL_MAX_DELAY) != HAL_OK) {
+//        Error_Handler();
+//    }
+//
+//    if (HAL_I2C_Master_Receive(&hi2c2, DEVICE_ADDRESS << 1, &buf, 22, HAL_MAX_DELAY) != HAL_OK) {
+//        Error_Handler();
+//    }
+    if (HAL_I2C_Mem_Read(&hi2c2, DEVICE_ADDRESS << 1, CALIBRATION_ADDRESS, 1, &buf, 22, HAL_MAX_DELAY) != HAL_OK) {
+        Error_Handler();
+    }
+
+    calibratio_data.ac1 = buf[0] << 8 + buf[1];
+
 }
 
 /* USER CODE END 0 */
@@ -136,6 +175,32 @@ int main(void)
     }
 
     printf("\n");
+
+//    uint8_t buf[4] = { 0 };
+//
+//    // Show endianness
+//    int16_t *int16_p = (int16_t*) &buf;
+//    int32_t *int32_p = (int32_t*) &buf;
+//
+//    printf("------\n");
+//    printf("Buffer = %02x %02d %02x %02x\n", buf[0], buf[1], buf[2], buf[3]);
+//    printf("Setting int16_p\n");
+//    *int16_p = 0x0a0b;
+//    printf("Buffer val = 0x%04x - buffer = %02x %02x %02x %02x\n", *int16_p, buf[0], buf[1], buf[2], buf[3]);
+//    printf("Setting int32_p\n");
+//    *int32_p = 0x0A0B0C0D;
+//    printf("Buffer val = 0x%08lx - buffer = %02x %02x %02x %02x\n", *int32_p, buf[0], buf[1], buf[2], buf[3]);
+//    printf("------\n");
+//
+//    printf("Setting int16_p\n");
+//    *int16_p = -1;
+//    printf("Buffer val = 0x%04x - buffer = %02x %02x %02x %02x\n", *int16_p, buf[0], buf[1], buf[2], buf[3]);
+//    printf("Setting int32_p\n");
+//    *int32_p = -1;
+//    printf("Buffer val = 0x%08lx - buffer = %02x %02x %02x %02x\n", *int32_p, buf[0], buf[1], buf[2], buf[3]);
+//    printf("------\n");
+
+    read_calibration_data();
 
     /* USER CODE END 2 */
 
