@@ -32,9 +32,10 @@ typedef void (*pFunction)(void);
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-/* USER CODE END PD */
 #define BOOTLOADER_ADDRESS 0x1FFF0000
 #define BOOTLOADER_FLAG 0xDEADBEEF
+/* USER CODE END PD */
+
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
 
