@@ -6,7 +6,7 @@
  ******************************************************************************
  * @attention
  *
- * Copyright (c) 2024 STMicroelectronics.
+ * Copyright (c) 2024 Lars Boegild Thomsen <lth@stm32world.com>
  * All rights reserved.
  *
  * This software is licensed under terms that can be found in the LICENSE file
@@ -31,6 +31,9 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+
+//
+// Macros to calculate bitband addresses for memory and peripherals
 
 #define BITBAND_SRAM_REF 0x20000000
 #define BITBAND_SRAM_BASE 0x22000000
@@ -116,8 +119,6 @@ int main(void)
 //            (uint8_t *)m_BITBAND_SRAM(&v, 6),
 //            (uint8_t *)m_BITBAND_SRAM(&v, 7)
 //    };
-
-
 
     uint8_t v_counter = 0;
   /* USER CODE END 1 */
