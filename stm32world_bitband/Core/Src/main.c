@@ -35,15 +35,10 @@
 //
 // Macros to calculate bitband addresses for memory and peripherals
 
-#define BITBAND_SRAM_REF 0x20000000
-#define BITBAND_SRAM_BASE 0x22000000
-#define BITBAND_PERIPH_REF 0x40000000
-#define BITBAND_PERIPH_BASE 0x42000000
-
 #define bitband_t *(volatile uint32_t*)
 
-#define m_BITBAND_SRAM(address,bit) (BITBAND_SRAM_BASE + (((uint32_t)address) - BITBAND_SRAM_REF) * 32 + (bit) * 4)
-#define m_BITBAND_PERIPH(address,bit) (BITBAND_PERIPH_BASE + (((uint32_t)address) - BITBAND_PERIPH_REF) * 32 + (bit) * 4)
+#define BITBAND_SRAM(address,bit) (SRAM1_BB_BASE + (((uint32_t)address) - SRAM1_BASE) * 32 + (bit) * 4)
+#define BITBAND_PERIPH(address,bit) (PERIPH_BB_BASE + (((uint32_t)address) - PERIPH_BASE) * 32 + (bit) * 4)
 
 /* USER CODE END PD */
 
@@ -149,7 +144,7 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 
-  uint8_t *led_pin = (uint8_t *)m_BITBAND_PERIPH(&LED_GPIO_Port->ODR, 13);
+  uint8_t *led_pin = (uint8_t *)BITBAND_PERIPH(&LED_GPIO_Port->ODR, 13);
 
   uint32_t now = 0, next_tick = 1000;
 
@@ -159,14 +154,14 @@ int main(void)
 
         if (now >= next_tick) {
 
-            *((uint8_t *)m_BITBAND_SRAM(&v, 7)) = (v_values[v_counter] & 0b10000000) >> 7;
-            *((uint8_t *)m_BITBAND_SRAM(&v, 6)) = (v_values[v_counter] & 0b01000000) >> 6;
-            *((uint8_t *)m_BITBAND_SRAM(&v, 5)) = (v_values[v_counter] & 0b00100000) >> 5;
-            *((uint8_t *)m_BITBAND_SRAM(&v, 4)) = (v_values[v_counter] & 0b00010000) >> 4;
-            *((uint8_t *)m_BITBAND_SRAM(&v, 3)) = (v_values[v_counter] & 0b00001000) >> 3;
-            *((uint8_t *)m_BITBAND_SRAM(&v, 2)) = (v_values[v_counter] & 0b00000100) >> 2;
-            *((uint8_t *)m_BITBAND_SRAM(&v, 1)) = (v_values[v_counter] & 0b00000010) >> 1;
-            *((uint8_t *)m_BITBAND_SRAM(&v, 0)) = (v_values[v_counter] & 0b00000001);
+            *((uint8_t *)BITBAND_SRAM(&v, 7)) = (v_values[v_counter] & 0b10000000) >> 7;
+            *((uint8_t *)BITBAND_SRAM(&v, 6)) = (v_values[v_counter] & 0b01000000) >> 6;
+            *((uint8_t *)BITBAND_SRAM(&v, 5)) = (v_values[v_counter] & 0b00100000) >> 5;
+            *((uint8_t *)BITBAND_SRAM(&v, 4)) = (v_values[v_counter] & 0b00010000) >> 4;
+            *((uint8_t *)BITBAND_SRAM(&v, 3)) = (v_values[v_counter] & 0b00001000) >> 3;
+            *((uint8_t *)BITBAND_SRAM(&v, 2)) = (v_values[v_counter] & 0b00000100) >> 2;
+            *((uint8_t *)BITBAND_SRAM(&v, 1)) = (v_values[v_counter] & 0b00000010) >> 1;
+            *((uint8_t *)BITBAND_SRAM(&v, 0)) = (v_values[v_counter] & 0b00000001);
 
             printf("Tick %lu count = %d bits = 0x%02x v = 0x%02x\n", now / 1000, v_counter, v_values[v_counter], v);
 
