@@ -1,23 +1,24 @@
 /* USER CODE BEGIN Header */
 /**
- ******************************************************************************
- * @file           : main.c
- * @brief          : Main program body
- ******************************************************************************
- * @attention
- *
- * Copyright (c) 2024 Lars Boegild Thomsen <lth@stm32world.com>
- * All rights reserved.
- *
- * This software is licensed under terms that can be found in the LICENSE file
- * in the root directory of this software component.
- * If no LICENSE file comes with this software, it is provided AS-IS.
- *
- ******************************************************************************
- */
+  ******************************************************************************
+  * @file           : main.c
+  * @brief          : Main program body
+  ******************************************************************************
+  * @attention
+  *
+  * Copyright (c) 2024 Lars Boegild Thomsen <lth@stm32world.com>
+  * All rights reserved.
+  *
+  * This software is licensed under terms that can be found in the LICENSE file
+  * in the root directory of this software component.
+  * If no LICENSE file comes with this software, it is provided AS-IS.
+  *
+  ******************************************************************************
+  */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "cmsis_os.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -32,10 +33,6 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 
-// Macros to calculate bitband addresses for memory and peripherals
-#define BITBAND_SRAM(address,bit) (SRAM1_BB_BASE + (((uint32_t)address) - SRAM1_BASE) * 32 + (bit) * 4)
-#define BITBAND_PERIPH(address,bit) (PERIPH_BB_BASE + (((uint32_t)address) - PERIPH_BASE) * 32 + (bit) * 4)
-
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -46,6 +43,20 @@
 /* Private variables ---------------------------------------------------------*/
 UART_HandleTypeDef huart1;
 
+/* Definitions for defaultTask */
+osThreadId_t defaultTaskHandle;
+const osThreadAttr_t defaultTask_attributes = {
+  .name = "defaultTask",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityNormal,
+};
+/* Definitions for ledTask */
+osThreadId_t ledTaskHandle;
+const osThreadAttr_t ledTask_attributes = {
+  .name = "ledTask",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityLow,
+};
 /* USER CODE BEGIN PV */
 
 /* USER CODE END PV */
@@ -54,6 +65,9 @@ UART_HandleTypeDef huart1;
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_USART1_UART_Init(void);
+void StartDefaultTask(void *argument);
+void StartLedTask(void *argument);
+
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -86,22 +100,6 @@ int main(void)
 
   /* USER CODE BEGIN 1 */
 
-<<<<<<< HEAD
-
-//    uint8_t *v_bb[] = {
-//            (uint8_t *)BITBAND_SRAM(&v, 0),
-//            (uint8_t *)BITBAND_SRAM(&v, 1),
-//            (uint8_t *)BITBAND_SRAM(&v, 2),
-//            (uint8_t *)BITBAND_SRAM(&v, 3),
-//            (uint8_t *)BITBAND_SRAM(&v, 4),
-//            (uint8_t *)BITBAND_SRAM(&v, 5),
-//            (uint8_t *)BITBAND_SRAM(&v, 6),
-//            (uint8_t *)BITBAND_SRAM(&v, 7)
-//    };
-
-    uint8_t v_counter = 0;
-=======
->>>>>>> 291c228fbffab2fb8c1d0585d7b1f8db098dde22
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -125,68 +123,57 @@ int main(void)
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
 
+  printf("\n\n\n--------\nStarting\n");
+
   /* USER CODE END 2 */
+
+  /* Init scheduler */
+  osKernelInitialize();
+
+  /* USER CODE BEGIN RTOS_MUTEX */
+  /* add mutexes, ... */
+  /* USER CODE END RTOS_MUTEX */
+
+  /* USER CODE BEGIN RTOS_SEMAPHORES */
+  /* add semaphores, ... */
+  /* USER CODE END RTOS_SEMAPHORES */
+
+  /* USER CODE BEGIN RTOS_TIMERS */
+  /* start timers, add new ones, ... */
+  /* USER CODE END RTOS_TIMERS */
+
+  /* USER CODE BEGIN RTOS_QUEUES */
+  /* add queues, ... */
+  /* USER CODE END RTOS_QUEUES */
+
+  /* Create the thread(s) */
+  /* creation of defaultTask */
+  defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
+
+  /* creation of ledTask */
+  ledTaskHandle = osThreadNew(StartLedTask, NULL, &ledTask_attributes);
+
+  /* USER CODE BEGIN RTOS_THREADS */
+  /* add threads, ... */
+  /* USER CODE END RTOS_THREADS */
+
+  /* USER CODE BEGIN RTOS_EVENTS */
+  /* add events, ... */
+  /* USER CODE END RTOS_EVENTS */
+
+  /* Start scheduler */
+  osKernelStart();
+
+  /* We should never get here as control is now taken by the scheduler */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-
-  const uint8_t v_values[] = {
-          0b00000001,
-          0b00000010,
-          0b00000100,
-          0b00001000,
-          0b00010000,
-          0b00100000,
-          0b01000000,
-          0b10000000
-  };
-
-  uint8_t v_counter = 0;
-
-  uint8_t v = 0;
-
-  uint8_t *led_pin = (uint8_t *)BITBAND_PERIPH(&LED_GPIO_Port->ODR, 13);
-
-  uint32_t now = 0, next_tick = 1000;
-
-    while (1) {
-
-        now = uwTick;
-
-        if (now >= next_tick) {
-
-            *((uint8_t *)BITBAND_SRAM(&v, 7)) = (v_values[v_counter] & 0b10000000) >> 7;
-            *((uint8_t *)BITBAND_SRAM(&v, 6)) = (v_values[v_counter] & 0b01000000) >> 6;
-            *((uint8_t *)BITBAND_SRAM(&v, 5)) = (v_values[v_counter] & 0b00100000) >> 5;
-            *((uint8_t *)BITBAND_SRAM(&v, 4)) = (v_values[v_counter] & 0b00010000) >> 4;
-            *((uint8_t *)BITBAND_SRAM(&v, 3)) = (v_values[v_counter] & 0b00001000) >> 3;
-            *((uint8_t *)BITBAND_SRAM(&v, 2)) = (v_values[v_counter] & 0b00000100) >> 2;
-            *((uint8_t *)BITBAND_SRAM(&v, 1)) = (v_values[v_counter] & 0b00000010) >> 1;
-            *((uint8_t *)BITBAND_SRAM(&v, 0)) = (v_values[v_counter] & 0b00000001);
-
-            printf("Tick %lu count = %d bits = 0x%02x v = 0x%02x\n", now / 1000, v_counter, v_values[v_counter], v);
-
-//            uint16_t temp = LED_GPIO_Port->ODR;
-//            temp = temp ^ (1 << 13);
-//            LED_GPIO_Port->ODR = temp;
-
-//            LED_GPIO_Port->ODR = LED_GPIO_Port->ODR ^ (1 << 13);
-
-//            LED_GPIO_Port->ODR ^= (1 << 13);
-
-            *led_pin = !*led_pin;
-
-            ++v_counter;
-            if (v_counter >= sizeof(v_values) / sizeof(v_values[0])) v_counter = 0;
-
-            next_tick = now + 1000;
-
-        }
-
+  while (1)
+  {
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-    }
+  }
   /* USER CODE END 3 */
 }
 
@@ -286,7 +273,7 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : LED_Pin */
   GPIO_InitStruct.Pin = LED_Pin;
@@ -303,6 +290,65 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE END 4 */
 
+/* USER CODE BEGIN Header_StartDefaultTask */
+/**
+  * @brief  Function implementing the defaultTask thread.
+  * @param  argument: Not used
+  * @retval None
+  */
+/* USER CODE END Header_StartDefaultTask */
+void StartDefaultTask(void *argument)
+{
+  /* USER CODE BEGIN 5 */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1000);
+    printf("Tick %lu\n", osKernelGetTickCount()/1000);
+  }
+  /* USER CODE END 5 */
+}
+
+/* USER CODE BEGIN Header_StartLedTask */
+/**
+* @brief Function implementing the ledTask thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartLedTask */
+void StartLedTask(void *argument)
+{
+  /* USER CODE BEGIN StartLedTask */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(500);
+    HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+  }
+  /* USER CODE END StartLedTask */
+}
+
+/**
+  * @brief  Period elapsed callback in non blocking mode
+  * @note   This function is called  when TIM14 interrupt took place, inside
+  * HAL_TIM_IRQHandler(). It makes a direct call to HAL_IncTick() to increment
+  * a global variable "uwTick" used as application time base.
+  * @param  htim : TIM handle
+  * @retval None
+  */
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+  /* USER CODE BEGIN Callback 0 */
+
+  /* USER CODE END Callback 0 */
+  if (htim->Instance == TIM14) {
+    HAL_IncTick();
+  }
+  /* USER CODE BEGIN Callback 1 */
+
+  /* USER CODE END Callback 1 */
+}
+
 /**
   * @brief  This function is executed in case of error occurrence.
   * @retval None
@@ -310,11 +356,11 @@ static void MX_GPIO_Init(void)
 void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
-    /* User can add his own implementation to report the HAL error return state */
-    __disable_irq();
-    while (1)
-    {
-    }
+  /* User can add his own implementation to report the HAL error return state */
+  __disable_irq();
+  while (1)
+  {
+  }
   /* USER CODE END Error_Handler_Debug */
 }
 
