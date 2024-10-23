@@ -35,7 +35,7 @@
 //
 // Macros to calculate bitband addresses for memory and peripherals
 
-#define bitband_t *(volatile uint32_t*)
+//#define bitband_t *(volatile uint32_t*)
 
 #define BITBAND_SRAM(address,bit) (SRAM1_BB_BASE + (((uint32_t)address) - SRAM1_BASE) * 32 + (bit) * 4)
 #define BITBAND_PERIPH(address,bit) (PERIPH_BB_BASE + (((uint32_t)address) - PERIPH_BASE) * 32 + (bit) * 4)
@@ -105,14 +105,14 @@ int main(void)
 
 
 //    uint8_t *v_bb[] = {
-//            (uint8_t *)m_BITBAND_SRAM(&v, 0),
-//            (uint8_t *)m_BITBAND_SRAM(&v, 1),
-//            (uint8_t *)m_BITBAND_SRAM(&v, 2),
-//            (uint8_t *)m_BITBAND_SRAM(&v, 3),
-//            (uint8_t *)m_BITBAND_SRAM(&v, 4),
-//            (uint8_t *)m_BITBAND_SRAM(&v, 5),
-//            (uint8_t *)m_BITBAND_SRAM(&v, 6),
-//            (uint8_t *)m_BITBAND_SRAM(&v, 7)
+//            (uint8_t *)BITBAND_SRAM(&v, 0),
+//            (uint8_t *)BITBAND_SRAM(&v, 1),
+//            (uint8_t *)BITBAND_SRAM(&v, 2),
+//            (uint8_t *)BITBAND_SRAM(&v, 3),
+//            (uint8_t *)BITBAND_SRAM(&v, 4),
+//            (uint8_t *)BITBAND_SRAM(&v, 5),
+//            (uint8_t *)BITBAND_SRAM(&v, 6),
+//            (uint8_t *)BITBAND_SRAM(&v, 7)
 //    };
 
     uint8_t v_counter = 0;
