@@ -32,10 +32,9 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 
+<<<<<<< HEAD
 //
 // Macros to calculate bitband addresses for memory and peripherals
-
-//#define bitband_t *(volatile uint32_t*)
 
 #define BITBAND_SRAM(address,bit) (SRAM1_BB_BASE + (((uint32_t)address) - SRAM1_BASE) * 32 + (bit) * 4)
 #define BITBAND_PERIPH(address,bit) (PERIPH_BB_BASE + (((uint32_t)address) - PERIPH_BASE) * 32 + (bit) * 4)
@@ -51,19 +50,6 @@
 UART_HandleTypeDef huart1;
 
 /* USER CODE BEGIN PV */
-
-const uint8_t v_values[] = {
-        0b00000001,
-        0b00000010,
-        0b00000100,
-        0b00001000,
-        0b00010000,
-        0b00100000,
-        0b01000000,
-        0b10000000
-};
-
-uint8_t v = 0;
 
 /* USER CODE END PV */
 
@@ -103,6 +89,7 @@ int main(void)
 
   /* USER CODE BEGIN 1 */
 
+<<<<<<< HEAD
 
 //    uint8_t *v_bb[] = {
 //            (uint8_t *)BITBAND_SRAM(&v, 0),
@@ -116,6 +103,8 @@ int main(void)
 //    };
 
     uint8_t v_counter = 0;
+=======
+>>>>>>> 291c228fbffab2fb8c1d0585d7b1f8db098dde22
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -144,6 +133,21 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 
+  const uint8_t v_values[] = {
+          0b00000001,
+          0b00000010,
+          0b00000100,
+          0b00001000,
+          0b00010000,
+          0b00100000,
+          0b01000000,
+          0b10000000
+  };
+
+  uint8_t v_counter = 0;
+
+  uint8_t v = 0;
+
   uint8_t *led_pin = (uint8_t *)BITBAND_PERIPH(&LED_GPIO_Port->ODR, 13);
 
   uint32_t now = 0, next_tick = 1000;
@@ -165,13 +169,21 @@ int main(void)
 
             printf("Tick %lu count = %d bits = 0x%02x v = 0x%02x\n", now / 1000, v_counter, v_values[v_counter], v);
 
-            // Toggle the LED
+//            uint16_t temp = LED_GPIO_Port->ODR;
+//            temp = temp ^ (1 << 13);
+//            LED_GPIO_Port->ODR = temp;
+
+//            LED_GPIO_Port->ODR = LED_GPIO_Port->ODR ^ (1 << 13);
+
+//            LED_GPIO_Port->ODR ^= (1 << 13);
+
             *led_pin = !*led_pin;
 
             ++v_counter;
             if (v_counter >= sizeof(v_values) / sizeof(v_values[0])) v_counter = 0;
 
             next_tick = now + 1000;
+
         }
 
     /* USER CODE END WHILE */
@@ -281,7 +293,7 @@ static void MX_GPIO_Init(void)
 
   /*Configure GPIO pin : LED_Pin */
   GPIO_InitStruct.Pin = LED_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(LED_GPIO_Port, &GPIO_InitStruct);
