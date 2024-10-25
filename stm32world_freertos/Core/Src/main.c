@@ -1,20 +1,20 @@
 /* USER CODE BEGIN Header */
 /**
-  ******************************************************************************
-  * @file           : main.c
-  * @brief          : Main program body
-  ******************************************************************************
-  * @attention
-  *
-  * Copyright (c) 2024 Lars Boegild Thomsen <lth@stm32world.com>
-  * All rights reserved.
-  *
-  * This software is licensed under terms that can be found in the LICENSE file
-  * in the root directory of this software component.
-  * If no LICENSE file comes with this software, it is provided AS-IS.
-  *
-  ******************************************************************************
-  */
+ ******************************************************************************
+ * @file           : main.c
+ * @brief          : Main program body
+ ******************************************************************************
+ * @attention
+ *
+ * Copyright (c) 2024 Lars Boegild Thomsen <lth@stm32world.com>
+ * All rights reserved.
+ *
+ * This software is licensed under terms that can be found in the LICENSE file
+ * in the root directory of this software component.
+ * If no LICENSE file comes with this software, it is provided AS-IS.
+ *
+ ******************************************************************************
+ */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
@@ -27,7 +27,6 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -43,20 +42,13 @@
 /* Private variables ---------------------------------------------------------*/
 UART_HandleTypeDef huart1;
 
-/* Definitions for defaultTask */
-osThreadId_t defaultTaskHandle;
-const osThreadAttr_t defaultTask_attributes = {
-  .name = "defaultTask",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityNormal,
-};
-/* Definitions for ledTask */
-osThreadId_t ledTaskHandle;
-const osThreadAttr_t ledTask_attributes = {
-  .name = "ledTask",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityLow,
-};
+osThreadId defaultTaskHandle;
+osThreadId ledTaskHandle;
+osThreadId tickTaskHandle;
+osMessageQId tickQueueHandle;
+osMutexId printMutexHandle;
+osMutexId ledMutexHandle;
+osSemaphoreId ledSemaphoreHandle;
 /* USER CODE BEGIN PV */
 
 /* USER CODE END PV */
@@ -65,8 +57,9 @@ const osThreadAttr_t ledTask_attributes = {
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_USART1_UART_Init(void);
-void StartDefaultTask(void *argument);
-void StartLedTask(void *argument);
+void StartDefaultTask(void const * argument);
+void StartLedTask(void const * argument);
+void StartTickTask(void const * argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -123,43 +116,61 @@ int main(void)
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
 
-  printf("\n\n\n--------\nStarting\n");
+    printf("\n\n\n--------\nStarting\n");
 
   /* USER CODE END 2 */
 
-  /* Init scheduler */
-  osKernelInitialize();
+  /* Create the mutex(es) */
+  /* definition and creation of printMutex */
+  osMutexDef(printMutex);
+  printMutexHandle = osMutexCreate(osMutex(printMutex));
+
+  /* definition and creation of ledMutex */
+  osMutexDef(ledMutex);
+  ledMutexHandle = osMutexCreate(osMutex(ledMutex));
 
   /* USER CODE BEGIN RTOS_MUTEX */
-  /* add mutexes, ... */
+    /* add mutexes, ... */
   /* USER CODE END RTOS_MUTEX */
 
+  /* Create the semaphores(s) */
+  /* definition and creation of ledSemaphore */
+  osSemaphoreDef(ledSemaphore);
+  ledSemaphoreHandle = osSemaphoreCreate(osSemaphore(ledSemaphore), 1);
+
   /* USER CODE BEGIN RTOS_SEMAPHORES */
-  /* add semaphores, ... */
+    /* add semaphores, ... */
   /* USER CODE END RTOS_SEMAPHORES */
 
   /* USER CODE BEGIN RTOS_TIMERS */
-  /* start timers, add new ones, ... */
+    /* start timers, add new ones, ... */
   /* USER CODE END RTOS_TIMERS */
 
+  /* Create the queue(s) */
+  /* definition and creation of tickQueue */
+  osMessageQDef(tickQueue, 16, uint32_t);
+  tickQueueHandle = osMessageCreate(osMessageQ(tickQueue), NULL);
+
   /* USER CODE BEGIN RTOS_QUEUES */
-  /* add queues, ... */
+    /* add queues, ... */
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
-  /* creation of defaultTask */
-  defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
+  /* definition and creation of defaultTask */
+  osThreadDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 128);
+  defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
 
-  /* creation of ledTask */
-  ledTaskHandle = osThreadNew(StartLedTask, NULL, &ledTask_attributes);
+  /* definition and creation of ledTask */
+  osThreadDef(ledTask, StartLedTask, osPriorityLow, 0, 128);
+  ledTaskHandle = osThreadCreate(osThread(ledTask), NULL);
+
+  /* definition and creation of tickTask */
+  osThreadDef(tickTask, StartTickTask, osPriorityLow, 0, 128);
+  tickTaskHandle = osThreadCreate(osThread(tickTask), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
-  /* add threads, ... */
+    /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
-
-  /* USER CODE BEGIN RTOS_EVENTS */
-  /* add events, ... */
-  /* USER CODE END RTOS_EVENTS */
 
   /* Start scheduler */
   osKernelStart();
@@ -168,12 +179,12 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  while (1)
-  {
+    while (1)
+    {
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-  }
+    }
   /* USER CODE END 3 */
 }
 
@@ -273,7 +284,7 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin : LED_Pin */
   GPIO_InitStruct.Pin = LED_Pin;
@@ -292,40 +303,89 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN Header_StartDefaultTask */
 /**
-  * @brief  Function implementing the defaultTask thread.
-  * @param  argument: Not used
-  * @retval None
-  */
+ * @brief  Function implementing the defaultTask thread.
+ * @param  argument: Not used
+ * @retval None
+ */
 /* USER CODE END Header_StartDefaultTask */
-void StartDefaultTask(void *argument)
+void StartDefaultTask(void const * argument)
 {
   /* USER CODE BEGIN 5 */
-  /* Infinite loop */
-  for(;;)
-  {
-    osDelay(1000);
-    printf("Tick %lu\n", osKernelGetTickCount()/1000);
-  }
+
+    uint8_t toggle = 0;
+
+    /* Infinite loop */
+    for (;;)
+            {
+        osDelay(500);
+
+        toggle = !toggle;
+
+        osSemaphoreRelease(ledSemaphoreHandle);
+
+        if (!toggle) { // Only every second time
+            osMessagePut(tickQueueHandle, osKernelSysTick(), osWaitForever);
+        }
+
+    }
   /* USER CODE END 5 */
 }
 
 /* USER CODE BEGIN Header_StartLedTask */
 /**
-* @brief Function implementing the ledTask thread.
-* @param argument: Not used
-* @retval None
-*/
+ * @brief Function implementing the ledTask thread.
+ * @param argument: Not used
+ * @retval None
+ */
 /* USER CODE END Header_StartLedTask */
-void StartLedTask(void *argument)
+void StartLedTask(void const * argument)
 {
   /* USER CODE BEGIN StartLedTask */
-  /* Infinite loop */
-  for(;;)
-  {
-    osDelay(500);
-    HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-  }
+
+    osStatus ret;
+
+    /* Infinite loop */
+    for (;;) {
+
+        ret = osSemaphoreWait(ledSemaphoreHandle, osWaitForever);
+        if (!ret) {
+            osMutexWait(ledMutexHandle, osWaitForever);
+            HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+            osMutexRelease(ledMutexHandle);
+        }
+
+    }
   /* USER CODE END StartLedTask */
+}
+
+/* USER CODE BEGIN Header_StartTickTask */
+/**
+ * @brief Function implementing the tickTask thread.
+ * @param argument: Not used
+ * @retval None
+ */
+/* USER CODE END Header_StartTickTask */
+void StartTickTask(void const * argument)
+{
+  /* USER CODE BEGIN StartTickTask */
+
+    osEvent ret;
+
+    /* Infinite loop */
+    for (;;) {
+
+        ret = osMessageGet(tickQueueHandle, osWaitForever);
+        if (!ret.status) {
+
+            osMutexWait(printMutexHandle, osWaitForever);
+            printf("Tick %lu\n", ret.value.v / 1000);
+            osMutexRelease(printMutexHandle);
+
+        }
+
+    }
+
+  /* USER CODE END StartTickTask */
 }
 
 /**
@@ -356,11 +416,11 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
-  /* User can add his own implementation to report the HAL error return state */
-  __disable_irq();
-  while (1)
-  {
-  }
+    /* User can add his own implementation to report the HAL error return state */
+    __disable_irq();
+    while (1)
+    {
+    }
   /* USER CODE END Error_Handler_Debug */
 }
 
