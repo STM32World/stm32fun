@@ -40,16 +40,65 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
+TIM_HandleTypeDef htim13;
+
 UART_HandleTypeDef huart1;
 
-osThreadId defaultTaskHandle;
-osThreadId ledTaskHandle;
-osThreadId tickTaskHandle;
-osMessageQId tickQueueHandle;
-osMutexId printMutexHandle;
-osMutexId ledMutexHandle;
-osSemaphoreId ledSemaphoreHandle;
+/* Definitions for defaultTask */
+osThreadId_t defaultTaskHandle;
+const osThreadAttr_t defaultTask_attributes = {
+  .name = "defaultTask",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityNormal,
+};
+/* Definitions for ledTask */
+osThreadId_t ledTaskHandle;
+const osThreadAttr_t ledTask_attributes = {
+  .name = "ledTask",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityLow,
+};
+/* Definitions for tickTask */
+osThreadId_t tickTaskHandle;
+const osThreadAttr_t tickTask_attributes = {
+  .name = "tickTask",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityLow,
+};
+/* Definitions for statusTask */
+osThreadId_t statusTaskHandle;
+const osThreadAttr_t statusTask_attributes = {
+  .name = "statusTask",
+  .stack_size = 256 * 4,
+  .priority = (osPriority_t) osPriorityLow,
+};
+/* Definitions for tickQueue */
+osMessageQueueId_t tickQueueHandle;
+const osMessageQueueAttr_t tickQueue_attributes = {
+  .name = "tickQueue"
+};
+/* Definitions for printMutex */
+osMutexId_t printMutexHandle;
+const osMutexAttr_t printMutex_attributes = {
+  .name = "printMutex"
+};
+/* Definitions for ledMutex */
+osMutexId_t ledMutexHandle;
+const osMutexAttr_t ledMutex_attributes = {
+  .name = "ledMutex"
+};
+/* Definitions for ledSemaphore */
+osSemaphoreId_t ledSemaphoreHandle;
+const osSemaphoreAttr_t ledSemaphore_attributes = {
+  .name = "ledSemaphore"
+};
 /* USER CODE BEGIN PV */
+
+volatile unsigned long ulHighFrequencyTimerTicks;
+
+#ifdef configAPPLICATION_ALLOCATED_HEAP
+uint8_t ucHeap[ configTOTAL_HEAP_SIZE ] __attribute__((section(".ccmram")));
+#endif
 
 /* USER CODE END PV */
 
@@ -57,9 +106,11 @@ osSemaphoreId ledSemaphoreHandle;
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_USART1_UART_Init(void);
-void StartDefaultTask(void const * argument);
-void StartLedTask(void const * argument);
-void StartTickTask(void const * argument);
+static void MX_TIM13_Init(void);
+void StartDefaultTask(void *argument);
+void StartLedTask(void *argument);
+void StartTickTask(void *argument);
+void StartStatusTask(void *argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -80,6 +131,15 @@ int _write(int fd, char *ptr, int len) {
             return -1;
     }
     return -1;
+}
+
+void configureTimerForRunTimeStats(void) {
+    ulHighFrequencyTimerTicks = 0;
+    HAL_TIM_Base_Start_IT(&htim13);
+}
+
+unsigned long getRunTimeCounterValue(void) {
+    return ulHighFrequencyTimerTicks;
 }
 
 /* USER CODE END 0 */
@@ -114,29 +174,29 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_USART1_UART_Init();
+  MX_TIM13_Init();
   /* USER CODE BEGIN 2 */
 
     printf("\n\n\n--------\nStarting\n");
 
   /* USER CODE END 2 */
 
+  /* Init scheduler */
+  osKernelInitialize();
   /* Create the mutex(es) */
-  /* definition and creation of printMutex */
-  osMutexDef(printMutex);
-  printMutexHandle = osMutexCreate(osMutex(printMutex));
+  /* creation of printMutex */
+  printMutexHandle = osMutexNew(&printMutex_attributes);
 
-  /* definition and creation of ledMutex */
-  osMutexDef(ledMutex);
-  ledMutexHandle = osMutexCreate(osMutex(ledMutex));
+  /* creation of ledMutex */
+  ledMutexHandle = osMutexNew(&ledMutex_attributes);
 
   /* USER CODE BEGIN RTOS_MUTEX */
     /* add mutexes, ... */
   /* USER CODE END RTOS_MUTEX */
 
   /* Create the semaphores(s) */
-  /* definition and creation of ledSemaphore */
-  osSemaphoreDef(ledSemaphore);
-  ledSemaphoreHandle = osSemaphoreCreate(osSemaphore(ledSemaphore), 1);
+  /* creation of ledSemaphore */
+  ledSemaphoreHandle = osSemaphoreNew(1, 1, &ledSemaphore_attributes);
 
   /* USER CODE BEGIN RTOS_SEMAPHORES */
     /* add semaphores, ... */
@@ -147,30 +207,33 @@ int main(void)
   /* USER CODE END RTOS_TIMERS */
 
   /* Create the queue(s) */
-  /* definition and creation of tickQueue */
-  osMessageQDef(tickQueue, 16, uint32_t);
-  tickQueueHandle = osMessageCreate(osMessageQ(tickQueue), NULL);
+  /* creation of tickQueue */
+  tickQueueHandle = osMessageQueueNew (16, 4, &tickQueue_attributes);
 
   /* USER CODE BEGIN RTOS_QUEUES */
     /* add queues, ... */
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
-  /* definition and creation of defaultTask */
-  osThreadDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 128);
-  defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
+  /* creation of defaultTask */
+  defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
 
-  /* definition and creation of ledTask */
-  osThreadDef(ledTask, StartLedTask, osPriorityLow, 0, 128);
-  ledTaskHandle = osThreadCreate(osThread(ledTask), NULL);
+  /* creation of ledTask */
+  ledTaskHandle = osThreadNew(StartLedTask, NULL, &ledTask_attributes);
 
-  /* definition and creation of tickTask */
-  osThreadDef(tickTask, StartTickTask, osPriorityLow, 0, 128);
-  tickTaskHandle = osThreadCreate(osThread(tickTask), NULL);
+  /* creation of tickTask */
+  tickTaskHandle = osThreadNew(StartTickTask, NULL, &tickTask_attributes);
+
+  /* creation of statusTask */
+  statusTaskHandle = osThreadNew(StartStatusTask, NULL, &statusTask_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
     /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
+
+  /* USER CODE BEGIN RTOS_EVENTS */
+    /* add events, ... */
+  /* USER CODE END RTOS_EVENTS */
 
   /* Start scheduler */
   osKernelStart();
@@ -179,6 +242,9 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+
+    Error_Handler();
+
     while (1)
     {
     /* USER CODE END WHILE */
@@ -231,6 +297,37 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
+}
+
+/**
+  * @brief TIM13 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM13_Init(void)
+{
+
+  /* USER CODE BEGIN TIM13_Init 0 */
+
+  /* USER CODE END TIM13_Init 0 */
+
+  /* USER CODE BEGIN TIM13_Init 1 */
+
+  /* USER CODE END TIM13_Init 1 */
+  htim13.Instance = TIM13;
+  htim13.Init.Prescaler = 0;
+  htim13.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim13.Init.Period = 840-1;
+  htim13.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim13.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim13) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM13_Init 2 */
+
+  /* USER CODE END TIM13_Init 2 */
+
 }
 
 /**
@@ -308,7 +405,7 @@ static void MX_GPIO_Init(void)
  * @retval None
  */
 /* USER CODE END Header_StartDefaultTask */
-void StartDefaultTask(void const * argument)
+void StartDefaultTask(void *argument)
 {
   /* USER CODE BEGIN 5 */
 
@@ -323,8 +420,10 @@ void StartDefaultTask(void const * argument)
 
         osSemaphoreRelease(ledSemaphoreHandle);
 
+        uint32_t tick = osKernelGetTickCount();
+
         if (!toggle) { // Only every second time
-            osMessagePut(tickQueueHandle, osKernelSysTick(), osWaitForever);
+            osMessageQueuePut(tickQueueHandle, &tick, NULL, osWaitForever);
         }
 
     }
@@ -338,16 +437,16 @@ void StartDefaultTask(void const * argument)
  * @retval None
  */
 /* USER CODE END Header_StartLedTask */
-void StartLedTask(void const * argument)
+void StartLedTask(void *argument)
 {
   /* USER CODE BEGIN StartLedTask */
 
-    osStatus ret;
+    osStatus_t ret;
 
     /* Infinite loop */
     for (;;) {
 
-        ret = osSemaphoreWait(ledSemaphoreHandle, osWaitForever);
+        ret = osSemaphoreAcquire(ledSemaphoreHandle, osWaitForever);
         if (!ret) {
             osMutexWait(ledMutexHandle, osWaitForever);
             HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
@@ -365,20 +464,22 @@ void StartLedTask(void const * argument)
  * @retval None
  */
 /* USER CODE END Header_StartTickTask */
-void StartTickTask(void const * argument)
+void StartTickTask(void *argument)
 {
   /* USER CODE BEGIN StartTickTask */
 
-    osEvent ret;
+    osStatus_t ret;
 
     /* Infinite loop */
     for (;;) {
 
-        ret = osMessageGet(tickQueueHandle, osWaitForever);
-        if (!ret.status) {
+        uint32_t tick;
+
+        ret = osMessageQueueGet(tickQueueHandle, &tick, NULL, osWaitForever);
+        if (ret == osOK) {
 
             osMutexWait(printMutexHandle, osWaitForever);
-            printf("Tick %lu\n", ret.value.v / 1000);
+            printf("Tick %lu\n", tick / 1000);
             osMutexRelease(printMutexHandle);
 
         }
@@ -386,6 +487,65 @@ void StartTickTask(void const * argument)
     }
 
   /* USER CODE END StartTickTask */
+}
+
+/* USER CODE BEGIN Header_StartStatusTask */
+/**
+ * @brief Function implementing the statusTask thread.
+ * @param argument: Not used
+ * @retval None
+ */
+/* USER CODE END Header_StartStatusTask */
+void StartStatusTask(void *argument)
+{
+  /* USER CODE BEGIN StartStatusTask */
+    TaskStatus_t *pxTaskStatusArray;
+    volatile UBaseType_t uxArraySize, x;
+    unsigned long ulTotalRunTime;
+    float runtime_percent;
+
+    /* Infinite loop */
+    for (;;) {
+
+        osDelay(10000);
+
+        uxArraySize = uxTaskGetNumberOfTasks();
+        pxTaskStatusArray = pvPortMalloc(uxArraySize * sizeof(TaskStatus_t)); // a little bit scary!
+
+        osMutexWait(printMutexHandle, osWaitForever);
+
+        if (pxTaskStatusArray != NULL) {
+
+            uxArraySize = uxTaskGetSystemState(pxTaskStatusArray, uxArraySize,
+                    &ulTotalRunTime);
+
+            printf("Task count = %lu\n", uxArraySize);
+            printf("No      Name          S  Usage   HW\n");
+
+            for (x = 0; x < uxArraySize; x++) {
+
+                runtime_percent = (float) (100
+                        * (float) pxTaskStatusArray[x].ulRunTimeCounter
+                        / (float) ulTotalRunTime);
+
+                printf("Task %lu: %-12s %2d %8.4f %4i\n", x,
+                        pxTaskStatusArray[x].pcTaskName,
+                        pxTaskStatusArray[x].eCurrentState, runtime_percent,
+                        pxTaskStatusArray[x].usStackHighWaterMark);
+
+            }
+
+            vPortFree(pxTaskStatusArray);
+
+        } else {
+            printf("Unable to allocate stack space\n");
+        }
+
+        osMutexRelease(printMutexHandle);
+
+    }
+
+  /* USER CODE END StartStatusTask */
 }
 
 /**
