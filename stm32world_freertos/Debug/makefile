@@ -65,7 +65,7 @@ main-build: stm32world_freertos.elf secondary-outputs
 
 # Tool invocations
 stm32world_freertos.elf stm32world_freertos.map: $(OBJS) $(USER_OBJS) /home/lth/src/stm32fun/stm32world_freertos/STM32F405RGTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "stm32world_freertos.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"/home/lth/src/stm32fun/stm32world_freertos/STM32F405RGTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="stm32world_freertos.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -u _printf_float -Wl,--start-group -lc -lm -Wl,--end-group
+	arm-none-eabi-gcc -o "stm32world_freertos.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"/home/lth/src/stm32fun/stm32world_freertos/STM32F405RGTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="stm32world_freertos.map" -Wl,--gc-sections -static -L../Middlewares/Third_Party/ARM_CMSIS/CMSIS/DSP/Lib/GCC --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -u _printf_float -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

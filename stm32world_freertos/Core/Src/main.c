@@ -23,15 +23,27 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
+#include <math.h>
+#include "arm_math.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
+
+typedef struct {
+    uint16_t *buffer;
+    float angle;
+    float angle_change;
+    float amplication;
+} sine_queue_t;
+
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
+#define DMA_BUFFER_SIZE 64
+#define SAMPLE_FREQ 100000
+#define OUTPUT_MID 2048
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -40,6 +52,12 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
+DAC_HandleTypeDef hdac;
+DMA_HandleTypeDef hdma_dac1;
+DMA_HandleTypeDef hdma_dac2;
+
+TIM_HandleTypeDef htim4;
+TIM_HandleTypeDef htim6;
 TIM_HandleTypeDef htim13;
 
 UART_HandleTypeDef huart1;
@@ -72,10 +90,29 @@ const osThreadAttr_t statusTask_attributes = {
   .stack_size = 256 * 4,
   .priority = (osPriority_t) osPriorityLow,
 };
+/* Definitions for pulseTask */
+osThreadId_t pulseTaskHandle;
+const osThreadAttr_t pulseTask_attributes = {
+  .name = "pulseTask",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityLow,
+};
+/* Definitions for sineTask */
+osThreadId_t sineTaskHandle;
+const osThreadAttr_t sineTask_attributes = {
+  .name = "sineTask",
+  .stack_size = 256 * 4,
+  .priority = (osPriority_t) osPriorityLow,
+};
 /* Definitions for tickQueue */
 osMessageQueueId_t tickQueueHandle;
 const osMessageQueueAttr_t tickQueue_attributes = {
   .name = "tickQueue"
+};
+/* Definitions for sineQueue */
+osMessageQueueId_t sineQueueHandle;
+const osMessageQueueAttr_t sineQueue_attributes = {
+  .name = "sineQueue"
 };
 /* Definitions for printMutex */
 osMutexId_t printMutexHandle;
@@ -92,6 +129,11 @@ osSemaphoreId_t ledSemaphoreHandle;
 const osSemaphoreAttr_t ledSemaphore_attributes = {
   .name = "ledSemaphore"
 };
+/* Definitions for pulseSemaphore */
+osSemaphoreId_t pulseSemaphoreHandle;
+const osSemaphoreAttr_t pulseSemaphore_attributes = {
+  .name = "pulseSemaphore"
+};
 /* USER CODE BEGIN PV */
 
 volatile unsigned long ulHighFrequencyTimerTicks;
@@ -100,17 +142,46 @@ volatile unsigned long ulHighFrequencyTimerTicks;
 uint8_t ucHeap[ configTOTAL_HEAP_SIZE ] __attribute__((section(".ccmram")));
 #endif
 
+uint16_t dma_buffer_1[2 * DMA_BUFFER_SIZE];
+uint16_t dma_buffer_2[2 * DMA_BUFFER_SIZE];
+
+sine_queue_t dacs[2] = {
+        {
+                &dma_buffer_1[0],
+                0,
+                440 * (2 * M_PI / SAMPLE_FREQ),
+                0.9
+        },
+        {
+                &dma_buffer_2[0],
+                0,
+                440 * (2 * M_PI / SAMPLE_FREQ),
+                0.9
+        }
+
+};
+
+float angle = 0;
+float angle_change = 440 * (2 * M_PI / SAMPLE_FREQ);
+float amplifier = 0.9;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
+static void MX_DMA_Init(void);
 static void MX_USART1_UART_Init(void);
 static void MX_TIM13_Init(void);
+static void MX_TIM4_Init(void);
+static void MX_DAC_Init(void);
+static void MX_TIM6_Init(void);
 void StartDefaultTask(void *argument);
 void StartLedTask(void *argument);
 void StartTickTask(void *argument);
 void StartStatusTask(void *argument);
+void StartPulseTask(void *argument);
+void StartSineTask(void *argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -131,6 +202,18 @@ int _write(int fd, char *ptr, int len) {
             return -1;
     }
     return -1;
+}
+
+inline void HAL_DAC_ConvCpltCallbackCh1(DAC_HandleTypeDef *hdac) {
+    if (hdac->Instance)
+
+//    ++cb_full;
+//    do_dac(&dma_buffer[DMA_BUFFER_SIZE]);
+}
+
+inline void HAL_DAC_ConvHalfCpltCallbackCh1(DAC_HandleTypeDef *hdac) {
+//    ++cb_half;
+//    do_dac(&dma_buffer[0]);
 }
 
 void configureTimerForRunTimeStats(void) {
@@ -173,11 +256,20 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_USART1_UART_Init();
   MX_TIM13_Init();
+  MX_TIM4_Init();
+  MX_DAC_Init();
+  MX_TIM6_Init();
   /* USER CODE BEGIN 2 */
 
     printf("\n\n\n--------\nStarting\n");
+
+    HAL_TIM_Base_Start_IT(&htim4);
+    HAL_TIM_Base_Start_IT(&htim6);
+
+    //HAL_DAC_Start_DMA(&hdac, DAC_CHANNEL_1, (uint32_t*) &dma_buffer, 2 * DMA_BUFFER_SIZE, DAC_ALIGN_12B_R);
 
   /* USER CODE END 2 */
 
@@ -198,6 +290,9 @@ int main(void)
   /* creation of ledSemaphore */
   ledSemaphoreHandle = osSemaphoreNew(1, 1, &ledSemaphore_attributes);
 
+  /* creation of pulseSemaphore */
+  pulseSemaphoreHandle = osSemaphoreNew(1, 1, &pulseSemaphore_attributes);
+
   /* USER CODE BEGIN RTOS_SEMAPHORES */
     /* add semaphores, ... */
   /* USER CODE END RTOS_SEMAPHORES */
@@ -209,6 +304,9 @@ int main(void)
   /* Create the queue(s) */
   /* creation of tickQueue */
   tickQueueHandle = osMessageQueueNew (16, 4, &tickQueue_attributes);
+
+  /* creation of sineQueue */
+  sineQueueHandle = osMessageQueueNew (16, 6, &sineQueue_attributes);
 
   /* USER CODE BEGIN RTOS_QUEUES */
     /* add queues, ... */
@@ -226,6 +324,12 @@ int main(void)
 
   /* creation of statusTask */
   statusTaskHandle = osThreadNew(StartStatusTask, NULL, &statusTask_attributes);
+
+  /* creation of pulseTask */
+  pulseTaskHandle = osThreadNew(StartPulseTask, NULL, &pulseTask_attributes);
+
+  /* creation of sineTask */
+  sineTaskHandle = osThreadNew(StartSineTask, NULL, &sineTask_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
     /* add threads, ... */
@@ -300,6 +404,136 @@ void SystemClock_Config(void)
 }
 
 /**
+  * @brief DAC Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_DAC_Init(void)
+{
+
+  /* USER CODE BEGIN DAC_Init 0 */
+
+  /* USER CODE END DAC_Init 0 */
+
+  DAC_ChannelConfTypeDef sConfig = {0};
+
+  /* USER CODE BEGIN DAC_Init 1 */
+
+  /* USER CODE END DAC_Init 1 */
+
+  /** DAC Initialization
+  */
+  hdac.Instance = DAC;
+  if (HAL_DAC_Init(&hdac) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  /** DAC channel OUT1 config
+  */
+  sConfig.DAC_Trigger = DAC_TRIGGER_T6_TRGO;
+  sConfig.DAC_OutputBuffer = DAC_OUTPUTBUFFER_ENABLE;
+  if (HAL_DAC_ConfigChannel(&hdac, &sConfig, DAC_CHANNEL_1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  /** DAC channel OUT2 config
+  */
+  if (HAL_DAC_ConfigChannel(&hdac, &sConfig, DAC_CHANNEL_2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN DAC_Init 2 */
+
+  /* USER CODE END DAC_Init 2 */
+
+}
+
+/**
+  * @brief TIM4 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM4_Init(void)
+{
+
+  /* USER CODE BEGIN TIM4_Init 0 */
+
+  /* USER CODE END TIM4_Init 0 */
+
+  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+  /* USER CODE BEGIN TIM4_Init 1 */
+
+  /* USER CODE END TIM4_Init 1 */
+  htim4.Instance = TIM4;
+  htim4.Init.Prescaler = 84 - 1;
+  htim4.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim4.Init.Period = 25 - 1;
+  htim4.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim4.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim4) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim4, &sClockSourceConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim4, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM4_Init 2 */
+
+  /* USER CODE END TIM4_Init 2 */
+
+}
+
+/**
+  * @brief TIM6 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM6_Init(void)
+{
+
+  /* USER CODE BEGIN TIM6_Init 0 */
+
+  /* USER CODE END TIM6_Init 0 */
+
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+  /* USER CODE BEGIN TIM6_Init 1 */
+
+  /* USER CODE END TIM6_Init 1 */
+  htim6.Instance = TIM6;
+  htim6.Init.Prescaler = 84 - 1;
+  htim6.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim6.Init.Period = 10 - 1;
+  htim6.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim6) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_UPDATE;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim6, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM6_Init 2 */
+
+  /* USER CODE END TIM6_Init 2 */
+
+}
+
+/**
   * @brief TIM13 Initialization Function
   * @param None
   * @retval None
@@ -364,6 +598,25 @@ static void MX_USART1_UART_Init(void)
 }
 
 /**
+  * Enable DMA controller clock
+  */
+static void MX_DMA_Init(void)
+{
+
+  /* DMA controller clock enable */
+  __HAL_RCC_DMA1_CLK_ENABLE();
+
+  /* DMA interrupt init */
+  /* DMA1_Stream5_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Stream5_IRQn, 5, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Stream5_IRQn);
+  /* DMA1_Stream6_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Stream6_IRQn, 5, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Stream6_IRQn);
+
+}
+
+/**
   * @brief GPIO Initialization Function
   * @param None
   * @retval None
@@ -383,12 +636,15 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);
 
-  /*Configure GPIO pin : LED_Pin */
-  GPIO_InitStruct.Pin = LED_Pin;
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(PULSE_GPIO_Port, PULSE_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pins : LED_Pin PULSE_Pin */
+  GPIO_InitStruct.Pin = LED_Pin|PULSE_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(LED_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
 /* USER CODE BEGIN MX_GPIO_Init_2 */
 /* USER CODE END MX_GPIO_Init_2 */
@@ -423,7 +679,7 @@ void StartDefaultTask(void *argument)
         uint32_t tick = osKernelGetTickCount();
 
         if (!toggle) { // Only every second time
-            osMessageQueuePut(tickQueueHandle, &tick, NULL, osWaitForever);
+            osMessageQueuePut(tickQueueHandle, &tick, 0, osWaitForever);
         }
 
     }
@@ -548,6 +804,51 @@ void StartStatusTask(void *argument)
   /* USER CODE END StartStatusTask */
 }
 
+/* USER CODE BEGIN Header_StartPulseTask */
+/**
+* @brief Function implementing the pulseTask thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartPulseTask */
+void StartPulseTask(void *argument)
+{
+  /* USER CODE BEGIN StartPulseTask */
+
+    osStatus_t ret;
+
+    /* Infinite loop */
+    for (;;) {
+
+        ret = osSemaphoreAcquire(pulseSemaphoreHandle, osWaitForever);
+
+        if (!ret) {
+            HAL_GPIO_TogglePin(PULSE_GPIO_Port, PULSE_Pin);
+        }
+
+    }
+
+  /* USER CODE END StartPulseTask */
+}
+
+/* USER CODE BEGIN Header_StartSineTask */
+/**
+* @brief Function implementing the sineTask thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartSineTask */
+void StartSineTask(void *argument)
+{
+  /* USER CODE BEGIN StartSineTask */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END StartSineTask */
+}
+
 /**
   * @brief  Period elapsed callback in non blocking mode
   * @note   This function is called  when TIM14 interrupt took place, inside
@@ -559,6 +860,10 @@ void StartStatusTask(void *argument)
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
   /* USER CODE BEGIN Callback 0 */
+
+    if (htim->Instance == TIM4) {
+        osSemaphoreRelease(pulseSemaphoreHandle);
+    }
 
   /* USER CODE END Callback 0 */
   if (htim->Instance == TIM14) {
