@@ -881,11 +881,20 @@ void StartSineTask(void *argument)
         if (ret == osOK) {
             ++sine_task;
 
+            // The message contain a pointer to the relevant sine_queue_t struct
             sine_queue_t *sine = (sine_queue_t *)sine_p;
 
+            // Run through the buffer
             for (int i = 0; i < DMA_BUFFER_SIZE; ++i) {
+
+                // Since we got the angle, calculating the dac value is quite simple.  The arm_cos_f32 function
+                // is blindingly fast compared with the fpu
                 sine->buffer[i] = OUTPUT_MID - (sine->amplification * (OUTPUT_MID * arm_cos_f32(sine->angle)));
+
+                // Prepare angle for next point simply by adding the pre-calculated angle change (based on frequency)
                 sine->angle += sine->angle_change;
+
+                // If we've gone full circle - cycle back
                 if (sine->angle >= two_pi) {
                     sine->angle -= two_pi;
                 }
