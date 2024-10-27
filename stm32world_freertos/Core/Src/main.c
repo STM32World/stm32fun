@@ -147,16 +147,16 @@ uint16_t dma_buffer_2[2 * DMA_BUFFER_SIZE];
 
 sine_queue_t dacs[2] = {
         {
-                &dma_buffer_1[DMA_BUFFER_SIZE],
+                &dma_buffer_1[0],
                 0,
-                1000 * (2 * M_PI / SAMPLE_FREQ),
+                100 * (2 * M_PI / SAMPLE_FREQ),
                 0.99
         },
         {
-                &dma_buffer_2[DMA_BUFFER_SIZE],
+                &dma_buffer_2[0],
                 0,
-                441 * (2 * M_PI / SAMPLE_FREQ),
-                0.99
+                101 * (2 * M_PI / SAMPLE_FREQ),
+                0.90
         }
 
 };
@@ -213,28 +213,33 @@ int _write(int fd, char *ptr, int len) {
     return -1;
 }
 
-void HAL_DAC_ConvCpltCallbackCh1(DAC_HandleTypeDef *hdac) {
-    ++conv_ch1;
-    dacs[0].buffer = &dma_buffer_1[DMA_BUFFER_SIZE];
-    osMessageQueuePut(sineQueueHandle, &dacs[0], 0, 0);
-}
 
 void HAL_DAC_ConvHalfCpltCallbackCh1(DAC_HandleTypeDef *hdac) {
     ++conv_half_ch1;
     dacs[0].buffer = &dma_buffer_1[0];
-    osMessageQueuePut(sineQueueHandle, &dacs[0], 0, 0);
+    uint32_t dac_addr = (uint32_t)&dacs[0];
+    osMessageQueuePut(sineQueueHandle, &dac_addr, 0, 0);
 }
 
-void HAL_DACEx_ConvCpltCallbackCh2(DAC_HandleTypeDef *hdac) {
-    ++conv_ch2;
-    dacs[1].buffer = &dma_buffer_2[DMA_BUFFER_SIZE];
-    osMessageQueuePut(sineQueueHandle, &dacs[1], 0, 0);
+void HAL_DAC_ConvCpltCallbackCh1(DAC_HandleTypeDef *hdac) {
+    ++conv_ch1;
+    dacs[0].buffer = &dma_buffer_1[DMA_BUFFER_SIZE];
+    uint32_t dac_addr = (uint32_t)&dacs[0];
+    osMessageQueuePut(sineQueueHandle, &dac_addr, 0, 0);
 }
 
 void HAL_DACEx_ConvHalfCpltCallbackCh2(DAC_HandleTypeDef *hdac) {
     ++conv_half_ch2;
     dacs[1].buffer = &dma_buffer_2[0];
-    osMessageQueuePut(sineQueueHandle, &dacs[1], 0, 0);
+    uint32_t dac_addr = (uint32_t)&dacs[1];
+    osMessageQueuePut(sineQueueHandle, &dac_addr, 0, 0);
+}
+
+void HAL_DACEx_ConvCpltCallbackCh2(DAC_HandleTypeDef *hdac) {
+    ++conv_ch2;
+    dacs[1].buffer = &dma_buffer_2[DMA_BUFFER_SIZE];
+    uint32_t dac_addr = (uint32_t)&dacs[1];
+    osMessageQueuePut(sineQueueHandle, &dac_addr, 0, 0);
 }
 
 void configureTimerForRunTimeStats(void) {
@@ -325,10 +330,10 @@ int main(void)
 
   /* Create the queue(s) */
   /* creation of tickQueue */
-  tickQueueHandle = osMessageQueueNew (16, 4, &tickQueue_attributes);
+  tickQueueHandle = osMessageQueueNew (16, sizeof(uint32_t), &tickQueue_attributes);
 
   /* creation of sineQueue */
-  sineQueueHandle = osMessageQueueNew (16, sizeof(sine_queue_t), &sineQueue_attributes);
+  sineQueueHandle = osMessageQueueNew (16, sizeof(uint32_t), &sineQueue_attributes);
 
   /* USER CODE BEGIN RTOS_QUEUES */
     /* creation of sineQueue */
@@ -493,7 +498,7 @@ static void MX_TIM4_Init(void)
   htim4.Instance = TIM4;
   htim4.Init.Prescaler = 84 - 1;
   htim4.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim4.Init.Period = 50 - 1;
+  htim4.Init.Period = 100 - 1;
   htim4.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim4.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim4) != HAL_OK)
@@ -866,19 +871,23 @@ void StartSineTask(void *argument)
 
     osStatus_t ret;
 
+    uint32_t sine_p;
+
     /* Infinite loop */
     for (;;) {
 
-        sine_queue_t sine;
+        ret = osMessageQueueGet(sineQueueHandle, &sine_p, 0, osWaitForever);
 
-        ret = osMessageQueueGet(sineQueueHandle, &sine, NULL, osWaitForever);
         if (ret == osOK) {
             ++sine_task;
+
+            sine_queue_t *sine = (sine_queue_t *)sine_p;
+
             for (int i = 0; i < DMA_BUFFER_SIZE; ++i) {
-                sine.buffer[i] = OUTPUT_MID - (sine.amplification * (OUTPUT_MID * arm_cos_f32(sine.angle)));
-                sine.angle += sine.angle_change;
-                if (sine.angle >= two_pi) {
-                    sine.angle -= two_pi;
+                sine->buffer[i] = OUTPUT_MID - (sine->amplification * (OUTPUT_MID * arm_cos_f32(sine->angle)));
+                sine->angle += sine->angle_change;
+                if (sine->angle >= two_pi) {
+                    sine->angle -= two_pi;
                 }
             }
 
