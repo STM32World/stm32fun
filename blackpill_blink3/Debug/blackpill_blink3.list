@@ -39,11 +39,11 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING, OCTETS
  17 .debug_macro  00016277  00000000  00000000  0001339a  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 18 .debug_line   0000a73b  00000000  00000000  00029611  2**0
+ 18 .debug_line   0000a739  00000000  00000000  00029611  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .debug_str    000875b1  00000000  00000000  00033d4c  2**0
+ 19 .debug_str    000875b1  00000000  00000000  00033d4a  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 20 .comment      00000043  00000000  00000000  000bb2fd  2**0
+ 20 .comment      00000043  00000000  00000000  000bb2fb  2**0
                   CONTENTS, READONLY
  21 .debug_frame  00001864  00000000  00000000  000bb340  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
@@ -407,26 +407,26 @@ Disassembly of section .text:
  800056e:	bf00      	nop
 
 08000570 <MX_GPIO_Init>:
-  * @brief GPIO Initialization Function
-  * @param None
-  * @retval None
-  */
+ * @brief GPIO Initialization Function
+ * @param None
+ * @retval None
+ */
 static void MX_GPIO_Init(void)
 {
  8000570:	b530      	push	{r4, r5, lr}
  8000572:	b089      	sub	sp, #36	@ 0x24
-  GPIO_InitTypeDef GPIO_InitStruct = {0};
+    GPIO_InitTypeDef GPIO_InitStruct = { 0 };
  8000574:	2400      	movs	r4, #0
  8000576:	9403      	str	r4, [sp, #12]
  8000578:	9404      	str	r4, [sp, #16]
  800057a:	9405      	str	r4, [sp, #20]
  800057c:	9406      	str	r4, [sp, #24]
  800057e:	9407      	str	r4, [sp, #28]
-/* USER CODE BEGIN MX_GPIO_Init_1 */
-/* USER CODE END MX_GPIO_Init_1 */
+    /* USER CODE BEGIN MX_GPIO_Init_1 */
+    /* USER CODE END MX_GPIO_Init_1 */
 
-  /* GPIO Ports Clock Enable */
-  __HAL_RCC_GPIOC_CLK_ENABLE();
+    /* GPIO Ports Clock Enable */
+    __HAL_RCC_GPIOC_CLK_ENABLE();
  8000580:	9400      	str	r4, [sp, #0]
  8000582:	4b22      	ldr	r3, [pc, #136]	@ (800060c <MX_GPIO_Init+0x9c>)
  8000584:	6b1a      	ldr	r2, [r3, #48]	@ 0x30
@@ -436,7 +436,7 @@ static void MX_GPIO_Init(void)
  800058e:	f002 0204 	and.w	r2, r2, #4
  8000592:	9200      	str	r2, [sp, #0]
  8000594:	9a00      	ldr	r2, [sp, #0]
-  __HAL_RCC_GPIOH_CLK_ENABLE();
+    __HAL_RCC_GPIOH_CLK_ENABLE();
  8000596:	9401      	str	r4, [sp, #4]
  8000598:	6b1a      	ldr	r2, [r3, #48]	@ 0x30
  800059a:	f042 0280 	orr.w	r2, r2, #128	@ 0x80
@@ -445,7 +445,7 @@ static void MX_GPIO_Init(void)
  80005a2:	f002 0280 	and.w	r2, r2, #128	@ 0x80
  80005a6:	9201      	str	r2, [sp, #4]
  80005a8:	9a01      	ldr	r2, [sp, #4]
-  __HAL_RCC_GPIOA_CLK_ENABLE();
+    __HAL_RCC_GPIOA_CLK_ENABLE();
  80005aa:	9402      	str	r4, [sp, #8]
  80005ac:	6b1a      	ldr	r2, [r3, #48]	@ 0x30
  80005ae:	f042 0201 	orr.w	r2, r2, #1
@@ -455,56 +455,56 @@ static void MX_GPIO_Init(void)
  80005ba:	9302      	str	r3, [sp, #8]
  80005bc:	9b02      	ldr	r3, [sp, #8]
 
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);
+    /*Configure GPIO pin Output Level */
+    HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);
  80005be:	4d14      	ldr	r5, [pc, #80]	@ (8000610 <MX_GPIO_Init+0xa0>)
  80005c0:	2201      	movs	r2, #1
  80005c2:	f44f 5100 	mov.w	r1, #8192	@ 0x2000
  80005c6:	4628      	mov	r0, r5
  80005c8:	f000 fb9a 	bl	8000d00 <HAL_GPIO_WritePin>
 
-  /*Configure GPIO pin : LED_Pin */
-  GPIO_InitStruct.Pin = LED_Pin;
+    /*Configure GPIO pin : LED_Pin */
+    GPIO_InitStruct.Pin = LED_Pin;
  80005cc:	f44f 5300 	mov.w	r3, #8192	@ 0x2000
  80005d0:	9303      	str	r3, [sp, #12]
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
  80005d2:	2311      	movs	r3, #17
  80005d4:	9304      	str	r3, [sp, #16]
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
  80005d6:	9405      	str	r4, [sp, #20]
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
  80005d8:	9406      	str	r4, [sp, #24]
-  HAL_GPIO_Init(LED_GPIO_Port, &GPIO_InitStruct);
+    HAL_GPIO_Init(LED_GPIO_Port, &GPIO_InitStruct);
  80005da:	a903      	add	r1, sp, #12
  80005dc:	4628      	mov	r0, r5
  80005de:	f000 faab 	bl	8000b38 <HAL_GPIO_Init>
 
-  /*Configure GPIO pin : BTN_Pin */
-  GPIO_InitStruct.Pin = BTN_Pin;
+    /*Configure GPIO pin : BTN_Pin */
+    GPIO_InitStruct.Pin = BTN_Pin;
  80005e2:	2301      	movs	r3, #1
  80005e4:	9303      	str	r3, [sp, #12]
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+    GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
  80005e6:	f44f 1288 	mov.w	r2, #1114112	@ 0x110000
  80005ea:	9204      	str	r2, [sp, #16]
-  GPIO_InitStruct.Pull = GPIO_PULLUP;
+    GPIO_InitStruct.Pull = GPIO_PULLUP;
  80005ec:	9305      	str	r3, [sp, #20]
-  HAL_GPIO_Init(BTN_GPIO_Port, &GPIO_InitStruct);
+    HAL_GPIO_Init(BTN_GPIO_Port, &GPIO_InitStruct);
  80005ee:	a903      	add	r1, sp, #12
  80005f0:	4808      	ldr	r0, [pc, #32]	@ (8000614 <MX_GPIO_Init+0xa4>)
  80005f2:	f000 faa1 	bl	8000b38 <HAL_GPIO_Init>
 
-  /* EXTI interrupt init*/
-  HAL_NVIC_SetPriority(EXTI0_IRQn, 0, 0);
+    /* EXTI interrupt init*/
+    HAL_NVIC_SetPriority(EXTI0_IRQn, 0, 0);
  80005f6:	4622      	mov	r2, r4
  80005f8:	4621      	mov	r1, r4
  80005fa:	2006      	movs	r0, #6
  80005fc:	f000 fa74 	bl	8000ae8 <HAL_NVIC_SetPriority>
-  HAL_NVIC_EnableIRQ(EXTI0_IRQn);
+    HAL_NVIC_EnableIRQ(EXTI0_IRQn);
  8000600:	2006      	movs	r0, #6
  8000602:	f000 fa81 	bl	8000b08 <HAL_NVIC_EnableIRQ>
 
-/* USER CODE BEGIN MX_GPIO_Init_2 */
-/* USER CODE END MX_GPIO_Init_2 */
+    /* USER CODE BEGIN MX_GPIO_Init_2 */
+    /* USER CODE END MX_GPIO_Init_2 */
 }
  8000606:	b009      	add	sp, #36	@ 0x24
  8000608:	bd30      	pop	{r4, r5, pc}
@@ -566,7 +566,7 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  8000658:	b672      	cpsid	i
 void Error_Handler(void)
 {
-  /* USER CODE BEGIN Error_Handler_Debug */
+    /* USER CODE BEGIN Error_Handler_Debug */
     /* User can add his own implementation to report the HAL error return state */
     __disable_irq();
     while (1) {
@@ -575,33 +575,33 @@ void Error_Handler(void)
 0800065c <MX_USART1_UART_Init>:
 {
  800065c:	b508      	push	{r3, lr}
-  huart1.Instance = USART1;
+    huart1.Instance = USART1;
  800065e:	480a      	ldr	r0, [pc, #40]	@ (8000688 <MX_USART1_UART_Init+0x2c>)
  8000660:	4b0a      	ldr	r3, [pc, #40]	@ (800068c <MX_USART1_UART_Init+0x30>)
  8000662:	6003      	str	r3, [r0, #0]
-  huart1.Init.BaudRate = 921600;
+    huart1.Init.BaudRate = 921600;
  8000664:	f44f 2361 	mov.w	r3, #921600	@ 0xe1000
  8000668:	6043      	str	r3, [r0, #4]
-  huart1.Init.WordLength = UART_WORDLENGTH_8B;
+    huart1.Init.WordLength = UART_WORDLENGTH_8B;
  800066a:	2300      	movs	r3, #0
  800066c:	6083      	str	r3, [r0, #8]
-  huart1.Init.StopBits = UART_STOPBITS_1;
+    huart1.Init.StopBits = UART_STOPBITS_1;
  800066e:	60c3      	str	r3, [r0, #12]
-  huart1.Init.Parity = UART_PARITY_NONE;
+    huart1.Init.Parity = UART_PARITY_NONE;
  8000670:	6103      	str	r3, [r0, #16]
-  huart1.Init.Mode = UART_MODE_TX_RX;
+    huart1.Init.Mode = UART_MODE_TX_RX;
  8000672:	220c      	movs	r2, #12
  8000674:	6142      	str	r2, [r0, #20]
-  huart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+    huart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
  8000676:	6183      	str	r3, [r0, #24]
-  huart1.Init.OverSampling = UART_OVERSAMPLING_16;
+    huart1.Init.OverSampling = UART_OVERSAMPLING_16;
  8000678:	61c3      	str	r3, [r0, #28]
-  if (HAL_UART_Init(&huart1) != HAL_OK)
+    if (HAL_UART_Init(&huart1) != HAL_OK)
  800067a:	f000 ff7e 	bl	800157a <HAL_UART_Init>
  800067e:	b900      	cbnz	r0, 8000682 <MX_USART1_UART_Init+0x26>
 }
  8000680:	bd08      	pop	{r3, pc}
-    Error_Handler();
+        Error_Handler();
  8000682:	f7ff ffe9 	bl	8000658 <Error_Handler>
  8000686:	bf00      	nop
  8000688:	20000090 	.word	0x20000090
@@ -611,19 +611,19 @@ void Error_Handler(void)
 {
  8000690:	b500      	push	{lr}
  8000692:	b095      	sub	sp, #84	@ 0x54
-  RCC_OscInitTypeDef RCC_OscInitStruct = {0};
+    RCC_OscInitTypeDef RCC_OscInitStruct = { 0 };
  8000694:	2230      	movs	r2, #48	@ 0x30
  8000696:	2100      	movs	r1, #0
  8000698:	a808      	add	r0, sp, #32
  800069a:	f001 fa0f 	bl	8001abc <memset>
-  RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+    RCC_ClkInitTypeDef RCC_ClkInitStruct = { 0 };
  800069e:	2300      	movs	r3, #0
  80006a0:	9303      	str	r3, [sp, #12]
  80006a2:	9304      	str	r3, [sp, #16]
  80006a4:	9305      	str	r3, [sp, #20]
  80006a6:	9306      	str	r3, [sp, #24]
  80006a8:	9307      	str	r3, [sp, #28]
-  __HAL_RCC_PWR_CLK_ENABLE();
+    __HAL_RCC_PWR_CLK_ENABLE();
  80006aa:	9301      	str	r3, [sp, #4]
  80006ac:	4a1f      	ldr	r2, [pc, #124]	@ (800072c <SystemClock_Config+0x9c>)
  80006ae:	6c11      	ldr	r1, [r2, #64]	@ 0x40
@@ -633,7 +633,7 @@ void Error_Handler(void)
  80006b8:	f002 5280 	and.w	r2, r2, #268435456	@ 0x10000000
  80006bc:	9201      	str	r2, [sp, #4]
  80006be:	9a01      	ldr	r2, [sp, #4]
-  __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
+    __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
  80006c0:	9302      	str	r3, [sp, #8]
  80006c2:	4b1b      	ldr	r3, [pc, #108]	@ (8000730 <SystemClock_Config+0xa0>)
  80006c4:	681a      	ldr	r2, [r3, #0]
@@ -643,48 +643,48 @@ void Error_Handler(void)
  80006ce:	f403 4340 	and.w	r3, r3, #49152	@ 0xc000
  80006d2:	9302      	str	r3, [sp, #8]
  80006d4:	9b02      	ldr	r3, [sp, #8]
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+    RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
  80006d6:	2301      	movs	r3, #1
  80006d8:	9308      	str	r3, [sp, #32]
-  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+    RCC_OscInitStruct.HSEState = RCC_HSE_ON;
  80006da:	f44f 3380 	mov.w	r3, #65536	@ 0x10000
  80006de:	9309      	str	r3, [sp, #36]	@ 0x24
-  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+    RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
  80006e0:	2302      	movs	r3, #2
  80006e2:	930e      	str	r3, [sp, #56]	@ 0x38
-  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
+    RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
  80006e4:	f44f 0280 	mov.w	r2, #4194304	@ 0x400000
  80006e8:	920f      	str	r2, [sp, #60]	@ 0x3c
-  RCC_OscInitStruct.PLL.PLLM = 12;
+    RCC_OscInitStruct.PLL.PLLM = 12;
  80006ea:	220c      	movs	r2, #12
  80006ec:	9210      	str	r2, [sp, #64]	@ 0x40
-  RCC_OscInitStruct.PLL.PLLN = 96;
+    RCC_OscInitStruct.PLL.PLLN = 96;
  80006ee:	2260      	movs	r2, #96	@ 0x60
  80006f0:	9211      	str	r2, [sp, #68]	@ 0x44
-  RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
+    RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
  80006f2:	9312      	str	r3, [sp, #72]	@ 0x48
-  RCC_OscInitStruct.PLL.PLLQ = 4;
+    RCC_OscInitStruct.PLL.PLLQ = 4;
  80006f4:	2304      	movs	r3, #4
  80006f6:	9313      	str	r3, [sp, #76]	@ 0x4c
-  if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
+    if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
  80006f8:	a808      	add	r0, sp, #32
  80006fa:	f000 fb1f 	bl	8000d3c <HAL_RCC_OscConfig>
  80006fe:	b988      	cbnz	r0, 8000724 <SystemClock_Config+0x94>
-  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
+    RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK
  8000700:	230f      	movs	r3, #15
  8000702:	9303      	str	r3, [sp, #12]
-  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+    RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
  8000704:	2302      	movs	r3, #2
  8000706:	9304      	str	r3, [sp, #16]
-  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+    RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
  8000708:	2300      	movs	r3, #0
  800070a:	9305      	str	r3, [sp, #20]
-  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
+    RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
  800070c:	f44f 5280 	mov.w	r2, #4096	@ 0x1000
  8000710:	9206      	str	r2, [sp, #24]
-  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
+    RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
  8000712:	9307      	str	r3, [sp, #28]
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_3) != HAL_OK)
+    if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_3) != HAL_OK)
  8000714:	2103      	movs	r1, #3
  8000716:	a803      	add	r0, sp, #12
  8000718:	f000 fd60 	bl	80011dc <HAL_RCC_ClockConfig>
@@ -692,9 +692,9 @@ void Error_Handler(void)
 }
  800071e:	b015      	add	sp, #84	@ 0x54
  8000720:	f85d fb04 	ldr.w	pc, [sp], #4
-    Error_Handler();
+        Error_Handler();
  8000724:	f7ff ff98 	bl	8000658 <Error_Handler>
-    Error_Handler();
+        Error_Handler();
  8000728:	f7ff ff96 	bl	8000658 <Error_Handler>
  800072c:	40023800 	.word	0x40023800
  8000730:	40007000 	.word	0x40007000
@@ -702,13 +702,13 @@ void Error_Handler(void)
 08000734 <main>:
 {
  8000734:	b5f8      	push	{r3, r4, r5, r6, r7, lr}
-  HAL_Init();
+    HAL_Init();
  8000736:	f000 f957 	bl	80009e8 <HAL_Init>
-  SystemClock_Config();
+    SystemClock_Config();
  800073a:	f7ff ffa9 	bl	8000690 <SystemClock_Config>
-  MX_GPIO_Init();
+    MX_GPIO_Init();
  800073e:	f7ff ff17 	bl	8000570 <MX_GPIO_Init>
-  MX_USART1_UART_Init();
+    MX_USART1_UART_Init();
  8000742:	f7ff ff8b 	bl	800065c <MX_USART1_UART_Init>
     printf("Starting blackpill_blink3\n");
  8000746:	481f      	ldr	r0, [pc, #124]	@ (80007c4 <main+0x90>)
