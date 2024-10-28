@@ -65,74 +65,74 @@ UART_HandleTypeDef huart1;
 /* Definitions for defaultTask */
 osThreadId_t defaultTaskHandle;
 const osThreadAttr_t defaultTask_attributes = {
-  .name = "defaultTask",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityNormal,
+        .name = "defaultTask",
+        .stack_size = 128 * 4,
+        .priority = (osPriority_t) osPriorityNormal,
 };
 /* Definitions for ledTask */
 osThreadId_t ledTaskHandle;
 const osThreadAttr_t ledTask_attributes = {
-  .name = "ledTask",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityLow,
+        .name = "ledTask",
+        .stack_size = 128 * 4,
+        .priority = (osPriority_t) osPriorityLow,
 };
 /* Definitions for tickTask */
 osThreadId_t tickTaskHandle;
 const osThreadAttr_t tickTask_attributes = {
-  .name = "tickTask",
-  .stack_size = 256 * 4,
-  .priority = (osPriority_t) osPriorityLow,
+        .name = "tickTask",
+        .stack_size = 256 * 4,
+        .priority = (osPriority_t) osPriorityLow,
 };
 /* Definitions for statusTask */
 osThreadId_t statusTaskHandle;
 const osThreadAttr_t statusTask_attributes = {
-  .name = "statusTask",
-  .stack_size = 256 * 4,
-  .priority = (osPriority_t) osPriorityLow,
+        .name = "statusTask",
+        .stack_size = 256 * 4,
+        .priority = (osPriority_t) osPriorityLow,
 };
 /* Definitions for pulseTask */
 osThreadId_t pulseTaskHandle;
 const osThreadAttr_t pulseTask_attributes = {
-  .name = "pulseTask",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityLow,
+        .name = "pulseTask",
+        .stack_size = 128 * 4,
+        .priority = (osPriority_t) osPriorityLow,
 };
 /* Definitions for sineTask */
 osThreadId_t sineTaskHandle;
 const osThreadAttr_t sineTask_attributes = {
-  .name = "sineTask",
-  .stack_size = 256 * 4,
-  .priority = (osPriority_t) osPriorityLow,
+        .name = "sineTask",
+        .stack_size = 256 * 4,
+        .priority = (osPriority_t) osPriorityLow,
 };
 /* Definitions for tickQueue */
 osMessageQueueId_t tickQueueHandle;
 const osMessageQueueAttr_t tickQueue_attributes = {
-  .name = "tickQueue"
+        .name = "tickQueue"
 };
 /* Definitions for sineQueue */
 osMessageQueueId_t sineQueueHandle;
 const osMessageQueueAttr_t sineQueue_attributes = {
-  .name = "sineQueue"
+        .name = "sineQueue"
 };
 /* Definitions for printMutex */
 osMutexId_t printMutexHandle;
 const osMutexAttr_t printMutex_attributes = {
-  .name = "printMutex"
+        .name = "printMutex"
 };
 /* Definitions for ledMutex */
 osMutexId_t ledMutexHandle;
 const osMutexAttr_t ledMutex_attributes = {
-  .name = "ledMutex"
+        .name = "ledMutex"
 };
 /* Definitions for ledSemaphore */
 osSemaphoreId_t ledSemaphoreHandle;
 const osSemaphoreAttr_t ledSemaphore_attributes = {
-  .name = "ledSemaphore"
+        .name = "ledSemaphore"
 };
 /* Definitions for pulseSemaphore */
 osSemaphoreId_t pulseSemaphoreHandle;
 const osSemaphoreAttr_t pulseSemaphore_attributes = {
-  .name = "pulseSemaphore"
+        .name = "pulseSemaphore"
 };
 /* USER CODE BEGIN PV */
 
@@ -149,14 +149,14 @@ sine_queue_t dacs[2] = {
         {
                 &dma_buffer_1[0],
                 0,
-                100 * (2 * M_PI / SAMPLE_FREQ),
+                1000 * (2 * M_PI / SAMPLE_FREQ),
                 0.99
         },
         {
                 &dma_buffer_2[0],
                 0,
-                101 * (2 * M_PI / SAMPLE_FREQ),
-                0.90
+                999 * (2 * M_PI / SAMPLE_FREQ),
+                0.50
         }
 
 };
@@ -213,32 +213,31 @@ int _write(int fd, char *ptr, int len) {
     return -1;
 }
 
-
 void HAL_DAC_ConvHalfCpltCallbackCh1(DAC_HandleTypeDef *hdac) {
     ++conv_half_ch1;
     dacs[0].buffer = &dma_buffer_1[0];
-    uint32_t dac_addr = (uint32_t)&dacs[0];
+    uint32_t dac_addr = (uint32_t) &dacs[0];
     osMessageQueuePut(sineQueueHandle, &dac_addr, 0, 0);
 }
 
 void HAL_DAC_ConvCpltCallbackCh1(DAC_HandleTypeDef *hdac) {
     ++conv_ch1;
     dacs[0].buffer = &dma_buffer_1[DMA_BUFFER_SIZE];
-    uint32_t dac_addr = (uint32_t)&dacs[0];
+    uint32_t dac_addr = (uint32_t) &dacs[0];
     osMessageQueuePut(sineQueueHandle, &dac_addr, 0, 0);
 }
 
 void HAL_DACEx_ConvHalfCpltCallbackCh2(DAC_HandleTypeDef *hdac) {
     ++conv_half_ch2;
     dacs[1].buffer = &dma_buffer_2[0];
-    uint32_t dac_addr = (uint32_t)&dacs[1];
+    uint32_t dac_addr = (uint32_t) &dacs[1];
     osMessageQueuePut(sineQueueHandle, &dac_addr, 0, 0);
 }
 
 void HAL_DACEx_ConvCpltCallbackCh2(DAC_HandleTypeDef *hdac) {
     ++conv_ch2;
     dacs[1].buffer = &dma_buffer_2[DMA_BUFFER_SIZE];
-    uint32_t dac_addr = (uint32_t)&dacs[1];
+    uint32_t dac_addr = (uint32_t) &dacs[1];
     osMessageQueuePut(sineQueueHandle, &dac_addr, 0, 0);
 }
 
@@ -254,41 +253,41 @@ unsigned long getRunTimeCounterValue(void) {
 /* USER CODE END 0 */
 
 /**
-  * @brief  The application entry point.
-  * @retval int
-  */
+ * @brief  The application entry point.
+ * @retval int
+ */
 int main(void)
 {
 
-  /* USER CODE BEGIN 1 */
+    /* USER CODE BEGIN 1 */
 
-  /* USER CODE END 1 */
+    /* USER CODE END 1 */
 
-  /* MCU Configuration--------------------------------------------------------*/
+    /* MCU Configuration--------------------------------------------------------*/
 
-  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
-  HAL_Init();
+    /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
+    HAL_Init();
 
-  /* USER CODE BEGIN Init */
+    /* USER CODE BEGIN Init */
 
-  /* USER CODE END Init */
+    /* USER CODE END Init */
 
-  /* Configure the system clock */
-  SystemClock_Config();
+    /* Configure the system clock */
+    SystemClock_Config();
 
-  /* USER CODE BEGIN SysInit */
+    /* USER CODE BEGIN SysInit */
 
-  /* USER CODE END SysInit */
+    /* USER CODE END SysInit */
 
-  /* Initialize all configured peripherals */
-  MX_GPIO_Init();
-  MX_DMA_Init();
-  MX_USART1_UART_Init();
-  MX_TIM13_Init();
-  MX_TIM4_Init();
-  MX_DAC_Init();
-  MX_TIM6_Init();
-  /* USER CODE BEGIN 2 */
+    /* Initialize all configured peripherals */
+    MX_GPIO_Init();
+    MX_DMA_Init();
+    MX_USART1_UART_Init();
+    MX_TIM13_Init();
+    MX_TIM4_Init();
+    MX_DAC_Init();
+    MX_TIM6_Init();
+    /* USER CODE BEGIN 2 */
 
     printf("\n\n\n--------\nStarting\n");
 
@@ -298,383 +297,383 @@ int main(void)
     HAL_DAC_Start_DMA(&hdac, DAC_CHANNEL_1, (uint32_t*) &dma_buffer_1, 2 * DMA_BUFFER_SIZE, DAC_ALIGN_12B_R);
     HAL_DAC_Start_DMA(&hdac, DAC_CHANNEL_2, (uint32_t*) &dma_buffer_2, 2 * DMA_BUFFER_SIZE, DAC_ALIGN_12B_R);
 
-  /* USER CODE END 2 */
+    /* USER CODE END 2 */
 
-  /* Init scheduler */
-  osKernelInitialize();
-  /* Create the mutex(es) */
-  /* creation of printMutex */
-  printMutexHandle = osMutexNew(&printMutex_attributes);
+    /* Init scheduler */
+    osKernelInitialize();
+    /* Create the mutex(es) */
+    /* creation of printMutex */
+    printMutexHandle = osMutexNew(&printMutex_attributes);
 
-  /* creation of ledMutex */
-  ledMutexHandle = osMutexNew(&ledMutex_attributes);
+    /* creation of ledMutex */
+    ledMutexHandle = osMutexNew(&ledMutex_attributes);
 
-  /* USER CODE BEGIN RTOS_MUTEX */
+    /* USER CODE BEGIN RTOS_MUTEX */
     /* add mutexes, ... */
-  /* USER CODE END RTOS_MUTEX */
+    /* USER CODE END RTOS_MUTEX */
 
-  /* Create the semaphores(s) */
-  /* creation of ledSemaphore */
-  ledSemaphoreHandle = osSemaphoreNew(1, 1, &ledSemaphore_attributes);
+    /* Create the semaphores(s) */
+    /* creation of ledSemaphore */
+    ledSemaphoreHandle = osSemaphoreNew(1, 1, &ledSemaphore_attributes);
 
-  /* creation of pulseSemaphore */
-  pulseSemaphoreHandle = osSemaphoreNew(1, 1, &pulseSemaphore_attributes);
+    /* creation of pulseSemaphore */
+    pulseSemaphoreHandle = osSemaphoreNew(1, 1, &pulseSemaphore_attributes);
 
-  /* USER CODE BEGIN RTOS_SEMAPHORES */
+    /* USER CODE BEGIN RTOS_SEMAPHORES */
     /* add semaphores, ... */
-  /* USER CODE END RTOS_SEMAPHORES */
+    /* USER CODE END RTOS_SEMAPHORES */
 
-  /* USER CODE BEGIN RTOS_TIMERS */
+    /* USER CODE BEGIN RTOS_TIMERS */
     /* start timers, add new ones, ... */
-  /* USER CODE END RTOS_TIMERS */
+    /* USER CODE END RTOS_TIMERS */
 
-  /* Create the queue(s) */
-  /* creation of tickQueue */
-  tickQueueHandle = osMessageQueueNew (16, sizeof(uint32_t), &tickQueue_attributes);
+    /* Create the queue(s) */
+    /* creation of tickQueue */
+    tickQueueHandle = osMessageQueueNew(16, sizeof(uint32_t), &tickQueue_attributes);
 
-  /* creation of sineQueue */
-  sineQueueHandle = osMessageQueueNew (16, sizeof(uint32_t), &sineQueue_attributes);
-
-  /* USER CODE BEGIN RTOS_QUEUES */
     /* creation of sineQueue */
-  /* USER CODE END RTOS_QUEUES */
+    sineQueueHandle = osMessageQueueNew(16, sizeof(uint32_t), &sineQueue_attributes);
 
-  /* Create the thread(s) */
-  /* creation of defaultTask */
-  defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
+    /* USER CODE BEGIN RTOS_QUEUES */
+    /* creation of sineQueue */
+    /* USER CODE END RTOS_QUEUES */
 
-  /* creation of ledTask */
-  ledTaskHandle = osThreadNew(StartLedTask, NULL, &ledTask_attributes);
+    /* Create the thread(s) */
+    /* creation of defaultTask */
+    defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
 
-  /* creation of tickTask */
-  tickTaskHandle = osThreadNew(StartTickTask, NULL, &tickTask_attributes);
+    /* creation of ledTask */
+    ledTaskHandle = osThreadNew(StartLedTask, NULL, &ledTask_attributes);
 
-  /* creation of statusTask */
-  statusTaskHandle = osThreadNew(StartStatusTask, NULL, &statusTask_attributes);
+    /* creation of tickTask */
+    tickTaskHandle = osThreadNew(StartTickTask, NULL, &tickTask_attributes);
 
-  /* creation of pulseTask */
-  pulseTaskHandle = osThreadNew(StartPulseTask, NULL, &pulseTask_attributes);
+    /* creation of statusTask */
+    statusTaskHandle = osThreadNew(StartStatusTask, NULL, &statusTask_attributes);
 
-  /* creation of sineTask */
-  sineTaskHandle = osThreadNew(StartSineTask, NULL, &sineTask_attributes);
+    /* creation of pulseTask */
+    pulseTaskHandle = osThreadNew(StartPulseTask, NULL, &pulseTask_attributes);
 
-  /* USER CODE BEGIN RTOS_THREADS */
+    /* creation of sineTask */
+    sineTaskHandle = osThreadNew(StartSineTask, NULL, &sineTask_attributes);
+
+    /* USER CODE BEGIN RTOS_THREADS */
     /* add threads, ... */
-  /* USER CODE END RTOS_THREADS */
+    /* USER CODE END RTOS_THREADS */
 
-  /* USER CODE BEGIN RTOS_EVENTS */
+    /* USER CODE BEGIN RTOS_EVENTS */
     /* add events, ... */
-  /* USER CODE END RTOS_EVENTS */
+    /* USER CODE END RTOS_EVENTS */
 
-  /* Start scheduler */
-  osKernelStart();
+    /* Start scheduler */
+    osKernelStart();
 
-  /* We should never get here as control is now taken by the scheduler */
+    /* We should never get here as control is now taken by the scheduler */
 
-  /* Infinite loop */
-  /* USER CODE BEGIN WHILE */
+    /* Infinite loop */
+    /* USER CODE BEGIN WHILE */
 
     Error_Handler();
 
     while (1)
     {
-    /* USER CODE END WHILE */
+        /* USER CODE END WHILE */
 
-    /* USER CODE BEGIN 3 */
+        /* USER CODE BEGIN 3 */
     }
-  /* USER CODE END 3 */
+    /* USER CODE END 3 */
 }
 
 /**
-  * @brief System Clock Configuration
-  * @retval None
-  */
+ * @brief System Clock Configuration
+ * @retval None
+ */
 void SystemClock_Config(void)
 {
-  RCC_OscInitTypeDef RCC_OscInitStruct = {0};
-  RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+    RCC_OscInitTypeDef RCC_OscInitStruct = { 0 };
+    RCC_ClkInitTypeDef RCC_ClkInitStruct = { 0 };
 
-  /** Configure the main internal regulator output voltage
-  */
-  __HAL_RCC_PWR_CLK_ENABLE();
-  __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
+    /** Configure the main internal regulator output voltage
+     */
+    __HAL_RCC_PWR_CLK_ENABLE();
+    __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
 
-  /** Initializes the RCC Oscillators according to the specified parameters
-  * in the RCC_OscInitTypeDef structure.
-  */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
-  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
-  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
-  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
-  RCC_OscInitStruct.PLL.PLLM = 8;
-  RCC_OscInitStruct.PLL.PLLN = 168;
-  RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
-  RCC_OscInitStruct.PLL.PLLQ = 4;
-  if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
-  {
-    Error_Handler();
-  }
+    /** Initializes the RCC Oscillators according to the specified parameters
+     * in the RCC_OscInitTypeDef structure.
+     */
+    RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+    RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+    RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+    RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
+    RCC_OscInitStruct.PLL.PLLM = 8;
+    RCC_OscInitStruct.PLL.PLLN = 168;
+    RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
+    RCC_OscInitStruct.PLL.PLLQ = 4;
+    if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
+            {
+        Error_Handler();
+    }
 
-  /** Initializes the CPU, AHB and APB buses clocks
-  */
-  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
-                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
-  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
-  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
-  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
-  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
+    /** Initializes the CPU, AHB and APB buses clocks
+     */
+    RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK
+            | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
+    RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+    RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+    RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
+    RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_5) != HAL_OK)
-  {
-    Error_Handler();
-  }
+    if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_5) != HAL_OK)
+            {
+        Error_Handler();
+    }
 }
 
 /**
-  * @brief DAC Initialization Function
-  * @param None
-  * @retval None
-  */
+ * @brief DAC Initialization Function
+ * @param None
+ * @retval None
+ */
 static void MX_DAC_Init(void)
 {
 
-  /* USER CODE BEGIN DAC_Init 0 */
+    /* USER CODE BEGIN DAC_Init 0 */
 
-  /* USER CODE END DAC_Init 0 */
+    /* USER CODE END DAC_Init 0 */
 
-  DAC_ChannelConfTypeDef sConfig = {0};
+    DAC_ChannelConfTypeDef sConfig = { 0 };
 
-  /* USER CODE BEGIN DAC_Init 1 */
+    /* USER CODE BEGIN DAC_Init 1 */
 
-  /* USER CODE END DAC_Init 1 */
+    /* USER CODE END DAC_Init 1 */
 
-  /** DAC Initialization
-  */
-  hdac.Instance = DAC;
-  if (HAL_DAC_Init(&hdac) != HAL_OK)
-  {
-    Error_Handler();
-  }
+    /** DAC Initialization
+     */
+    hdac.Instance = DAC;
+    if (HAL_DAC_Init(&hdac) != HAL_OK)
+            {
+        Error_Handler();
+    }
 
-  /** DAC channel OUT1 config
-  */
-  sConfig.DAC_Trigger = DAC_TRIGGER_T6_TRGO;
-  sConfig.DAC_OutputBuffer = DAC_OUTPUTBUFFER_ENABLE;
-  if (HAL_DAC_ConfigChannel(&hdac, &sConfig, DAC_CHANNEL_1) != HAL_OK)
-  {
-    Error_Handler();
-  }
+    /** DAC channel OUT1 config
+     */
+    sConfig.DAC_Trigger = DAC_TRIGGER_T6_TRGO;
+    sConfig.DAC_OutputBuffer = DAC_OUTPUTBUFFER_ENABLE;
+    if (HAL_DAC_ConfigChannel(&hdac, &sConfig, DAC_CHANNEL_1) != HAL_OK)
+            {
+        Error_Handler();
+    }
 
-  /** DAC channel OUT2 config
-  */
-  if (HAL_DAC_ConfigChannel(&hdac, &sConfig, DAC_CHANNEL_2) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN DAC_Init 2 */
+    /** DAC channel OUT2 config
+     */
+    if (HAL_DAC_ConfigChannel(&hdac, &sConfig, DAC_CHANNEL_2) != HAL_OK)
+            {
+        Error_Handler();
+    }
+    /* USER CODE BEGIN DAC_Init 2 */
 
-  /* USER CODE END DAC_Init 2 */
+    /* USER CODE END DAC_Init 2 */
 
 }
 
 /**
-  * @brief TIM4 Initialization Function
-  * @param None
-  * @retval None
-  */
+ * @brief TIM4 Initialization Function
+ * @param None
+ * @retval None
+ */
 static void MX_TIM4_Init(void)
 {
 
-  /* USER CODE BEGIN TIM4_Init 0 */
+    /* USER CODE BEGIN TIM4_Init 0 */
 
-  /* USER CODE END TIM4_Init 0 */
+    /* USER CODE END TIM4_Init 0 */
 
-  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
-  TIM_MasterConfigTypeDef sMasterConfig = {0};
+    TIM_ClockConfigTypeDef sClockSourceConfig = { 0 };
+    TIM_MasterConfigTypeDef sMasterConfig = { 0 };
 
-  /* USER CODE BEGIN TIM4_Init 1 */
+    /* USER CODE BEGIN TIM4_Init 1 */
 
-  /* USER CODE END TIM4_Init 1 */
-  htim4.Instance = TIM4;
-  htim4.Init.Prescaler = 84 - 1;
-  htim4.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim4.Init.Period = 100 - 1;
-  htim4.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-  htim4.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-  if (HAL_TIM_Base_Init(&htim4) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
-  if (HAL_TIM_ConfigClockSource(&htim4, &sClockSourceConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
-  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
-  if (HAL_TIMEx_MasterConfigSynchronization(&htim4, &sMasterConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN TIM4_Init 2 */
+    /* USER CODE END TIM4_Init 1 */
+    htim4.Instance = TIM4;
+    htim4.Init.Prescaler = 84 - 1;
+    htim4.Init.CounterMode = TIM_COUNTERMODE_UP;
+    htim4.Init.Period = 100 - 1;
+    htim4.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+    htim4.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+    if (HAL_TIM_Base_Init(&htim4) != HAL_OK)
+            {
+        Error_Handler();
+    }
+    sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+    if (HAL_TIM_ConfigClockSource(&htim4, &sClockSourceConfig) != HAL_OK)
+            {
+        Error_Handler();
+    }
+    sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+    sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+    if (HAL_TIMEx_MasterConfigSynchronization(&htim4, &sMasterConfig) != HAL_OK)
+            {
+        Error_Handler();
+    }
+    /* USER CODE BEGIN TIM4_Init 2 */
 
-  /* USER CODE END TIM4_Init 2 */
+    /* USER CODE END TIM4_Init 2 */
 
 }
 
 /**
-  * @brief TIM6 Initialization Function
-  * @param None
-  * @retval None
-  */
+ * @brief TIM6 Initialization Function
+ * @param None
+ * @retval None
+ */
 static void MX_TIM6_Init(void)
 {
 
-  /* USER CODE BEGIN TIM6_Init 0 */
+    /* USER CODE BEGIN TIM6_Init 0 */
 
-  /* USER CODE END TIM6_Init 0 */
+    /* USER CODE END TIM6_Init 0 */
 
-  TIM_MasterConfigTypeDef sMasterConfig = {0};
+    TIM_MasterConfigTypeDef sMasterConfig = { 0 };
 
-  /* USER CODE BEGIN TIM6_Init 1 */
+    /* USER CODE BEGIN TIM6_Init 1 */
 
-  /* USER CODE END TIM6_Init 1 */
-  htim6.Instance = TIM6;
-  htim6.Init.Prescaler = 84 - 1;
-  htim6.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim6.Init.Period = 10 - 1;
-  htim6.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-  if (HAL_TIM_Base_Init(&htim6) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  sMasterConfig.MasterOutputTrigger = TIM_TRGO_UPDATE;
-  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
-  if (HAL_TIMEx_MasterConfigSynchronization(&htim6, &sMasterConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN TIM6_Init 2 */
+    /* USER CODE END TIM6_Init 1 */
+    htim6.Instance = TIM6;
+    htim6.Init.Prescaler = 84 - 1;
+    htim6.Init.CounterMode = TIM_COUNTERMODE_UP;
+    htim6.Init.Period = 10 - 1;
+    htim6.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+    if (HAL_TIM_Base_Init(&htim6) != HAL_OK)
+            {
+        Error_Handler();
+    }
+    sMasterConfig.MasterOutputTrigger = TIM_TRGO_UPDATE;
+    sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+    if (HAL_TIMEx_MasterConfigSynchronization(&htim6, &sMasterConfig) != HAL_OK)
+            {
+        Error_Handler();
+    }
+    /* USER CODE BEGIN TIM6_Init 2 */
 
-  /* USER CODE END TIM6_Init 2 */
+    /* USER CODE END TIM6_Init 2 */
 
 }
 
 /**
-  * @brief TIM13 Initialization Function
-  * @param None
-  * @retval None
-  */
+ * @brief TIM13 Initialization Function
+ * @param None
+ * @retval None
+ */
 static void MX_TIM13_Init(void)
 {
 
-  /* USER CODE BEGIN TIM13_Init 0 */
+    /* USER CODE BEGIN TIM13_Init 0 */
 
-  /* USER CODE END TIM13_Init 0 */
+    /* USER CODE END TIM13_Init 0 */
 
-  /* USER CODE BEGIN TIM13_Init 1 */
+    /* USER CODE BEGIN TIM13_Init 1 */
 
-  /* USER CODE END TIM13_Init 1 */
-  htim13.Instance = TIM13;
-  htim13.Init.Prescaler = 0;
-  htim13.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim13.Init.Period = 840-1;
-  htim13.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-  htim13.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-  if (HAL_TIM_Base_Init(&htim13) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN TIM13_Init 2 */
+    /* USER CODE END TIM13_Init 1 */
+    htim13.Instance = TIM13;
+    htim13.Init.Prescaler = 0;
+    htim13.Init.CounterMode = TIM_COUNTERMODE_UP;
+    htim13.Init.Period = 840 - 1;
+    htim13.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+    htim13.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+    if (HAL_TIM_Base_Init(&htim13) != HAL_OK)
+            {
+        Error_Handler();
+    }
+    /* USER CODE BEGIN TIM13_Init 2 */
 
-  /* USER CODE END TIM13_Init 2 */
+    /* USER CODE END TIM13_Init 2 */
 
 }
 
 /**
-  * @brief USART1 Initialization Function
-  * @param None
-  * @retval None
-  */
+ * @brief USART1 Initialization Function
+ * @param None
+ * @retval None
+ */
 static void MX_USART1_UART_Init(void)
 {
 
-  /* USER CODE BEGIN USART1_Init 0 */
+    /* USER CODE BEGIN USART1_Init 0 */
 
-  /* USER CODE END USART1_Init 0 */
+    /* USER CODE END USART1_Init 0 */
 
-  /* USER CODE BEGIN USART1_Init 1 */
+    /* USER CODE BEGIN USART1_Init 1 */
 
-  /* USER CODE END USART1_Init 1 */
-  huart1.Instance = USART1;
-  huart1.Init.BaudRate = 2000000;
-  huart1.Init.WordLength = UART_WORDLENGTH_8B;
-  huart1.Init.StopBits = UART_STOPBITS_1;
-  huart1.Init.Parity = UART_PARITY_NONE;
-  huart1.Init.Mode = UART_MODE_TX_RX;
-  huart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
-  huart1.Init.OverSampling = UART_OVERSAMPLING_8;
-  if (HAL_UART_Init(&huart1) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN USART1_Init 2 */
+    /* USER CODE END USART1_Init 1 */
+    huart1.Instance = USART1;
+    huart1.Init.BaudRate = 2000000;
+    huart1.Init.WordLength = UART_WORDLENGTH_8B;
+    huart1.Init.StopBits = UART_STOPBITS_1;
+    huart1.Init.Parity = UART_PARITY_NONE;
+    huart1.Init.Mode = UART_MODE_TX_RX;
+    huart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+    huart1.Init.OverSampling = UART_OVERSAMPLING_8;
+    if (HAL_UART_Init(&huart1) != HAL_OK)
+            {
+        Error_Handler();
+    }
+    /* USER CODE BEGIN USART1_Init 2 */
 
-  /* USER CODE END USART1_Init 2 */
+    /* USER CODE END USART1_Init 2 */
 
 }
 
 /**
-  * Enable DMA controller clock
-  */
+ * Enable DMA controller clock
+ */
 static void MX_DMA_Init(void)
 {
 
-  /* DMA controller clock enable */
-  __HAL_RCC_DMA1_CLK_ENABLE();
+    /* DMA controller clock enable */
+    __HAL_RCC_DMA1_CLK_ENABLE();
 
-  /* DMA interrupt init */
-  /* DMA1_Stream5_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(DMA1_Stream5_IRQn, 5, 0);
-  HAL_NVIC_EnableIRQ(DMA1_Stream5_IRQn);
-  /* DMA1_Stream6_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(DMA1_Stream6_IRQn, 5, 0);
-  HAL_NVIC_EnableIRQ(DMA1_Stream6_IRQn);
+    /* DMA interrupt init */
+    /* DMA1_Stream5_IRQn interrupt configuration */
+    HAL_NVIC_SetPriority(DMA1_Stream5_IRQn, 5, 0);
+    HAL_NVIC_EnableIRQ(DMA1_Stream5_IRQn);
+    /* DMA1_Stream6_IRQn interrupt configuration */
+    HAL_NVIC_SetPriority(DMA1_Stream6_IRQn, 5, 0);
+    HAL_NVIC_EnableIRQ(DMA1_Stream6_IRQn);
 
 }
 
 /**
-  * @brief GPIO Initialization Function
-  * @param None
-  * @retval None
-  */
+ * @brief GPIO Initialization Function
+ * @param None
+ * @retval None
+ */
 static void MX_GPIO_Init(void)
 {
-  GPIO_InitTypeDef GPIO_InitStruct = {0};
-/* USER CODE BEGIN MX_GPIO_Init_1 */
-/* USER CODE END MX_GPIO_Init_1 */
+    GPIO_InitTypeDef GPIO_InitStruct = { 0 };
+    /* USER CODE BEGIN MX_GPIO_Init_1 */
+    /* USER CODE END MX_GPIO_Init_1 */
 
-  /* GPIO Ports Clock Enable */
-  __HAL_RCC_GPIOC_CLK_ENABLE();
-  __HAL_RCC_GPIOH_CLK_ENABLE();
-  __HAL_RCC_GPIOA_CLK_ENABLE();
-  __HAL_RCC_GPIOB_CLK_ENABLE();
+    /* GPIO Ports Clock Enable */
+    __HAL_RCC_GPIOC_CLK_ENABLE();
+    __HAL_RCC_GPIOH_CLK_ENABLE();
+    __HAL_RCC_GPIOA_CLK_ENABLE();
+    __HAL_RCC_GPIOB_CLK_ENABLE();
 
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);
+    /*Configure GPIO pin Output Level */
+    HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);
 
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(PULSE_GPIO_Port, PULSE_Pin, GPIO_PIN_RESET);
+    /*Configure GPIO pin Output Level */
+    HAL_GPIO_WritePin(PULSE_GPIO_Port, PULSE_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pins : LED_Pin PULSE_Pin */
-  GPIO_InitStruct.Pin = LED_Pin|PULSE_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+    /*Configure GPIO pins : LED_Pin PULSE_Pin */
+    GPIO_InitStruct.Pin = LED_Pin | PULSE_Pin;
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+    HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-/* USER CODE BEGIN MX_GPIO_Init_2 */
-/* USER CODE END MX_GPIO_Init_2 */
+    /* USER CODE BEGIN MX_GPIO_Init_2 */
+    /* USER CODE END MX_GPIO_Init_2 */
 }
 
 /* USER CODE BEGIN 4 */
@@ -690,7 +689,7 @@ static void MX_GPIO_Init(void)
 /* USER CODE END Header_StartDefaultTask */
 void StartDefaultTask(void *argument)
 {
-  /* USER CODE BEGIN 5 */
+    /* USER CODE BEGIN 5 */
 
     uint8_t toggle = 0;
 
@@ -710,7 +709,7 @@ void StartDefaultTask(void *argument)
         }
 
     }
-  /* USER CODE END 5 */
+    /* USER CODE END 5 */
 }
 
 /* USER CODE BEGIN Header_StartLedTask */
@@ -722,7 +721,7 @@ void StartDefaultTask(void *argument)
 /* USER CODE END Header_StartLedTask */
 void StartLedTask(void *argument)
 {
-  /* USER CODE BEGIN StartLedTask */
+    /* USER CODE BEGIN StartLedTask */
 
     osStatus_t ret;
 
@@ -737,7 +736,7 @@ void StartLedTask(void *argument)
         }
 
     }
-  /* USER CODE END StartLedTask */
+    /* USER CODE END StartLedTask */
 }
 
 /* USER CODE BEGIN Header_StartTickTask */
@@ -749,7 +748,7 @@ void StartLedTask(void *argument)
 /* USER CODE END Header_StartTickTask */
 void StartTickTask(void *argument)
 {
-  /* USER CODE BEGIN StartTickTask */
+    /* USER CODE BEGIN StartTickTask */
 
     osStatus_t ret;
 
@@ -769,7 +768,7 @@ void StartTickTask(void *argument)
 
     }
 
-  /* USER CODE END StartTickTask */
+    /* USER CODE END StartTickTask */
 }
 
 /* USER CODE BEGIN Header_StartStatusTask */
@@ -781,11 +780,11 @@ void StartTickTask(void *argument)
 /* USER CODE END Header_StartStatusTask */
 void StartStatusTask(void *argument)
 {
-  /* USER CODE BEGIN StartStatusTask */
+    /* USER CODE BEGIN StartStatusTask */
     TaskStatus_t *pxTaskStatusArray;
     volatile UBaseType_t uxArraySize, x;
     unsigned long ulTotalRunTime;
-    float runtime_percent;
+    float runtime_percentage;
 
     /* Infinite loop */
     for (;;) {
@@ -807,13 +806,16 @@ void StartStatusTask(void *argument)
 
             for (x = 0; x < uxArraySize; x++) {
 
-                runtime_percent = (float) (100
+                runtime_percentage = (float) (100
                         * (float) pxTaskStatusArray[x].ulRunTimeCounter
                         / (float) ulTotalRunTime);
 
-                printf("Task %lu: %-12s %2d %8.4f (%8lu) %4i\n", x,
+                printf("Task %lu: %-12s %2d %8.4f (%8lu) %4i\n",
+                        x,
                         pxTaskStatusArray[x].pcTaskName,
-                        pxTaskStatusArray[x].eCurrentState, runtime_percent, pxTaskStatusArray[x].ulRunTimeCounter,
+                        pxTaskStatusArray[x].eCurrentState,
+                        runtime_percentage,
+                        pxTaskStatusArray[x].ulRunTimeCounter,
                         pxTaskStatusArray[x].usStackHighWaterMark);
 
             }
@@ -828,7 +830,7 @@ void StartStatusTask(void *argument)
 
     }
 
-  /* USER CODE END StartStatusTask */
+    /* USER CODE END StartStatusTask */
 }
 
 /* USER CODE BEGIN Header_StartPulseTask */
@@ -840,7 +842,7 @@ void StartStatusTask(void *argument)
 /* USER CODE END Header_StartPulseTask */
 void StartPulseTask(void *argument)
 {
-  /* USER CODE BEGIN StartPulseTask */
+    /* USER CODE BEGIN StartPulseTask */
 
     osStatus_t ret;
 
@@ -855,7 +857,7 @@ void StartPulseTask(void *argument)
 
     }
 
-  /* USER CODE END StartPulseTask */
+    /* USER CODE END StartPulseTask */
 }
 
 /* USER CODE BEGIN Header_StartSineTask */
@@ -867,7 +869,7 @@ void StartPulseTask(void *argument)
 /* USER CODE END Header_StartSineTask */
 void StartSineTask(void *argument)
 {
-  /* USER CODE BEGIN StartSineTask */
+    /* USER CODE BEGIN StartSineTask */
 
     osStatus_t ret;
 
@@ -882,7 +884,7 @@ void StartSineTask(void *argument)
             ++sine_task;
 
             // The message contain a pointer to the relevant sine_queue_t struct
-            sine_queue_t *sine = (sine_queue_t *)sine_p;
+            sine_queue_t *sine = (sine_queue_t*) sine_p;
 
             // Run through the buffer
             for (int i = 0; i < DMA_BUFFER_SIZE; ++i) {
@@ -904,47 +906,47 @@ void StartSineTask(void *argument)
 
     }
 
-  /* USER CODE END StartSineTask */
+    /* USER CODE END StartSineTask */
 }
 
 /**
-  * @brief  Period elapsed callback in non blocking mode
-  * @note   This function is called  when TIM14 interrupt took place, inside
-  * HAL_TIM_IRQHandler(). It makes a direct call to HAL_IncTick() to increment
-  * a global variable "uwTick" used as application time base.
-  * @param  htim : TIM handle
-  * @retval None
-  */
+ * @brief  Period elapsed callback in non blocking mode
+ * @note   This function is called  when TIM14 interrupt took place, inside
+ * HAL_TIM_IRQHandler(). It makes a direct call to HAL_IncTick() to increment
+ * a global variable "uwTick" used as application time base.
+ * @param  htim : TIM handle
+ * @retval None
+ */
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
-  /* USER CODE BEGIN Callback 0 */
+    /* USER CODE BEGIN Callback 0 */
 
     if (htim->Instance == TIM4) {
         osSemaphoreRelease(pulseSemaphoreHandle);
     }
 
-  /* USER CODE END Callback 0 */
-  if (htim->Instance == TIM14) {
-    HAL_IncTick();
-  }
-  /* USER CODE BEGIN Callback 1 */
+    /* USER CODE END Callback 0 */
+    if (htim->Instance == TIM14) {
+        HAL_IncTick();
+    }
+    /* USER CODE BEGIN Callback 1 */
 
-  /* USER CODE END Callback 1 */
+    /* USER CODE END Callback 1 */
 }
 
 /**
-  * @brief  This function is executed in case of error occurrence.
-  * @retval None
-  */
+ * @brief  This function is executed in case of error occurrence.
+ * @retval None
+ */
 void Error_Handler(void)
 {
-  /* USER CODE BEGIN Error_Handler_Debug */
+    /* USER CODE BEGIN Error_Handler_Debug */
     /* User can add his own implementation to report the HAL error return state */
     __disable_irq();
     while (1)
     {
     }
-  /* USER CODE END Error_Handler_Debug */
+    /* USER CODE END Error_Handler_Debug */
 }
 
 #ifdef  USE_FULL_ASSERT

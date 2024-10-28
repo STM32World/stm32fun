@@ -15,10 +15,13 @@
  ******************************************************************************
  */
 
+#include "main.h"
+
+#include "bmp085.h"
+
 #include <math.h>
 
-#include "main.h"
-#include "bmp085.h"
+
 
 // Internal functions
 

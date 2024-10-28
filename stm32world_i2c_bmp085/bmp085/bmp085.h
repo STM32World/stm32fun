@@ -18,7 +18,7 @@
 #ifndef BMP085_H_
 #define BMP085_H_
 
-#ifdef DEBUG
+#ifdef xxxDEBUG
 #include <stdio.h>
 #define BMP085_DBG(...) printf(__VA_ARGS__)
 #else
