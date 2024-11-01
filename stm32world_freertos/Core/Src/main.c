@@ -37,6 +37,12 @@ typedef struct {
     float amplification;
 } sine_queue_t;
 
+typedef struct {
+    uint8_t dac;
+    float frequency;
+    float amplification;
+} wave_queue_t;
+
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -74,34 +80,55 @@ osThreadId_t ledTaskHandle;
 const osThreadAttr_t ledTask_attributes = {
         .name = "ledTask",
         .stack_size = 128 * 4,
-        .priority = (osPriority_t) osPriorityLow,
+        .priority = (osPriority_t) osPriorityNormal,
 };
 /* Definitions for tickTask */
 osThreadId_t tickTaskHandle;
 const osThreadAttr_t tickTask_attributes = {
         .name = "tickTask",
         .stack_size = 256 * 4,
-        .priority = (osPriority_t) osPriorityLow,
+        .priority = (osPriority_t) osPriorityNormal,
 };
 /* Definitions for statusTask */
 osThreadId_t statusTaskHandle;
 const osThreadAttr_t statusTask_attributes = {
         .name = "statusTask",
         .stack_size = 256 * 4,
-        .priority = (osPriority_t) osPriorityLow,
+        .priority = (osPriority_t) osPriorityNormal,
 };
 /* Definitions for pulseTask */
 osThreadId_t pulseTaskHandle;
 const osThreadAttr_t pulseTask_attributes = {
         .name = "pulseTask",
         .stack_size = 128 * 4,
-        .priority = (osPriority_t) osPriorityLow,
+        .priority = (osPriority_t) osPriorityNormal,
 };
 /* Definitions for sineTask */
 osThreadId_t sineTaskHandle;
 const osThreadAttr_t sineTask_attributes = {
         .name = "sineTask",
         .stack_size = 256 * 4,
+        .priority = (osPriority_t) osPriorityNormal,
+};
+/* Definitions for waveTask */
+osThreadId_t waveTaskHandle;
+const osThreadAttr_t waveTask_attributes = {
+        .name = "waveTask",
+        .stack_size = 256 * 4,
+        .priority = (osPriority_t) osPriorityNormal,
+};
+/* Definitions for waste1Task */
+osThreadId_t waste1TaskHandle;
+const osThreadAttr_t waste1Task_attributes = {
+        .name = "waste1Task",
+        .stack_size = 128 * 4,
+        .priority = (osPriority_t) osPriorityLow,
+};
+/* Definitions for waste2Task */
+osThreadId_t waste2TaskHandle;
+const osThreadAttr_t waste2Task_attributes = {
+        .name = "waste2Task",
+        .stack_size = 128 * 4,
         .priority = (osPriority_t) osPriorityLow,
 };
 /* Definitions for tickQueue */
@@ -113,6 +140,11 @@ const osMessageQueueAttr_t tickQueue_attributes = {
 osMessageQueueId_t sineQueueHandle;
 const osMessageQueueAttr_t sineQueue_attributes = {
         .name = "sineQueue"
+};
+/* Definitions for waveQueue */
+osMessageQueueId_t waveQueueHandle;
+const osMessageQueueAttr_t waveQueue_attributes = {
+        .name = "waveQueue"
 };
 /* Definitions for printMutex */
 osMutexId_t printMutexHandle;
@@ -145,6 +177,19 @@ uint8_t ucHeap[configTOTAL_HEAP_SIZE] __attribute__((section(".ccmram")));
 uint16_t dma_buffer_1[2 * DMA_BUFFER_SIZE];
 uint16_t dma_buffer_2[2 * DMA_BUFFER_SIZE];
 
+const float amplification_demo_values[] = {
+        0.1,
+        0.2,
+        0.3,
+        0.4,
+        0.5,
+        0.6,
+        0.7,
+        0.8,
+        0.9,
+        1.0
+};
+
 sine_queue_t dacs[2] = {
         {
                 &dma_buffer_1[0],
@@ -155,22 +200,13 @@ sine_queue_t dacs[2] = {
         {
                 &dma_buffer_2[0],
                 0,
-                999 * (2 * M_PI / SAMPLE_FREQ),
-                0.50
+                999.9 * (2 * M_PI / SAMPLE_FREQ),
+                0.00
         }
 
 };
 
 const float two_pi = 2 * M_PI;
-
-//float angle = 0;
-//float angle_change = 440 * (2 * M_PI / SAMPLE_FREQ);
-//float amplifier = 0.9;
-
-//osMessageQueueId_t sineQueueHandle;
-//const osMessageQueueAttr_t sineQueue_attributes = {
-//        .name = "sineQueue"
-//};
 
 uint32_t conv_half_ch1, conv_ch1, conv_half_ch2, conv_ch2, sine_task;
 
@@ -191,6 +227,9 @@ void StartTickTask(void *argument);
 void StartStatusTask(void *argument);
 void StartPulseTask(void *argument);
 void StartSineTask(void *argument);
+void StartWaveTask(void *argument);
+void StartWaste1Task(void *argument);
+void StartWaste2Task(void *argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -334,6 +373,9 @@ int main(void)
     /* creation of sineQueue */
     sineQueueHandle = osMessageQueueNew(16, sizeof(uint32_t), &sineQueue_attributes);
 
+    /* creation of waveQueue */
+    waveQueueHandle = osMessageQueueNew(16, sizeof(wave_queue_t), &waveQueue_attributes);
+
     /* USER CODE BEGIN RTOS_QUEUES */
     /* creation of sineQueue */
     /* USER CODE END RTOS_QUEUES */
@@ -356,6 +398,15 @@ int main(void)
 
     /* creation of sineTask */
     sineTaskHandle = osThreadNew(StartSineTask, NULL, &sineTask_attributes);
+
+    /* creation of waveTask */
+    waveTaskHandle = osThreadNew(StartWaveTask, NULL, &waveTask_attributes);
+
+    /* creation of waste1Task */
+    waste1TaskHandle = osThreadNew(StartWaste1Task, NULL, &waste1Task_attributes);
+
+    /* creation of waste2Task */
+    waste2TaskHandle = osThreadNew(StartWaste2Task, NULL, &waste2Task_attributes);
 
     /* USER CODE BEGIN RTOS_THREADS */
     /* add threads, ... */
@@ -691,22 +742,47 @@ void StartDefaultTask(void *argument)
 {
     /* USER CODE BEGIN 5 */
 
-    uint8_t toggle = 0;
+    uint32_t loop_cnt = 0;
+    uint8_t amplification_demo_idx = 0;
 
     /* Infinite loop */
-    for (;;)
-            {
-        osDelay(500);
+    for (;;) {
 
-        toggle = !toggle;
+        osDelay(100);
 
-        osSemaphoreRelease(ledSemaphoreHandle);
+        if (loop_cnt % 10 == 0) {
 
-        uint32_t tick = osKernelGetTickCount();
+            uint32_t tick = osKernelGetTickCount();
 
-        if (!toggle) { // Only every second time
             osMessageQueuePut(tickQueueHandle, &tick, 0, osWaitForever);
+
         }
+
+        if (loop_cnt % 5 == 0) {
+
+            osSemaphoreRelease(ledSemaphoreHandle);
+
+        }
+
+        if (loop_cnt % 1 == 0) {
+
+            wave_queue_t wave;
+
+            wave.dac = 1;
+            wave.frequency = 999.9;
+            wave.amplification = amplification_demo_values[amplification_demo_idx];
+
+            osMessageQueuePut(waveQueueHandle, &wave, 0, osWaitForever);
+
+            ++amplification_demo_idx;
+
+            if (amplification_demo_idx >= sizeof(amplification_demo_values) / sizeof(amplification_demo_values[0])) {
+                amplification_demo_idx = 0;
+            }
+
+        }
+
+        ++loop_cnt;
 
     }
     /* USER CODE END 5 */
@@ -729,10 +805,15 @@ void StartLedTask(void *argument)
     for (;;) {
 
         ret = osSemaphoreAcquire(ledSemaphoreHandle, osWaitForever);
+
         if (!ret) {
+
             osMutexWait(ledMutexHandle, osWaitForever);
+
             HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+
             osMutexRelease(ledMutexHandle);
+
         }
 
     }
@@ -758,10 +839,13 @@ void StartTickTask(void *argument)
         uint32_t tick;
 
         ret = osMessageQueueGet(tickQueueHandle, &tick, NULL, osWaitForever);
+
         if (ret == osOK) {
 
             osMutexWait(printMutexHandle, osWaitForever);
+
             printf("Tick %lu (c1 = %lu, c1h = %lu ch2 = %lu, c2h = %lu s = %lu)\n", tick / 1000, conv_ch1, conv_half_ch1, conv_ch2, conv_half_ch2, sine_task);
+
             osMutexRelease(printMutexHandle);
 
         }
@@ -802,7 +886,7 @@ void StartStatusTask(void *argument)
                     &ulTotalRunTime);
 
             printf("Task count = %lu\n", uxArraySize);
-            printf("No      Name          S   Usage     Count     HW\n");
+            printf("No       Name          P  S   Usage     Count     HW\n");
 
             for (x = 0; x < uxArraySize; x++) {
 
@@ -810,9 +894,10 @@ void StartStatusTask(void *argument)
                         * (float) pxTaskStatusArray[x].ulRunTimeCounter
                         / (float) ulTotalRunTime);
 
-                printf("Task %lu: %-12s %2d %8.4f (%8lu) %4i\n",
+                printf("Task %2lu: %-12s %2d %2d %8.4f (%8lu) %4i\n",
                         x,
                         pxTaskStatusArray[x].pcTaskName,
+                        pxTaskStatusArray[x].uxCurrentPriority,
                         pxTaskStatusArray[x].eCurrentState,
                         runtime_percentage,
                         pxTaskStatusArray[x].ulRunTimeCounter,
@@ -907,6 +992,85 @@ void StartSineTask(void *argument)
     }
 
     /* USER CODE END StartSineTask */
+}
+
+/* USER CODE BEGIN Header_StartWaveTask */
+/**
+ * @brief Function implementing the waveTask thread.
+ * @param argument: Not used
+ * @retval None
+ */
+/* USER CODE END Header_StartWaveTask */
+void StartWaveTask(void *argument)
+{
+    /* USER CODE BEGIN StartWaveTask */
+
+    osStatus_t ret;
+
+    /* Infinite loop */
+    for (;;) {
+
+        wave_queue_t wave;
+
+        ret = osMessageQueueGet(waveQueueHandle, &wave, NULL, osWaitForever);
+
+        if (ret == osOK) {
+
+            dacs[wave.dac].angle_change = wave.frequency * (2 * M_PI / SAMPLE_FREQ);
+            dacs[wave.dac].amplification = wave.amplification;
+
+        }
+
+    }
+    /* USER CODE END StartWaveTask */
+}
+
+/* USER CODE BEGIN Header_StartWaste1Task */
+/**
+ * @brief Function implementing the waste1Task thread.
+ * @param argument: Not used
+ * @retval None
+ */
+/* USER CODE END Header_StartWaste1Task */
+void StartWaste1Task(void *argument)
+{
+    /* USER CODE BEGIN StartWaste1Task */
+
+    uint8_t cnt = 0;
+
+    /* Infinite loop */
+    for (;;) {
+
+        ++cnt;
+
+        osThreadYield();
+
+    }
+
+    /* USER CODE END StartWaste1Task */
+}
+
+/* USER CODE BEGIN Header_StartWaste2Task */
+/**
+ * @brief Function implementing the waste2Task thread.
+ * @param argument: Not used
+ * @retval None
+ */
+/* USER CODE END Header_StartWaste2Task */
+void StartWaste2Task(void *argument)
+{
+    /* USER CODE BEGIN StartWaste2Task */
+    uint8_t cnt = 0;
+
+    /* Infinite loop */
+    for (;;) {
+
+        ++cnt;
+
+        osThreadYield();
+
+    }
+    /* USER CODE END StartWaste2Task */
 }
 
 /**
