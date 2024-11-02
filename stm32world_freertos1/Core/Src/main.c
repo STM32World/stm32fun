@@ -41,6 +41,8 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
+TIM_HandleTypeDef htim13;
+
 UART_HandleTypeDef huart1;
 
 /* Definitions for defaultTask */
@@ -61,7 +63,14 @@ const osThreadAttr_t ledTask_attributes = {
 osThreadId_t tickTaskHandle;
 const osThreadAttr_t tickTask_attributes = {
   .name = "tickTask",
-  .stack_size = 128 * 4,
+  .stack_size = 196 * 4,
+  .priority = (osPriority_t) osPriorityLow,
+};
+/* Definitions for statsTask */
+osThreadId_t statsTaskHandle;
+const osThreadAttr_t statsTask_attributes = {
+  .name = "statsTask",
+  .stack_size = 256 * 4,
   .priority = (osPriority_t) osPriorityLow,
 };
 /* Definitions for tickQueue */
@@ -86,15 +95,19 @@ const osSemaphoreAttr_t ledSemaphore_attributes = {
 };
 /* USER CODE BEGIN PV */
 
+volatile unsigned long ulHighFrequencyTimerTicks;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_USART1_UART_Init(void);
+static void MX_TIM13_Init(void);
 void StartDefaultTask(void *argument);
 void StartLedTask(void *argument);
 void StartTickTask(void *argument);
+void StartStatsTask(void *argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -115,6 +128,15 @@ int _write(int fd, char *ptr, int len) {
             return -1;
     }
     return -1;
+}
+
+void configureTimerForRunTimeStats(void) {
+    ulHighFrequencyTimerTicks = 0;
+    HAL_TIM_Base_Start_IT(&htim13);
+}
+
+unsigned long getRunTimeCounterValue(void) {
+    return ulHighFrequencyTimerTicks;
 }
 
 /* USER CODE END 0 */
@@ -149,6 +171,7 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_USART1_UART_Init();
+  MX_TIM13_Init();
   /* USER CODE BEGIN 2 */
 
   printf("\n\n\n--------\nStarting\n");
@@ -197,6 +220,9 @@ int main(void)
 
   /* creation of tickTask */
   tickTaskHandle = osThreadNew(StartTickTask, NULL, &tickTask_attributes);
+
+  /* creation of statsTask */
+  statsTaskHandle = osThreadNew(StartStatsTask, NULL, &statsTask_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -268,6 +294,37 @@ void SystemClock_Config(void)
 }
 
 /**
+  * @brief TIM13 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM13_Init(void)
+{
+
+  /* USER CODE BEGIN TIM13_Init 0 */
+
+  /* USER CODE END TIM13_Init 0 */
+
+  /* USER CODE BEGIN TIM13_Init 1 */
+
+  /* USER CODE END TIM13_Init 1 */
+  htim13.Instance = TIM13;
+  htim13.Init.Prescaler = 0;
+  htim13.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim13.Init.Period = 840 - 1;
+  htim13.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim13.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim13) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM13_Init 2 */
+
+  /* USER CODE END TIM13_Init 2 */
+
+}
+
+/**
   * @brief USART1 Initialization Function
   * @param None
   * @retval None
@@ -315,6 +372,7 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOH_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
+  __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);
@@ -436,6 +494,70 @@ void StartTickTask(void *argument)
     }
 
   /* USER CODE END StartTickTask */
+}
+
+/* USER CODE BEGIN Header_StartStatsTask */
+/**
+* @brief Function implementing the statsTask thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartStatsTask */
+void StartStatsTask(void *argument)
+{
+  /* USER CODE BEGIN StartStatsTask */
+
+    TaskStatus_t *pxTaskStatusArray;
+    volatile UBaseType_t uxArraySize, x;
+    unsigned long ulTotalRunTime;
+    float runtime_percentage;
+
+    /* Infinite loop */
+    for (;;) {
+
+        osDelay(10000);
+
+        uxArraySize = uxTaskGetNumberOfTasks();
+        pxTaskStatusArray = pvPortMalloc(uxArraySize * sizeof(TaskStatus_t)); // a little bit scary!
+
+        osMutexWait(printMutexHandle, osWaitForever);
+
+        if (pxTaskStatusArray != NULL) {
+
+            uxArraySize = uxTaskGetSystemState(pxTaskStatusArray, uxArraySize,
+                    &ulTotalRunTime);
+
+            printf("Task count = %lu\n", uxArraySize);
+            printf("No       Name          P  S   Usage     Count     HW\n");
+
+            for (x = 0; x < uxArraySize; x++) {
+
+                runtime_percentage = (float) (100
+                        * (float) pxTaskStatusArray[x].ulRunTimeCounter
+                        / (float) ulTotalRunTime);
+
+                printf("Task %2lu: %-12s %2d %2d %8.4f (%8lu) %4i\n",
+                        x,
+                        pxTaskStatusArray[x].pcTaskName,
+                        pxTaskStatusArray[x].uxCurrentPriority,
+                        pxTaskStatusArray[x].eCurrentState,
+                        runtime_percentage,
+                        pxTaskStatusArray[x].ulRunTimeCounter,
+                        pxTaskStatusArray[x].usStackHighWaterMark);
+
+            }
+
+            vPortFree(pxTaskStatusArray);
+
+        } else {
+            printf("Unable to allocate stack space\n");
+        }
+
+        osMutexRelease(printMutexHandle);
+
+    }
+
+  /* USER CODE END StartStatsTask */
 }
 
 /**
