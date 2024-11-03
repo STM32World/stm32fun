@@ -15,13 +15,11 @@
  ******************************************************************************
  */
 
-#include "main.h"
+//#include "main.h"
 
-#include "bmp085.h"
-
+#include "stm32f4xx_hal.h"
 #include <math.h>
-
-
+#include "bmp085.h"
 
 // Internal functions
 
