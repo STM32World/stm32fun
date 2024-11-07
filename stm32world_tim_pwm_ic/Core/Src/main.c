@@ -6,7 +6,7 @@
  ******************************************************************************
  * @attention
  *
- * Copyright (c) 2024 Lars Boegild Thomsen <lbthomsen@gmail.com>
+ * Copyright (c) 2024 Lars Boegild Thomsen <lth@stm32world.com>
  * All rights reserved.
  *
  * This software is licensed under terms that can be found in the LICENSE file
@@ -21,7 +21,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include <stdio.h>
+#include "stdio.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -31,10 +31,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
-#define IWDG_REFRESH_INTERVAL 1690
-#define TIMER_CLOCK_FREQ 84000000
-
+#define TIMER_CLOCK_FREQ 84000000 // APB1 Timer Clock
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -43,24 +40,37 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
-IWDG_HandleTypeDef hiwdg;
-
-RTC_HandleTypeDef hrtc;
-
+TIM_HandleTypeDef htim2;
+TIM_HandleTypeDef htim4;
 TIM_HandleTypeDef htim5;
 
 UART_HandleTypeDef huart1;
 
 /* USER CODE BEGIN PV */
-uint32_t tim_cnt, tim_val;
+
+// Define some test pwm values - first column is prescaler value for pwm and second row is duty cycle (of 1000)
+uint32_t pwm_vals[][2] = {
+        {999, 500},
+        {499, 250},
+        {249, 125},
+        {125, 63},
+        {59, 30},
+        {31, 15}
+};
+// Used to cycle around the pwm values
+uint32_t pwm_vals_idx = 0;
+
+uint32_t cnt_full, cnt_high, cnt_lsi;
+float freq = 0;
+float duty = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
-static void MX_RTC_Init(void);
 static void MX_USART1_UART_Init(void);
-static void MX_IWDG_Init(void);
+static void MX_TIM4_Init(void);
+static void MX_TIM2_Init(void);
 static void MX_TIM5_Init(void);
 /* USER CODE BEGIN PFP */
 
@@ -74,7 +84,8 @@ int _write(int fd, char *ptr, int len) {
     HAL_StatusTypeDef hstatus;
 
     if (fd == 1 || fd == 2) {
-        hstatus = HAL_UART_Transmit(&huart1, (uint8_t*) ptr, len, HAL_MAX_DELAY);
+        hstatus = HAL_UART_Transmit(&huart1, (uint8_t*) ptr, len,
+                HAL_MAX_DELAY);
         if (hstatus == HAL_OK)
             return len;
         else
@@ -84,132 +95,12 @@ int _write(int fd, char *ptr, int len) {
 }
 
 void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim) {
-
-    if (htim->Instance == TIM5) {
-        tim_val = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_4);
-        ++tim_cnt;
+    if (htim->Instance == TIM2) {
+        cnt_full = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_1) + 2;
+        cnt_high = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_2) + 2;
+    } else if (htim->Instance == TIM5) {
+        cnt_lsi = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_4) + 2;
     }
-
-}
-
-/// @brief  Possible STM32 system reset causes
-typedef enum reset_cause_e
-{
-    RESET_CAUSE_UNKNOWN = 0,
-    RESET_CAUSE_LOW_POWER_RESET,
-    RESET_CAUSE_WINDOW_WATCHDOG_RESET,
-    RESET_CAUSE_INDEPENDENT_WATCHDOG_RESET,
-    RESET_CAUSE_SOFTWARE_RESET,
-    RESET_CAUSE_POWER_ON_POWER_DOWN_RESET,
-    RESET_CAUSE_EXTERNAL_RESET_PIN_RESET,
-    RESET_CAUSE_BROWNOUT_RESET,
-} reset_cause_t;
-
-/// @brief      Obtain the STM32 system reset cause
-/// @param      None
-/// @return     The system reset cause
-reset_cause_t reset_cause_get(void)
-{
-    reset_cause_t reset_cause;
-
-    if (__HAL_RCC_GET_FLAG(RCC_FLAG_LPWRRST))
-            {
-        reset_cause = RESET_CAUSE_LOW_POWER_RESET;
-    }
-    else if (__HAL_RCC_GET_FLAG(RCC_FLAG_WWDGRST))
-            {
-        reset_cause = RESET_CAUSE_WINDOW_WATCHDOG_RESET;
-    }
-    else if (__HAL_RCC_GET_FLAG(RCC_FLAG_IWDGRST))
-            {
-        reset_cause = RESET_CAUSE_INDEPENDENT_WATCHDOG_RESET;
-    }
-    else if (__HAL_RCC_GET_FLAG(RCC_FLAG_SFTRST))
-            {
-        // This reset is induced by calling the ARM CMSIS
-        // `NVIC_SystemReset()` function!
-        reset_cause = RESET_CAUSE_SOFTWARE_RESET;
-    }
-    else if (__HAL_RCC_GET_FLAG(RCC_FLAG_PORRST))
-            {
-        reset_cause = RESET_CAUSE_POWER_ON_POWER_DOWN_RESET;
-    }
-    else if (__HAL_RCC_GET_FLAG(RCC_FLAG_PINRST))
-            {
-        reset_cause = RESET_CAUSE_EXTERNAL_RESET_PIN_RESET;
-    }
-    // Needs to come *after* checking the `RCC_FLAG_PORRST` flag in order to
-    // ensure first that the reset cause is NOT a POR/PDR reset. See note
-    // below.
-    else if (__HAL_RCC_GET_FLAG(RCC_FLAG_BORRST))
-            {
-        reset_cause = RESET_CAUSE_BROWNOUT_RESET;
-    }
-    else
-    {
-        reset_cause = RESET_CAUSE_UNKNOWN;
-    }
-
-    // Clear all the reset flags or else they will remain set during future
-    // resets until system power is fully removed.
-    __HAL_RCC_CLEAR_RESET_FLAGS();
-
-    return reset_cause;
-}
-
-// Note: any of the STM32 Hardware Abstraction Layer (HAL) Reset and Clock
-// Controller (RCC) header files, such as
-// "STM32Cube_FW_F7_V1.12.0/Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_rcc.h",
-// "STM32Cube_FW_F2_V1.7.0/Drivers/STM32F2xx_HAL_Driver/Inc/stm32f2xx_hal_rcc.h",
-// etc., indicate that the brownout flag, `RCC_FLAG_BORRST`, will be set in
-// the event of a "POR/PDR or BOR reset". This means that a Power-On Reset
-// (POR), Power-Down Reset (PDR), OR Brownout Reset (BOR) will trip this flag.
-// See the doxygen just above their definition for the
-// `__HAL_RCC_GET_FLAG()` macro to see this:
-//      "@arg RCC_FLAG_BORRST: POR/PDR or BOR reset." <== indicates the Brownout
-//      Reset flag will *also* be set in the event of a POR/PDR.
-// Therefore, you must check the Brownout Reset flag, `RCC_FLAG_BORRST`, *after*
-// first checking the `RCC_FLAG_PORRST` flag in order to ensure first that the
-// reset cause is NOT a POR/PDR reset.
-
-/// @brief      Obtain the system reset cause as an ASCII-printable name string
-///             from a reset cause type
-/// @param[in]  reset_cause     The previously-obtained system reset cause
-/// @return     A null-terminated ASCII name string describing the system
-///             reset cause
-const char* reset_cause_get_name(reset_cause_t reset_cause)
-{
-    const char *reset_cause_name = "TBD";
-
-    switch (reset_cause)
-    {
-    case RESET_CAUSE_UNKNOWN:
-        reset_cause_name = "UNKNOWN";
-        break;
-    case RESET_CAUSE_LOW_POWER_RESET:
-        reset_cause_name = "LOW_POWER_RESET";
-        break;
-    case RESET_CAUSE_WINDOW_WATCHDOG_RESET:
-        reset_cause_name = "WINDOW_WATCHDOG_RESET";
-        break;
-    case RESET_CAUSE_INDEPENDENT_WATCHDOG_RESET:
-        reset_cause_name = "INDEPENDENT_WATCHDOG_RESET";
-        break;
-    case RESET_CAUSE_SOFTWARE_RESET:
-        reset_cause_name = "SOFTWARE_RESET";
-        break;
-    case RESET_CAUSE_POWER_ON_POWER_DOWN_RESET:
-        reset_cause_name = "POWER-ON_RESET (POR) / POWER-DOWN_RESET (PDR)";
-        break;
-    case RESET_CAUSE_EXTERNAL_RESET_PIN_RESET:
-        reset_cause_name = "EXTERNAL_RESET_PIN_RESET";
-        break;
-    case RESET_CAUSE_BROWNOUT_RESET:
-        reset_cause_name = "BROWNOUT_RESET (BOR)";
-        break;
-    }
-
-    return reset_cause_name;
 }
 
 /* USER CODE END 0 */
@@ -243,55 +134,63 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_RTC_Init();
   MX_USART1_UART_Init();
+  MX_TIM4_Init();
+  MX_TIM2_Init();
   MX_TIM5_Init();
   /* USER CODE BEGIN 2 */
 
-  //MX_IWDG_Init();
+    printf("Firing up PWM\n");
+    HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_1);   // Output PWM Generation
 
-    printf("\n\n\n--------\nStarting\n");
-
-    reset_cause_t reset_cause = reset_cause_get();
-    printf("The system reset cause is \"%s\"\n", reset_cause_get_name(reset_cause));
-
-    HAL_TIM_IC_Start_IT(&htim5, TIM_CHANNEL_4);
+    printf("Firing up PWM Input Capture\n");
+    HAL_TIM_IC_Start_IT(&htim2, TIM_CHANNEL_1); // Primary channel - rising edge - rinse and repeat
+    HAL_TIM_IC_Start(&htim2, TIM_CHANNEL_2);    // Secondary channel - falling edge - stop second counter
+    HAL_TIM_IC_Start_IT(&htim5, TIM_CHANNEL_4);    // LSI
 
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-    //uint32_t wdg_reset_interval = 1000;
 
-    uint32_t loop_cnt = 0, now = 0, next_tick = 1000, next_iwdg = 0;
+    uint32_t now = 0, next_blink = 500, next_print = 1000, next_change = 0;
 
     while (1) {
 
         now = uwTick;
 
-        if (now >= next_iwdg) {
+        if (now >= next_blink) {
+            HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
 
-            //HAL_IWDG_Refresh(&hiwdg); // Kick the dog!
-
-            next_iwdg = now + IWDG_REFRESH_INTERVAL;
+            next_blink = now + 500;
         }
 
-        if (now >= next_tick) {
+        if (now >= next_print) {
 
-            float freq = (float) TIMER_CLOCK_FREQ / (tim_val + 1);
+            float freq = (float) TIMER_CLOCK_FREQ / (cnt_full);
+            float duty = (float) 100 * cnt_high / cnt_full;
+            float lsi = (float) TIMER_CLOCK_FREQ / (cnt_lsi);
 
-            printf("Tick %lu (loop = %lu tim = %lu freq = %0.2f)\n", now / 1000, loop_cnt, tim_cnt, freq);
+            printf("Tick %4lu count = %5lu freq = %8.2f Hz duty = %6.2f%% lsi = %8.2f\n", now / 1000, cnt_full, freq, duty, lsi);
 
-            // Uncomment to crash app after 10 loops
-            //if (now / 1000 >= 10) Error_Handler();
-
-            tim_cnt = 0;
-
-            loop_cnt = 0;
-            next_tick = now + 1000;
+            next_print = now + 1000;
         }
 
-        ++loop_cnt;
+        if (now >= next_change) {
+
+            printf("Setting reload = %lu compare = %lu\n", pwm_vals[pwm_vals_idx][0], pwm_vals[pwm_vals_idx][1]);
+
+            __HAL_TIM_SET_AUTORELOAD(&htim4, pwm_vals[pwm_vals_idx][0]);
+            __HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_1, pwm_vals[pwm_vals_idx][1]);
+
+            ++pwm_vals_idx;
+            if (pwm_vals_idx >= sizeof(pwm_vals) / sizeof(pwm_vals[0])) {
+                pwm_vals_idx = 0;
+            }
+
+            next_change = now + 2000;
+        }
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -346,65 +245,135 @@ void SystemClock_Config(void)
 }
 
 /**
-  * @brief IWDG Initialization Function
+  * @brief TIM2 Initialization Function
   * @param None
   * @retval None
   */
-static void MX_IWDG_Init(void)
+static void MX_TIM2_Init(void)
 {
 
-  /* USER CODE BEGIN IWDG_Init 0 */
+  /* USER CODE BEGIN TIM2_Init 0 */
 
-  /* USER CODE END IWDG_Init 0 */
+  /* USER CODE END TIM2_Init 0 */
 
-  /* USER CODE BEGIN IWDG_Init 1 */
+  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+  TIM_SlaveConfigTypeDef sSlaveConfig = {0};
+  TIM_IC_InitTypeDef sConfigIC = {0};
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
 
-  /* USER CODE END IWDG_Init 1 */
-  hiwdg.Instance = IWDG;
-  hiwdg.Init.Prescaler = IWDG_PRESCALER_16;
-  hiwdg.Init.Reload = 3000;
-  if (HAL_IWDG_Init(&hiwdg) != HAL_OK)
+  /* USER CODE BEGIN TIM2_Init 1 */
+
+  /* USER CODE END TIM2_Init 1 */
+  htim2.Instance = TIM2;
+  htim2.Init.Prescaler = 0;
+  htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim2.Init.Period = 4294967295;
+  htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim2) != HAL_OK)
   {
     Error_Handler();
   }
-  /* USER CODE BEGIN IWDG_Init 2 */
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim2, &sClockSourceConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_TIM_IC_Init(&htim2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sSlaveConfig.SlaveMode = TIM_SLAVEMODE_RESET;
+  sSlaveConfig.InputTrigger = TIM_TS_TI1FP1;
+  sSlaveConfig.TriggerPolarity = TIM_INPUTCHANNELPOLARITY_RISING;
+  sSlaveConfig.TriggerPrescaler = TIM_ICPSC_DIV1;
+  sSlaveConfig.TriggerFilter = 0;
+  if (HAL_TIM_SlaveConfigSynchro(&htim2, &sSlaveConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sConfigIC.ICPolarity = TIM_INPUTCHANNELPOLARITY_RISING;
+  sConfigIC.ICSelection = TIM_ICSELECTION_DIRECTTI;
+  sConfigIC.ICPrescaler = TIM_ICPSC_DIV1;
+  sConfigIC.ICFilter = 0;
+  if (HAL_TIM_IC_ConfigChannel(&htim2, &sConfigIC, TIM_CHANNEL_1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sConfigIC.ICPolarity = TIM_INPUTCHANNELPOLARITY_FALLING;
+  sConfigIC.ICSelection = TIM_ICSELECTION_INDIRECTTI;
+  if (HAL_TIM_IC_ConfigChannel(&htim2, &sConfigIC, TIM_CHANNEL_2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim2, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM2_Init 2 */
 
-  /* USER CODE END IWDG_Init 2 */
+  /* USER CODE END TIM2_Init 2 */
 
 }
 
 /**
-  * @brief RTC Initialization Function
+  * @brief TIM4 Initialization Function
   * @param None
   * @retval None
   */
-static void MX_RTC_Init(void)
+static void MX_TIM4_Init(void)
 {
 
-  /* USER CODE BEGIN RTC_Init 0 */
+  /* USER CODE BEGIN TIM4_Init 0 */
 
-  /* USER CODE END RTC_Init 0 */
+  /* USER CODE END TIM4_Init 0 */
 
-  /* USER CODE BEGIN RTC_Init 1 */
+  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+  TIM_OC_InitTypeDef sConfigOC = {0};
 
-  /* USER CODE END RTC_Init 1 */
+  /* USER CODE BEGIN TIM4_Init 1 */
 
-  /** Initialize RTC Only
-  */
-  hrtc.Instance = RTC;
-  hrtc.Init.HourFormat = RTC_HOURFORMAT_24;
-  hrtc.Init.AsynchPrediv = 127;
-  hrtc.Init.SynchPrediv = 255;
-  hrtc.Init.OutPut = RTC_OUTPUT_DISABLE;
-  hrtc.Init.OutPutPolarity = RTC_OUTPUT_POLARITY_HIGH;
-  hrtc.Init.OutPutType = RTC_OUTPUT_TYPE_OPENDRAIN;
-  if (HAL_RTC_Init(&hrtc) != HAL_OK)
+  /* USER CODE END TIM4_Init 1 */
+  htim4.Instance = TIM4;
+  htim4.Init.Prescaler = 84 - 1;
+  htim4.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim4.Init.Period = 999;
+  htim4.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim4.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim4) != HAL_OK)
   {
     Error_Handler();
   }
-  /* USER CODE BEGIN RTC_Init 2 */
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim4, &sClockSourceConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_TIM_PWM_Init(&htim4) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim4, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sConfigOC.OCMode = TIM_OCMODE_PWM1;
+  sConfigOC.Pulse = 500;
+  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+  if (HAL_TIM_PWM_ConfigChannel(&htim4, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM4_Init 2 */
 
-  /* USER CODE END RTC_Init 2 */
+  /* USER CODE END TIM4_Init 2 */
+  HAL_TIM_MspPostInit(&htim4);
 
 }
 
@@ -447,15 +416,15 @@ static void MX_TIM5_Init(void)
     Error_Handler();
   }
   sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
-  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_ENABLE;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
   if (HAL_TIMEx_MasterConfigSynchronization(&htim5, &sMasterConfig) != HAL_OK)
   {
     Error_Handler();
   }
-  sConfigIC.ICPolarity = TIM_INPUTCHANNELPOLARITY_FALLING;
+  sConfigIC.ICPolarity = TIM_INPUTCHANNELPOLARITY_RISING;
   sConfigIC.ICSelection = TIM_ICSELECTION_DIRECTTI;
   sConfigIC.ICPrescaler = TIM_ICPSC_DIV1;
-  sConfigIC.ICFilter = 0;
+  sConfigIC.ICFilter = 15;
   if (HAL_TIM_IC_ConfigChannel(&htim5, &sConfigIC, TIM_CHANNEL_4) != HAL_OK)
   {
     Error_Handler();
@@ -510,13 +479,25 @@ static void MX_USART1_UART_Init(void)
   */
 static void MX_GPIO_Init(void)
 {
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
 /* USER CODE BEGIN MX_GPIO_Init_1 */
 /* USER CODE END MX_GPIO_Init_1 */
 
   /* GPIO Ports Clock Enable */
+  __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOH_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin : LED_Pin */
+  GPIO_InitStruct.Pin = LED_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(LED_GPIO_Port, &GPIO_InitStruct);
 
 /* USER CODE BEGIN MX_GPIO_Init_2 */
 /* USER CODE END MX_GPIO_Init_2 */
@@ -535,8 +516,7 @@ void Error_Handler(void)
   /* USER CODE BEGIN Error_Handler_Debug */
     /* User can add his own implementation to report the HAL error return state */
     __disable_irq();
-    while (1)
-    {
+    while (1) {
     }
   /* USER CODE END Error_Handler_Debug */
 }
