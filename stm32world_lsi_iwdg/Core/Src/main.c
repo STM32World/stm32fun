@@ -243,9 +243,10 @@ int main(void)
   MX_GPIO_Init();
   MX_RTC_Init();
   MX_USART1_UART_Init();
-  MX_IWDG_Init();
   MX_TIM5_Init();
   /* USER CODE BEGIN 2 */
+
+  //MX_IWDG_Init();
 
     printf("\n\n\n--------\nStarting\n");
 
@@ -258,7 +259,7 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-    //uint32_t wdg_reset_interval = 1680;
+    //uint32_t wdg_reset_interval = 1000;
 
     uint32_t loop_cnt = 0, now = 0, next_tick = 1000, next_iwdg = 0;
 
@@ -268,12 +269,15 @@ int main(void)
 
         if (now >= next_iwdg) {
 
-            HAL_IWDG_Refresh(&hiwdg); // Kick the dog!
+            //HAL_IWDG_Refresh(&hiwdg); // Kick the dog!
 
             next_iwdg = now + IWDG_REFRESH_INTERVAL;
         }
 
         if (now >= next_tick) {
+
+            tim_val = htim5.Instance->CCR4;
+            //htim5.Instance->CCR4 = 0;
 
             printf("Tick %lu (loop = %lu tim = %lu val = %lu)\n", now / 1000, loop_cnt, tim_cnt, tim_val);
 
@@ -423,9 +427,9 @@ static void MX_TIM5_Init(void)
 
   /* USER CODE END TIM5_Init 1 */
   htim5.Instance = TIM5;
-  htim5.Init.Prescaler = 0;
-  htim5.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim5.Init.Period = 4294967295;
+  htim5.Init.Prescaler = 84 - 1;
+  htim5.Init.CounterMode = TIM_COUNTERMODE_DOWN;
+  htim5.Init.Period = 100000 - 1;
   htim5.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim5.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
   if (HAL_TIM_Base_Init(&htim5) != HAL_OK)
@@ -441,7 +445,7 @@ static void MX_TIM5_Init(void)
   {
     Error_Handler();
   }
-  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_UPDATE;
   sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
   if (HAL_TIMEx_MasterConfigSynchronization(&htim5, &sMasterConfig) != HAL_OK)
   {
