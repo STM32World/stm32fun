@@ -33,7 +33,6 @@
 /* USER CODE BEGIN PD */
 
 #define IWDG_REFRESH_INTERVAL 1690
-#define TIMER_CLOCK_FREQ 84000000
 
 /* USER CODE END PD */
 
@@ -52,7 +51,7 @@ TIM_HandleTypeDef htim5;
 UART_HandleTypeDef huart1;
 
 /* USER CODE BEGIN PV */
-uint32_t tim_cnt, tim_val;
+uint32_t tim_cnt;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -86,7 +85,6 @@ int _write(int fd, char *ptr, int len) {
 void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim) {
 
     if (htim->Instance == TIM5) {
-        tim_val = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_4);
         ++tim_cnt;
     }
 
@@ -245,6 +243,7 @@ int main(void)
   MX_GPIO_Init();
   MX_RTC_Init();
   MX_USART1_UART_Init();
+  MX_IWDG_Init();
   MX_TIM5_Init();
   /* USER CODE BEGIN 2 */
 
@@ -278,9 +277,7 @@ int main(void)
 
         if (now >= next_tick) {
 
-            float freq = (float) TIMER_CLOCK_FREQ / (tim_val + 1);
-
-            printf("Tick %lu (loop = %lu tim = %lu freq = %0.2f)\n", now / 1000, loop_cnt, tim_cnt, freq);
+            printf("Tick %lu (loop = %lu tim = %lu)\n", now / 1000, loop_cnt, tim_cnt);
 
             // Uncomment to crash app after 10 loops
             //if (now / 1000 >= 10) Error_Handler();
