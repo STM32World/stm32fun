@@ -1,0 +1,13 @@
+../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dac_ex.c:91:19:HAL_DACEx_DualStart	5
+../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dac_ex.c:140:19:HAL_DACEx_DualStop	2
+../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dac_ex.c:185:19:HAL_DACEx_TriangleWaveGenerate	3
+../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dac_ex.c:241:19:HAL_DACEx_NoiseWaveGenerate	3
+../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dac_ex.c:289:19:HAL_DACEx_DualSetValue	3
+../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dac_ex.c:331:13:HAL_DACEx_ConvCpltCallbackCh2	1
+../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dac_ex.c:347:13:HAL_DACEx_ConvHalfCpltCallbackCh2	1
+../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dac_ex.c:363:13:HAL_DACEx_ErrorCallbackCh2	1
+../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dac_ex.c:379:13:HAL_DACEx_DMAUnderrunCallbackCh2	1
+../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dac_ex.c:416:10:HAL_DACEx_DualGetValue	1
+../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dac_ex.c:449:6:DAC_DMAConvCpltCh2	1
+../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dac_ex.c:468:6:DAC_DMAHalfConvCpltCh2	1
+../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dac_ex.c:485:6:DAC_DMAErrorCh2	1
