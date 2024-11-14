@@ -61,6 +61,8 @@ TIM_HandleTypeDef htim13;
 
 UART_HandleTypeDef huart1;
 
+WWDG_HandleTypeDef hwwdg;
+
 /* Definitions for defaultTask */
 osThreadId_t defaultTaskHandle;
 const osThreadAttr_t defaultTask_attributes = {
@@ -82,10 +84,10 @@ const osThreadAttr_t tickTask_attributes = {
         .stack_size = 196 * 4,
         .priority = (osPriority_t) osPriorityLow,
 };
-/* Definitions for statsTask */
-osThreadId_t statsTaskHandle;
-const osThreadAttr_t statsTask_attributes = {
-        .name = "statsTask",
+/* Definitions for statusTask */
+osThreadId_t statusTaskHandle;
+const osThreadAttr_t statusTask_attributes = {
+        .name = "statusTask",
         .stack_size = 256 * 4,
         .priority = (osPriority_t) osPriorityLow,
 };
@@ -96,10 +98,17 @@ const osThreadAttr_t sineTask_attributes = {
         .stack_size = 128 * 4,
         .priority = (osPriority_t) osPriorityLow,
 };
-/* Definitions for wdgTask */
-osThreadId_t wdgTaskHandle;
-const osThreadAttr_t wdgTask_attributes = {
-        .name = "wdgTask",
+/* Definitions for iwdgTask */
+osThreadId_t iwdgTaskHandle;
+const osThreadAttr_t iwdgTask_attributes = {
+        .name = "iwdgTask",
+        .stack_size = 128 * 4,
+        .priority = (osPriority_t) osPriorityLow,
+};
+/* Definitions for wwdgTask */
+osThreadId_t wwdgTaskHandle;
+const osThreadAttr_t wwdgTask_attributes = {
+        .name = "wwdgTask",
         .stack_size = 128 * 4,
         .priority = (osPriority_t) osPriorityLow,
 };
@@ -127,6 +136,11 @@ const osMutexAttr_t ledMutex_attributes = {
 osSemaphoreId_t ledSemaphoreHandle;
 const osSemaphoreAttr_t ledSemaphore_attributes = {
         .name = "ledSemaphore"
+};
+/* Definitions for wwdgSemaphore */
+osSemaphoreId_t wwdgSemaphoreHandle;
+const osSemaphoreAttr_t wwdgSemaphore_attributes = {
+        .name = "wwdgSemaphore"
 };
 /* USER CODE BEGIN PV */
 
@@ -170,12 +184,14 @@ static void MX_USART1_UART_Init(void);
 static void MX_DAC_Init(void);
 static void MX_TIM6_Init(void);
 static void MX_IWDG_Init(void);
+static void MX_WWDG_Init(void);
 void StartDefaultTask(void *argument);
 void StartLedTask(void *argument);
 void StartTickTask(void *argument);
-void StartStatsTask(void *argument);
+void StartStatusTask(void *argument);
 void StartSineTask(void *argument);
-void StartIwdgTask(void *argument);
+void StartIIwdgTask(void *argument);
+void StartWwdgTask(void *argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -196,6 +212,11 @@ int _write(int fd, char *ptr, int len) {
             return -1;
     }
     return -1;
+}
+
+void HAL_WWDG_EarlyWakeupCallback(WWDG_HandleTypeDef *hwwdg) {
+    osSemaphoreRelease(wwdgSemaphoreHandle);
+    //HAL_WWDG_Refresh(hwwdg);
 }
 
 void configureTimerForRunTimeStats(void) {
@@ -392,6 +413,7 @@ int main(void)
     MX_DAC_Init();
     MX_TIM6_Init();
     MX_IWDG_Init();
+    MX_WWDG_Init();
     /* USER CODE BEGIN 2 */
 
     //buf[1] = 0xff;
@@ -424,6 +446,9 @@ int main(void)
     /* creation of ledSemaphore */
     ledSemaphoreHandle = osSemaphoreNew(1, 1, &ledSemaphore_attributes);
 
+    /* creation of wwdgSemaphore */
+    wwdgSemaphoreHandle = osSemaphoreNew(1, 0, &wwdgSemaphore_attributes);
+
     /* USER CODE BEGIN RTOS_SEMAPHORES */
     /* add semaphores, ... */
     /* USER CODE END RTOS_SEMAPHORES */
@@ -453,14 +478,17 @@ int main(void)
     /* creation of tickTask */
     tickTaskHandle = osThreadNew(StartTickTask, NULL, &tickTask_attributes);
 
-    /* creation of statsTask */
-    statsTaskHandle = osThreadNew(StartStatsTask, NULL, &statsTask_attributes);
+    /* creation of statusTask */
+    statusTaskHandle = osThreadNew(StartStatusTask, NULL, &statusTask_attributes);
 
     /* creation of sineTask */
     sineTaskHandle = osThreadNew(StartSineTask, NULL, &sineTask_attributes);
 
-    /* creation of wdgTask */
-    wdgTaskHandle = osThreadNew(StartIwdgTask, NULL, &wdgTask_attributes);
+    /* creation of iwdgTask */
+    iwdgTaskHandle = osThreadNew(StartIIwdgTask, NULL, &iwdgTask_attributes);
+
+    /* creation of wwdgTask */
+    wwdgTaskHandle = osThreadNew(StartWwdgTask, NULL, &wwdgTask_attributes);
 
     /* USER CODE BEGIN RTOS_THREADS */
     /* add threads, ... */
@@ -710,6 +738,36 @@ static void MX_USART1_UART_Init(void)
 }
 
 /**
+ * @brief WWDG Initialization Function
+ * @param None
+ * @retval None
+ */
+static void MX_WWDG_Init(void)
+{
+
+    /* USER CODE BEGIN WWDG_Init 0 */
+
+    /* USER CODE END WWDG_Init 0 */
+
+    /* USER CODE BEGIN WWDG_Init 1 */
+
+    /* USER CODE END WWDG_Init 1 */
+    hwwdg.Instance = WWDG;
+    hwwdg.Init.Prescaler = WWDG_PRESCALER_8;
+    hwwdg.Init.Window = 64;
+    hwwdg.Init.Counter = 127;
+    hwwdg.Init.EWIMode = WWDG_EWI_ENABLE;
+    if (HAL_WWDG_Init(&hwwdg) != HAL_OK)
+            {
+        Error_Handler();
+    }
+    /* USER CODE BEGIN WWDG_Init 2 */
+
+    /* USER CODE END WWDG_Init 2 */
+
+}
+
+/**
  * Enable DMA controller clock
  */
 static void MX_DMA_Init(void)
@@ -867,17 +925,16 @@ void StartTickTask(void *argument)
     /* USER CODE END StartTickTask */
 }
 
-/* USER CODE BEGIN Header_StartStatsTask */
+/* USER CODE BEGIN Header_StartStatusTask */
 /**
- * @brief Function implementing the statsTask thread.
+ * @brief Function implementing the statusTask thread.
  * @param argument: Not used
  * @retval None
  */
-/* USER CODE END Header_StartStatsTask */
-void StartStatsTask(void *argument)
+/* USER CODE END Header_StartStatusTask */
+void StartStatusTask(void *argument)
 {
-    /* USER CODE BEGIN StartStatsTask */
-
+    /* USER CODE BEGIN StartStatusTask */
     TaskStatus_t *pxTaskStatusArray;
     volatile UBaseType_t uxArraySize, x;
     unsigned long ulTotalRunTime;
@@ -928,7 +985,7 @@ void StartStatsTask(void *argument)
 
     }
 
-    /* USER CODE END StartStatsTask */
+    /* USER CODE END StartStatusTask */
 }
 
 /* USER CODE BEGIN Header_StartSineTask */
@@ -979,24 +1036,49 @@ void StartSineTask(void *argument)
     /* USER CODE END StartSineTask */
 }
 
-/* USER CODE BEGIN Header_StartIwdgTask */
+/* USER CODE BEGIN Header_StartIIwdgTask */
 /**
- * @brief Function implementing the wdgTask thread.
+ * @brief Function implementing the iwdgTask thread.
  * @param argument: Not used
  * @retval None
  */
-/* USER CODE END Header_StartIwdgTask */
-void StartIwdgTask(void *argument)
+/* USER CODE END Header_StartIIwdgTask */
+void StartIIwdgTask(void *argument)
 {
-    /* USER CODE BEGIN StartIwdgTask */
+    /* USER CODE BEGIN StartIIwdgTask */
     /* Infinite loop */
-    for (;;)
-            {
-        HAL_IWDG_Refresh(&hiwdg); // Kick the dog!
+    for (;;) {
+        HAL_IWDG_Refresh(&hiwdg);
         osDelay(1000);
+    }
+    /* USER CODE END StartIIwdgTask */
+}
+
+/* USER CODE BEGIN Header_StartWwdgTask */
+/**
+ * @brief Function implementing the wwdgTask thread.
+ * @param argument: Not used
+ * @retval None
+ */
+/* USER CODE END Header_StartWwdgTask */
+void StartWwdgTask(void *argument)
+{
+    /* USER CODE BEGIN StartWwdgTask */
+
+    osStatus_t ret;
+
+    /* Infinite loop */
+    for (;;) {
+
+        ret = osSemaphoreAcquire(wwdgSemaphoreHandle, osWaitForever);
+
+        if (!ret) {
+            HAL_WWDG_Refresh(&hwwdg);
+        }
 
     }
-    /* USER CODE END StartIwdgTask */
+
+    /* USER CODE END StartWwdgTask */
 }
 
 /**

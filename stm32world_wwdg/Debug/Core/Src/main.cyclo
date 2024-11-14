@@ -1,0 +1,10 @@
+../Core/Src/main.c:64:5:_write	4
+../Core/Src/main.c:77:6:HAL_WWDG_EarlyWakeupCallback	1
+../Core/Src/main.c:98:15:reset_cause_get	8
+../Core/Src/main.c:167:13:reset_cause_get_name	9
+../Core/Src/main.c:208:5:main	2
+../Core/Src/main.c:277:6:SystemClock_Config	3
+../Core/Src/main.c:323:13:MX_USART1_UART_Init	2
+../Core/Src/main.c:356:13:MX_WWDG_Init	2
+../Core/Src/main.c:386:13:MX_GPIO_Init	1
+../Core/Src/main.c:408:6:Error_Handler	1
