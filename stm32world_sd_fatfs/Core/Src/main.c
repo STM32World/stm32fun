@@ -1,28 +1,29 @@
 /* USER CODE BEGIN Header */
 /**
-  ******************************************************************************
-  * @file           : main.c
-  * @brief          : Main program body
-  ******************************************************************************
-  * @attention
-  *
-  * Copyright (c) 2024 STMicroelectronics.
-  * All rights reserved.
-  *
-  * This software is licensed under terms that can be found in the LICENSE file
-  * in the root directory of this software component.
-  * If no LICENSE file comes with this software, it is provided AS-IS.
-  *
-  ******************************************************************************
-  */
+ ******************************************************************************
+ * @file           : main.c
+ * @brief          : Main program body
+ ******************************************************************************
+ * @attention
+ *
+ * Copyright (c) 2024 STMicroelectronics.
+ * All rights reserved.
+ *
+ * This software is licensed under terms that can be found in the LICENSE file
+ * in the root directory of this software component.
+ * If no LICENSE file comes with this software, it is provided AS-IS.
+ *
+ ******************************************************************************
+ */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "cmsis_os.h"
 #include "fatfs.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include <stdio.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -32,7 +33,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
+#define UPTIME_FILE "uptime.dat"
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -42,24 +43,105 @@
 
 /* Private variables ---------------------------------------------------------*/
 SD_HandleTypeDef hsd;
+DMA_HandleTypeDef hdma_sdio;
+
+TIM_HandleTypeDef htim13;
 
 UART_HandleTypeDef huart1;
 
+/* Definitions for defaultTask */
+osThreadId_t defaultTaskHandle;
+const osThreadAttr_t defaultTask_attributes = {
+  .name = "defaultTask",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityNormal,
+};
+/* Definitions for ledTask */
+osThreadId_t ledTaskHandle;
+const osThreadAttr_t ledTask_attributes = {
+  .name = "ledTask",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityLow,
+};
+/* Definitions for statusTask */
+osThreadId_t statusTaskHandle;
+const osThreadAttr_t statusTask_attributes = {
+  .name = "statusTask",
+  .stack_size = 256 * 4,
+  .priority = (osPriority_t) osPriorityLow,
+};
+/* Definitions for tickTask */
+osThreadId_t tickTaskHandle;
+const osThreadAttr_t tickTask_attributes = {
+  .name = "tickTask",
+  .stack_size = 256 * 4,
+  .priority = (osPriority_t) osPriorityLow,
+};
+/* Definitions for printMutex */
+osMutexId_t printMutexHandle;
+const osMutexAttr_t printMutex_attributes = {
+  .name = "printMutex"
+};
 /* USER CODE BEGIN PV */
+
+// Counter updated from high freq timer
+volatile unsigned long ulHighFrequencyTimerTicks;
+
+uint64_t total_uptime = 0;
+
+// Pre-allocate all the heap for FreeRTOS.  FreeRTOS will do this by itself if this define is
+// not set.
+#ifdef configAPPLICATION_ALLOCATED_HEAP
+uint8_t ucHeap[configTOTAL_HEAP_SIZE] __attribute__((section(".ccmram"))); // Put in ccmram
+#endif
+
+FATFS fatfs; /* File system object for User logical drive */
+FIL file; /* File object */
+char mynewdiskPath[4]; /* User logical drive path */
 
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
+static void MX_DMA_Init(void);
 static void MX_SDIO_SD_Init(void);
 static void MX_USART1_UART_Init(void);
+static void MX_TIM13_Init(void);
+void StartDefaultTask(void *argument);
+void StartLedTask(void *argument);
+void StartStatusTask(void *argument);
+void StartTickTask(void *argument);
+
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+
+// Send printf to uart1
+int _write(int fd, char *ptr, int len) {
+    HAL_StatusTypeDef hstatus;
+
+    if (fd == 1 || fd == 2) {
+        hstatus = HAL_UART_Transmit(&huart1, (uint8_t*) ptr, len, HAL_MAX_DELAY);
+        if (hstatus == HAL_OK)
+            return len;
+        else
+            return -1;
+    }
+    return -1;
+}
+
+void configureTimerForRunTimeStats(void) {
+    ulHighFrequencyTimerTicks = 0;
+    HAL_TIM_Base_Start_IT(&htim13);
+}
+
+unsigned long getRunTimeCounterValue(void) {
+    return ulHighFrequencyTimerTicks;
+}
 
 /* USER CODE END 0 */
 
@@ -92,21 +174,103 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_SDIO_SD_Init();
   MX_USART1_UART_Init();
+  MX_TIM13_Init();
   MX_FATFS_Init();
   /* USER CODE BEGIN 2 */
 
+    printf("\n\n\n\n--------\nStarting\n");
+
+//    uint32_t wbytes, rbytes; /* File write counts */
+//
+//    if (f_mount(&fatfs, (TCHAR const*) mynewdiskPath, 0) != FR_OK) {
+//        printf("Unable to mount disk\n");
+//        Error_Handler();
+//    }
+//
+//    if (f_open(&file, "uptime.dat", FA_OPEN_EXISTING | FA_READ) == FR_OK) {
+//        if (f_read(&file, &total_uptime, sizeof(total_uptime), (void*) &rbytes) == FR_OK) {
+//            f_close(&file);
+//        } else {
+//            printf("Unable to read\n");
+//            Error_Handler();
+//        }
+//    } else {
+//        // File did not exist - let's create it
+//        if (f_open(&file, "uptime.dat", FA_CREATE_NEW | FA_WRITE) == FR_OK) {
+//            if (f_write(&file, &total_uptime, sizeof(total_uptime), (void*) &wbytes) == FR_OK) {
+//                printf("File %s created\n", UPTIME_FILE);
+//                f_close(&file);
+//            } else {
+//                printf("Unable to write\n");
+//                Error_Handler();
+//            }
+//        } else {
+//            printf("Unable to create\n");
+//            Error_Handler();
+//        }
+//    }
+
   /* USER CODE END 2 */
+
+  /* Init scheduler */
+  osKernelInitialize();
+  /* Create the mutex(es) */
+  /* creation of printMutex */
+  printMutexHandle = osMutexNew(&printMutex_attributes);
+
+  /* USER CODE BEGIN RTOS_MUTEX */
+    /* add mutexes, ... */
+  /* USER CODE END RTOS_MUTEX */
+
+  /* USER CODE BEGIN RTOS_SEMAPHORES */
+    /* add semaphores, ... */
+  /* USER CODE END RTOS_SEMAPHORES */
+
+  /* USER CODE BEGIN RTOS_TIMERS */
+    /* start timers, add new ones, ... */
+  /* USER CODE END RTOS_TIMERS */
+
+  /* USER CODE BEGIN RTOS_QUEUES */
+    /* add queues, ... */
+  /* USER CODE END RTOS_QUEUES */
+
+  /* Create the thread(s) */
+  /* creation of defaultTask */
+  defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
+
+  /* creation of ledTask */
+  ledTaskHandle = osThreadNew(StartLedTask, NULL, &ledTask_attributes);
+
+  /* creation of statusTask */
+  statusTaskHandle = osThreadNew(StartStatusTask, NULL, &statusTask_attributes);
+
+  /* creation of tickTask */
+  tickTaskHandle = osThreadNew(StartTickTask, NULL, &tickTask_attributes);
+
+  /* USER CODE BEGIN RTOS_THREADS */
+    /* add threads, ... */
+  /* USER CODE END RTOS_THREADS */
+
+  /* USER CODE BEGIN RTOS_EVENTS */
+    /* add events, ... */
+  /* USER CODE END RTOS_EVENTS */
+
+  /* Start scheduler */
+  osKernelStart();
+
+  /* We should never get here as control is now taken by the scheduler */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  while (1)
-  {
+    while (1)
+    {
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-  }
+    }
   /* USER CODE END 3 */
 }
 
@@ -131,10 +295,10 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.HSEState = RCC_HSE_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
-  RCC_OscInitStruct.PLL.PLLM = 15;
-  RCC_OscInitStruct.PLL.PLLN = 144;
+  RCC_OscInitStruct.PLL.PLLM = 8;
+  RCC_OscInitStruct.PLL.PLLN = 168;
   RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
-  RCC_OscInitStruct.PLL.PLLQ = 5;
+  RCC_OscInitStruct.PLL.PLLQ = 7;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
     Error_Handler();
@@ -149,7 +313,7 @@ void SystemClock_Config(void)
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_3) != HAL_OK)
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_5) != HAL_OK)
   {
     Error_Handler();
   }
@@ -176,10 +340,41 @@ static void MX_SDIO_SD_Init(void)
   hsd.Init.ClockPowerSave = SDIO_CLOCK_POWER_SAVE_DISABLE;
   hsd.Init.BusWide = SDIO_BUS_WIDE_4B;
   hsd.Init.HardwareFlowControl = SDIO_HARDWARE_FLOW_CONTROL_DISABLE;
-  hsd.Init.ClockDiv = 0;
+  hsd.Init.ClockDiv = 4;
   /* USER CODE BEGIN SDIO_Init 2 */
 
   /* USER CODE END SDIO_Init 2 */
+
+}
+
+/**
+  * @brief TIM13 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM13_Init(void)
+{
+
+  /* USER CODE BEGIN TIM13_Init 0 */
+
+  /* USER CODE END TIM13_Init 0 */
+
+  /* USER CODE BEGIN TIM13_Init 1 */
+
+  /* USER CODE END TIM13_Init 1 */
+  htim13.Instance = TIM13;
+  htim13.Init.Prescaler = 84 - 1;
+  htim13.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim13.Init.Period = 10 - 1;
+  htim13.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim13.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim13) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM13_Init 2 */
+
+  /* USER CODE END TIM13_Init 2 */
 
 }
 
@@ -205,7 +400,7 @@ static void MX_USART1_UART_Init(void)
   huart1.Init.Parity = UART_PARITY_NONE;
   huart1.Init.Mode = UART_MODE_TX_RX;
   huart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
-  huart1.Init.OverSampling = UART_OVERSAMPLING_16;
+  huart1.Init.OverSampling = UART_OVERSAMPLING_8;
   if (HAL_UART_Init(&huart1) != HAL_OK)
   {
     Error_Handler();
@@ -213,6 +408,22 @@ static void MX_USART1_UART_Init(void)
   /* USER CODE BEGIN USART1_Init 2 */
 
   /* USER CODE END USART1_Init 2 */
+
+}
+
+/**
+  * Enable DMA controller clock
+  */
+static void MX_DMA_Init(void)
+{
+
+  /* DMA controller clock enable */
+  __HAL_RCC_DMA2_CLK_ENABLE();
+
+  /* DMA interrupt init */
+  /* DMA2_Stream3_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA2_Stream3_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA2_Stream3_IRQn);
 
 }
 
@@ -232,12 +443,23 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOD_CLK_ENABLE();
+  __HAL_RCC_GPIOB_CLK_ENABLE();
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : SDIO_DET_Pin */
   GPIO_InitStruct.Pin = SDIO_DET_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(SDIO_DET_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : LED_Pin */
+  GPIO_InitStruct.Pin = LED_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(LED_GPIO_Port, &GPIO_InitStruct);
 
 /* USER CODE BEGIN MX_GPIO_Init_2 */
 /* USER CODE END MX_GPIO_Init_2 */
@@ -247,6 +469,152 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE END 4 */
 
+/* USER CODE BEGIN Header_StartDefaultTask */
+/**
+ * @brief  Function implementing the defaultTask thread.
+ * @param  argument: Not used
+ * @retval None
+ */
+/* USER CODE END Header_StartDefaultTask */
+void StartDefaultTask(void *argument)
+{
+  /* USER CODE BEGIN 5 */
+    /* Infinite loop */
+    for (;;)
+            {
+        osDelay(1);
+    }
+  /* USER CODE END 5 */
+}
+
+/* USER CODE BEGIN Header_StartLedTask */
+/**
+ * @brief Function implementing the ledTask thread.
+ * @param argument: Not used
+ * @retval None
+ */
+/* USER CODE END Header_StartLedTask */
+void StartLedTask(void *argument)
+{
+  /* USER CODE BEGIN StartLedTask */
+    /* Infinite loop */
+    for (;;) {
+        osDelay(500);
+        HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+    }
+  /* USER CODE END StartLedTask */
+}
+
+/* USER CODE BEGIN Header_StartStatusTask */
+/**
+ * @brief Function implementing the statusTask thread.
+ * @param argument: Not used
+ * @retval None
+ */
+/* USER CODE END Header_StartStatusTask */
+void StartStatusTask(void *argument)
+{
+  /* USER CODE BEGIN StartStatusTask */
+    TaskStatus_t *pxTaskStatusArray;
+    volatile UBaseType_t uxArraySize, x;
+    unsigned long ulTotalRunTime;
+    float runtime_percentage;
+
+    /* Infinite loop */
+    for (;;) {
+
+        osDelay(10000);
+
+        uxArraySize = uxTaskGetNumberOfTasks();
+        pxTaskStatusArray = pvPortMalloc(uxArraySize * sizeof(TaskStatus_t)); // a little bit scary!
+
+        osMutexWait(printMutexHandle, osWaitForever);
+
+        if (pxTaskStatusArray != NULL) {
+
+            uxArraySize = uxTaskGetSystemState(pxTaskStatusArray, uxArraySize,
+                    &ulTotalRunTime);
+
+            printf("Task count = %lu\n", uxArraySize);
+            printf("No       Name          P  S   Usage       Count      HW\n");
+
+            for (x = 0; x < uxArraySize; x++) {
+
+                runtime_percentage = (float) (100
+                        * (float) pxTaskStatusArray[x].ulRunTimeCounter
+                        / (float) ulTotalRunTime);
+
+                printf("Task %2lu: %-12s %2lu %2d %8.4f (%12lu) %5i\n",
+                        x,
+                        pxTaskStatusArray[x].pcTaskName,
+                        pxTaskStatusArray[x].uxCurrentPriority,
+                        pxTaskStatusArray[x].eCurrentState,
+                        runtime_percentage,
+                        pxTaskStatusArray[x].ulRunTimeCounter,
+                        pxTaskStatusArray[x].usStackHighWaterMark);
+
+            }
+
+            vPortFree(pxTaskStatusArray);
+
+        } else {
+            printf("Unable to allocate stack space\n");
+        }
+
+        osMutexRelease(printMutexHandle);
+
+    }
+
+  /* USER CODE END StartStatusTask */
+}
+
+/* USER CODE BEGIN Header_StartTickTask */
+/**
+ * @brief Function implementing the tickTask thread.
+ * @param argument: Not used
+ * @retval None
+ */
+/* USER CODE END Header_StartTickTask */
+void StartTickTask(void *argument)
+{
+  /* USER CODE BEGIN StartTickTask */
+    /* Infinite loop */
+    for (;;)
+            {
+
+        osDelay(1000);
+
+        osMutexWait(printMutexHandle, osWaitForever);
+
+        printf("Tick %lu\n", osKernelGetTickCount() / 1000);
+
+        osMutexRelease(printMutexHandle);
+
+    }
+  /* USER CODE END StartTickTask */
+}
+
+/**
+  * @brief  Period elapsed callback in non blocking mode
+  * @note   This function is called  when TIM12 interrupt took place, inside
+  * HAL_TIM_IRQHandler(). It makes a direct call to HAL_IncTick() to increment
+  * a global variable "uwTick" used as application time base.
+  * @param  htim : TIM handle
+  * @retval None
+  */
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+  /* USER CODE BEGIN Callback 0 */
+
+  /* USER CODE END Callback 0 */
+  if (htim->Instance == TIM12) {
+    HAL_IncTick();
+  }
+  /* USER CODE BEGIN Callback 1 */
+
+  /* USER CODE END Callback 1 */
+}
+
 /**
   * @brief  This function is executed in case of error occurrence.
   * @retval None
@@ -254,11 +622,11 @@ static void MX_GPIO_Init(void)
 void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
-  /* User can add his own implementation to report the HAL error return state */
-  __disable_irq();
-  while (1)
-  {
-  }
+    /* User can add his own implementation to report the HAL error return state */
+    __disable_irq();
+    while (1)
+    {
+    }
   /* USER CODE END Error_Handler_Debug */
 }
 

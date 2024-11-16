@@ -1,0 +1,2 @@
+../FATFS/App/fatfs.c:37:6:MX_FATFS_Init	1
+../FATFS/App/fatfs.c:52:7:get_fattime	1

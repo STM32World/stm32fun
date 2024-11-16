@@ -1,0 +1,4 @@
+../Middlewares/Third_Party/FatFs/src/option/syscall.c:36:5:ff_cre_syncobj	1
+../Middlewares/Third_Party/FatFs/src/option/syscall.c:77:5:ff_del_syncobj	1
+../Middlewares/Third_Party/FatFs/src/option/syscall.c:98:5:ff_req_grant	2
+../Middlewares/Third_Party/FatFs/src/option/syscall.c:135:6:ff_rel_grant	1

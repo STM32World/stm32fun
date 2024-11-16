@@ -1,0 +1,16 @@
+../Core/Src/main.c:327:13:MX_SDIO_SD_Init	1
+../Core/Src/main.c:435:13:MX_GPIO_Init	1
+../Core/Src/main.c:417:13:MX_DMA_Init	1
+../Core/Src/main.c:479:6:StartDefaultTask	1
+../Core/Src/main.c:497:6:StartLedTask	1
+../Core/Src/main.c:515:6:StartStatusTask	3
+../Core/Src/main.c:578:6:StartTickTask	1
+../Core/Src/main.c:124:5:_write	3
+../Core/Src/main.c:137:6:configureTimerForRunTimeStats	1
+../Core/Src/main.c:142:15:getRunTimeCounterValue	1
+../Core/Src/main.c:605:6:HAL_TIM_PeriodElapsedCallback	2
+../Core/Src/main.c:622:6:Error_Handler	1
+../Core/Src/main.c:386:13:MX_USART1_UART_Init	1
+../Core/Src/main.c:355:13:MX_TIM13_Init	1
+../Core/Src/main.c:281:6:SystemClock_Config	1
+../Core/Src/main.c:152:5:main	1
