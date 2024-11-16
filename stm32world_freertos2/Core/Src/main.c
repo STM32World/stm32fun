@@ -40,7 +40,7 @@ typedef struct {
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 #define DMA_BUFFER_SIZE 64
-#define SAMPLE_FREQ 100000
+#define SAMPLE_FREQ 96000
 #define OUTPUT_MID 2048
 /* USER CODE END PD */
 
@@ -110,7 +110,7 @@ osThreadId_t wwdgTaskHandle;
 const osThreadAttr_t wwdgTask_attributes = {
         .name = "wwdgTask",
         .stack_size = 128 * 4,
-        .priority = (osPriority_t) osPriorityLow,
+        .priority = (osPriority_t) osPriorityNormal,
 };
 /* Definitions for tickQueue */
 osMessageQueueId_t tickQueueHandle;
@@ -144,17 +144,22 @@ const osSemaphoreAttr_t wwdgSemaphore_attributes = {
 };
 /* USER CODE BEGIN PV */
 
+// Counter updated from high freq timer
 volatile unsigned long ulHighFrequencyTimerTicks;
 
+// Pre-allocate all the heap for FreeRTOS.  FreeRTOS will do this by itself if this define is
+// not set.
 #ifdef configAPPLICATION_ALLOCATED_HEAP
-uint8_t ucHeap[configTOTAL_HEAP_SIZE] __attribute__((section(".ccmram")));
+uint8_t ucHeap[configTOTAL_HEAP_SIZE] __attribute__((section(".ccmram"))); // Put in ccmram
 #endif
 
 //uint8_t buf[32232] __attribute__((section(".ccmram")));
 
+// DMA buffers - we need two of them.  Notice these can NOT go in ccmram!
 uint16_t dma_buffer_1[2 * DMA_BUFFER_SIZE];
 uint16_t dma_buffer_2[2 * DMA_BUFFER_SIZE];
 
+// Keep track of the sine wave on each dac.  Buffer, angle, angle change and amplification
 sine_queue_t dacs[2] = {
         {
                 &dma_buffer_1[0],
@@ -171,6 +176,7 @@ sine_queue_t dacs[2] = {
 
 };
 
+// Don't want to repeat this calculation over and over again
 const float two_pi = 2 * M_PI;
 
 /* USER CODE END PV */
@@ -214,6 +220,7 @@ int _write(int fd, char *ptr, int len) {
     return -1;
 }
 
+// Get triggered shortly before WWDG reset.  We can refresh here or in a separate task.
 void HAL_WWDG_EarlyWakeupCallback(WWDG_HandleTypeDef *hwwdg) {
     osSemaphoreRelease(wwdgSemaphoreHandle);
     //HAL_WWDG_Refresh(hwwdg);
@@ -653,9 +660,9 @@ static void MX_TIM6_Init(void)
 
     /* USER CODE END TIM6_Init 1 */
     htim6.Instance = TIM6;
-    htim6.Init.Prescaler = 84 - 1;
+    htim6.Init.Prescaler = 0;
     htim6.Init.CounterMode = TIM_COUNTERMODE_UP;
-    htim6.Init.Period = 10 - 1;
+    htim6.Init.Period = 875 - 1;
     htim6.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
     if (HAL_TIM_Base_Init(&htim6) != HAL_OK)
             {
