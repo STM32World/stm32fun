@@ -32,7 +32,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define UPTIME_FILE "uptime.dat"
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -139,7 +139,7 @@ int main(void)
         // File did not exist - let's create it
         if (f_open(&SDFile, total_uptime_filename, FA_CREATE_ALWAYS | FA_WRITE) == FR_OK) {
             if (f_write(&SDFile, &total_uptime, sizeof(total_uptime), (void*) &wbytes) == FR_OK) {
-                printf("File %s created\n", UPTIME_FILE);
+                printf("File %s created\n", total_uptime_filename);
                 f_close(&SDFile);
             } else {
                 printf("Unable to write\n");
@@ -171,7 +171,7 @@ int main(void)
 
         if (now >= next_tick) {
 
-            total_uptime += now / 1000;
+            ++total_uptime;
 
             printf("Tick %lu (loop = %lu total = %lu)\n", now / 1000, loop_count, total_uptime);
 
