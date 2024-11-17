@@ -27,11 +27,11 @@
 ../Middlewares/Third_Party/FatFs/src/ff.c:2570:5:pattern_matching	15
 ../Middlewares/Third_Party/FatFs/src/ff.c:2904:5:get_ldnumber	8
 ../Middlewares/Third_Party/FatFs/src/ff.c:5987:6:putc_init	1
-../Middlewares/Third_Party/FatFs/src/ff.c:742:5:lock_fs	3
+../Middlewares/Third_Party/FatFs/src/ff.c:3216:9:validate	6
 ../Middlewares/Third_Party/FatFs/src/ff.c:883:9:sync_window	5
 ../Middlewares/Third_Party/FatFs/src/ff.c:912:9:move_window	4
 ../Middlewares/Third_Party/FatFs/src/ff.c:2965:6:check_fs	8
-../Middlewares/Third_Party/FatFs/src/ff.c:2993:9:find_volume	63
+../Middlewares/Third_Party/FatFs/src/ff.c:2993:9:find_volume	62
 ../Middlewares/Third_Party/FatFs/src/ff.c:1146:7:find_bitmap	9
 ../Middlewares/Third_Party/FatFs/src/ff.c:1187:9:change_bitmap	6
 ../Middlewares/Third_Party/FatFs/src/ff.c:1081:9:put_fat	14
@@ -48,8 +48,6 @@
 ../Middlewares/Third_Party/FatFs/src/ff.c:1589:9:dir_alloc	10
 ../Middlewares/Third_Party/FatFs/src/ff.c:2056:9:store_xdir	4
 ../Middlewares/Third_Party/FatFs/src/ff.c:2396:9:dir_remove	8
-../Middlewares/Third_Party/FatFs/src/ff.c:751:6:unlock_fs	5
-../Middlewares/Third_Party/FatFs/src/ff.c:3216:9:validate	7
 ../Middlewares/Third_Party/FatFs/src/ff.c:2618:9:create_name	42
 ../Middlewares/Third_Party/FatFs/src/ff.c:1929:6:get_xdir_info	7
 ../Middlewares/Third_Party/FatFs/src/ff.c:2444:6:get_fileinfo	18
@@ -60,7 +58,7 @@
 ../Middlewares/Third_Party/FatFs/src/ff.c:2813:9:follow_path	11
 ../Middlewares/Third_Party/FatFs/src/ff.c:2292:9:dir_register	25
 ../Middlewares/Third_Party/FatFs/src/ff.c:944:9:sync_fs	5
-../Middlewares/Third_Party/FatFs/src/ff.c:3260:9:f_mount	8
+../Middlewares/Third_Party/FatFs/src/ff.c:3260:9:f_mount	6
 ../Middlewares/Third_Party/FatFs/src/ff.c:3308:9:f_open	37
 ../Middlewares/Third_Party/FatFs/src/ff.c:3511:9:f_read	23
 ../Middlewares/Third_Party/FatFs/src/ff.c:3611:9:f_write	28
@@ -85,6 +83,7 @@
 ../Middlewares/Third_Party/FatFs/src/ff.c:4919:9:f_getlabel	17
 ../Middlewares/Third_Party/FatFs/src/ff.c:5013:9:f_setlabel	27
 ../Middlewares/Third_Party/FatFs/src/ff.c:5140:9:f_expand	30
+../Middlewares/Third_Party/FatFs/src/ff.c:5230:9:f_forward	19
 ../Middlewares/Third_Party/FatFs/src/ff.c:5301:9:f_mkfs	131
 ../Middlewares/Third_Party/FatFs/src/ff.c:5758:9:f_fdisk	14
 ../Middlewares/Third_Party/FatFs/src/ff.c:5830:8:f_gets	6
