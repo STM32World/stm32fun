@@ -23,6 +23,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
+#include <string.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -49,6 +50,7 @@ UART_HandleTypeDef huart1;
 /* USER CODE BEGIN PV */
 
 const char total_uptime_filename[] = "uptime.dat";
+const char tick_filename[] = "tick.txt";
 
 uint32_t total_uptime = 0;
 
@@ -79,6 +81,46 @@ int _write(int fd, char *ptr, int len) {
             return -1;
     }
     return -1;
+}
+
+void ls() {
+
+    FRESULT res;
+    DIR dir;
+    char *path;
+
+    path = ""; // where you want to list
+
+    res = f_opendir(&dir, path);
+
+#ifdef DEBUG
+    if (res != FR_OK)
+        printf("res = %d f_opendir\n", res);
+#endif
+
+    if (res == FR_OK) {
+        while (1) {
+
+            FILINFO fno;
+
+            res = f_readdir(&dir, &fno);
+
+#ifdef DEBUG
+            if (res != FR_OK)
+                printf("res = %d f_readdir\n", res);
+#endif
+
+            if ((res != FR_OK) || (fno.fname[0] == 0))
+                break;
+
+            printf("%c%c%c%c %10d %s/%s\n",
+                    ((fno.fattrib & AM_DIR) ? 'D' : '-'),
+                    ((fno.fattrib & AM_RDO) ? 'R' : '-'),
+                    ((fno.fattrib & AM_SYS) ? 'S' : '-'),
+                    ((fno.fattrib & AM_HID) ? 'H' : '-'),
+                    (int) fno.fsize, path, fno.fname);
+        }
+    }
 }
 
 /* USER CODE END 0 */
@@ -151,6 +193,13 @@ int main(void)
         }
     }
 
+    // Create tick file if it does NOT exist
+    if (f_open(&SDFile, tick_filename, FA_CREATE_ALWAYS | FA_WRITE) == FR_OK) {
+        f_close(&SDFile);
+    }
+
+    //ls();
+
     //total_uptime = 0;
 
     /* USER CODE END 2 */
@@ -158,7 +207,7 @@ int main(void)
     /* Infinite loop */
     /* USER CODE BEGIN WHILE */
 
-    uint32_t now, next_blink = 500, next_tick = 1000, loop_count = 0;
+    uint32_t now, next_blink = 500, next_tick = 1000, loop_count = 0, next_ls = 10000;
 
     while (1) {
 
@@ -173,8 +222,23 @@ int main(void)
 
             ++total_uptime;
 
-            printf("Tick %lu (loop = %lu total = %lu)\n", now / 1000, loop_count, total_uptime);
+            char s[128];
 
+            sprintf(s, "Tick %lu (loop = %lu total = %lu)\n", now / 1000, loop_count, total_uptime);
+
+            printf("%s", s);
+
+            // Write tick line to file
+            if (f_open(&SDFile, tick_filename, FA_OPEN_APPEND | FA_WRITE) == FR_OK) {
+                if (f_write(&SDFile, &s, strlen(s), (void*) &wbytes) != FR_OK) {
+                    printf("Unable to write\n");
+                }
+                f_close(&SDFile);
+            } else {
+                printf("Unable to open tick file\n");
+            }
+
+            // Update the total uptime file
             if (f_open(&SDFile, total_uptime_filename, FA_OPEN_EXISTING | FA_WRITE) == FR_OK) {
                 if (f_write(&SDFile, &total_uptime, sizeof(total_uptime), (void*) &wbytes) != FR_OK) {
                     printf("Unable to write\n");
@@ -186,6 +250,11 @@ int main(void)
 
             loop_count = 0;
             next_tick = now + 1000;
+        }
+
+        if (now >= next_ls) {
+            ls();
+            next_ls = now + 10000;
         }
 
         ++loop_count;
@@ -259,13 +328,13 @@ static void MX_SDIO_SD_Init(void)
     /* USER CODE END SDIO_Init 1 */
     hsd.Instance = SDIO;
     hsd.Init.ClockEdge = SDIO_CLOCK_EDGE_RISING;
-    hsd.Init.ClockBypass = SDIO_CLOCK_BYPASS_DISABLE;
+    hsd.Init.ClockBypass = SDIO_CLOCK_BYPASS_ENABLE;
     hsd.Init.ClockPowerSave = SDIO_CLOCK_POWER_SAVE_DISABLE;
-    hsd.Init.BusWide = SDIO_BUS_WIDE_4B;
+    hsd.Init.BusWide = SDIO_BUS_WIDE_1B;
     hsd.Init.HardwareFlowControl = SDIO_HARDWARE_FLOW_CONTROL_DISABLE;
     hsd.Init.ClockDiv = 0;
     /* USER CODE BEGIN SDIO_Init 2 */
-    hsd.Init.BusWide = SDIO_BUS_WIDE_1B; // Fix
+    //hsd.Init.BusWide = SDIO_BUS_WIDE_1B; // Fix
     /* USER CODE END SDIO_Init 2 */
 
 }
