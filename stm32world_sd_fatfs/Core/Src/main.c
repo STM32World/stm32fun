@@ -51,6 +51,7 @@ UART_HandleTypeDef huart1;
 
 const char total_uptime_filename[] = "uptime.dat";
 const char tick_filename[] = "tick.txt";
+const char big_filename[] = "big.dat";
 
 uint32_t total_uptime = 0;
 
@@ -120,6 +121,7 @@ void ls() {
                     ((fno.fattrib & AM_HID) ? 'H' : '-'),
                     (int) fno.fsize, path, fno.fname);
         }
+
     }
 }
 
@@ -133,7 +135,6 @@ int main(void)
 {
 
     /* USER CODE BEGIN 1 */
-
     /* USER CODE END 1 */
 
     /* MCU Configuration--------------------------------------------------------*/
@@ -161,6 +162,12 @@ int main(void)
     /* USER CODE BEGIN 2 */
 
     printf("\n\n\n\n--------\nStarting\n");
+
+    printf("SD Card Information:\n");
+    printf("Block size: %lu\n", hsd.SdCard.BlockSize);
+    printf("Block nmbr: %lu\n", hsd.SdCard.BlockNbr);
+    printf("Card size: %lu\n", (hsd.SdCard.BlockSize * hsd.SdCard.BlockNbr) / 1024);
+    printf("Card version: %lu\n", hsd.SdCard.CardVersion);
 
     uint32_t wbytes, rbytes; /* File write counts */
 
@@ -253,6 +260,25 @@ int main(void)
         }
 
         if (now >= next_ls) {
+
+            uint8_t buf[1024]; // 1K buffer
+            for (uint16_t i = 0; i < 1024; ++i) {
+                buf[i] = (uint8_t) i;
+            }
+
+            uint32_t start = uwTick;
+            if (f_open(&SDFile, big_filename, FA_CREATE_ALWAYS | FA_WRITE) == FR_OK) {
+                for (uint16_t i = 0; i < 1 * 1024; ++i) {
+                    if (f_write(&SDFile, &buf, sizeof(buf), (void*) &wbytes) != FR_OK) {
+                        printf("Unable to write\n");
+                    }
+                }
+                f_close(&SDFile);
+            } else {
+                printf("Unable to open %s\n", big_filename);
+            }
+            printf("Write took %lu ms\n", uwTick - start);
+
             ls();
             next_ls = now + 10000;
         }
@@ -330,11 +356,22 @@ static void MX_SDIO_SD_Init(void)
     hsd.Init.ClockEdge = SDIO_CLOCK_EDGE_RISING;
     hsd.Init.ClockBypass = SDIO_CLOCK_BYPASS_ENABLE;
     hsd.Init.ClockPowerSave = SDIO_CLOCK_POWER_SAVE_DISABLE;
-    hsd.Init.BusWide = SDIO_BUS_WIDE_1B;
+    hsd.Init.BusWide = SDIO_BUS_WIDE_4B;
     hsd.Init.HardwareFlowControl = SDIO_HARDWARE_FLOW_CONTROL_DISABLE;
     hsd.Init.ClockDiv = 0;
     /* USER CODE BEGIN SDIO_Init 2 */
-    //hsd.Init.BusWide = SDIO_BUS_WIDE_1B; // Fix
+
+    // First init with 1B bus
+    hsd.Init.BusWide = SDIO_BUS_WIDE_1B;
+    if (HAL_SD_Init(&hsd) != HAL_OK) {
+        Error_Handler();
+    }
+
+    // Then enable the wide bus
+    if (HAL_SD_ConfigWideBusOperation(&hsd, SDIO_BUS_WIDE_4B) != HAL_OK) {
+        Error_Handler();
+    }
+
     /* USER CODE END SDIO_Init 2 */
 
 }
