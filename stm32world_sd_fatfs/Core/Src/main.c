@@ -205,6 +205,24 @@ int main(void)
         f_close(&SDFile);
     }
 
+    uint8_t buf[1024]; // 1K buffer
+    for (uint16_t i = 0; i < 1024; ++i) {
+        buf[i] = (uint8_t) i;
+    }
+
+    uint32_t start = uwTick;
+    if (f_open(&SDFile, big_filename, FA_CREATE_ALWAYS | FA_WRITE) == FR_OK) {
+        for (uint16_t i = 0; i < 1 * 1024; ++i) {
+            if (f_write(&SDFile, &buf, sizeof(buf), (void*) &wbytes) != FR_OK) {
+                printf("Unable to write\n");
+            }
+        }
+        f_close(&SDFile);
+    } else {
+        printf("Unable to open %s\n", big_filename);
+    }
+    printf("Write took %lu ms\n", uwTick - start);
+
     //ls();
 
     //total_uptime = 0;
@@ -261,23 +279,16 @@ int main(void)
 
         if (now >= next_ls) {
 
-            uint8_t buf[1024]; // 1K buffer
-            for (uint16_t i = 0; i < 1024; ++i) {
-                buf[i] = (uint8_t) i;
-            }
-
             uint32_t start = uwTick;
-            if (f_open(&SDFile, big_filename, FA_CREATE_ALWAYS | FA_WRITE) == FR_OK) {
-                for (uint16_t i = 0; i < 1 * 1024; ++i) {
-                    if (f_write(&SDFile, &buf, sizeof(buf), (void*) &wbytes) != FR_OK) {
-                        printf("Unable to write\n");
-                    }
+            if (f_open(&SDFile, big_filename, FA_OPEN_EXISTING | FA_READ) == FR_OK) {
+                while (f_read(&SDFile, &buf, sizeof(buf), &rbytes) == FR_OK && rbytes == sizeof(buf)) {
+
                 }
                 f_close(&SDFile);
             } else {
                 printf("Unable to open %s\n", big_filename);
             }
-            printf("Write took %lu ms\n", uwTick - start);
+            printf("Read took %lu ms\n", uwTick - start);
 
             ls();
             next_ls = now + 10000;
