@@ -49,6 +49,7 @@ UART_HandleTypeDef huart1;
 /* USER CODE BEGIN PV */
 const char total_uptime_filename[] = "uptime.dat";
 const char tick_filename[] = "tick.txt";
+const char big_filename[] = "big.dat";
 
 uint32_t total_uptime = 0;
 /* USER CODE END PV */
@@ -109,14 +110,30 @@ void ls() {
             if ((res != FR_OK) || (fno.fname[0] == 0))
                 break;
 
-            printf("%c%c%c%c %10d %s/%s\n",
+            printf("%c%c%c%c %12lu %s/%s\n",
                     ((fno.fattrib & AM_DIR) ? 'D' : '-'),
                     ((fno.fattrib & AM_RDO) ? 'R' : '-'),
                     ((fno.fattrib & AM_SYS) ? 'S' : '-'),
                     ((fno.fattrib & AM_HID) ? 'H' : '-'),
-                    (int) fno.fsize, path, fno.fname);
+                    (unsigned int) fno.fsize, path, fno.fname);
         }
     }
+
+    uint32_t freeClust;
+    FATFS *fs_ptr; // = &USERFatFS;
+    res = f_getfree("", &freeClust, &fs_ptr); // Warning! This fills fs.n_fatent and fs.csize!
+    //res = f_getfree("", &freeClust, &(&USERFatFS)); // Warning! This fills fs.n_fatent and fs.csize!
+    if (res == FR_OK) {
+        uint32_t totalBlocks = (fs_ptr->n_fatent - 2) * fs_ptr->csize;
+        uint32_t freeBlocks = freeClust * fs_ptr->csize;
+
+        printf("Total blocks: %lu (%lu Mb)\n", totalBlocks, totalBlocks / 2000);
+        printf("Free blocks: %lu (%lu Mb)\n", freeBlocks, freeBlocks / 2000);
+
+    } else {
+        printf("f_getfree() failed, res = %d\r\n", res);
+    }
+
 }
 
 /* USER CODE END 0 */
@@ -155,6 +172,8 @@ int main(void)
     MX_FATFS_Init();
     /* USER CODE BEGIN 2 */
 
+    HAL_Delay(1000);
+
     printf("\n\n\n\n--------\nStarting\n");
 
     uint32_t wbytes, rbytes; /* File write counts */
@@ -192,6 +211,24 @@ int main(void)
     if (f_open(&USERFile, tick_filename, FA_CREATE_ALWAYS | FA_WRITE) == FR_OK) {
         f_close(&USERFile);
     }
+
+    uint8_t buf[1024]; // 1K buffer
+    for (uint16_t i = 0; i < 1024; ++i) {
+        buf[i] = (uint8_t) i;
+    }
+
+    uint32_t start = uwTick;
+    if (f_open(&USERFile, big_filename, FA_CREATE_ALWAYS | FA_WRITE) == FR_OK) {
+        for (uint16_t i = 0; i < 100; ++i) {
+            if (f_write(&USERFile, &buf, sizeof(buf), (void*) &wbytes) != FR_OK) {
+                printf("Unable to write\n");
+            }
+        }
+        f_close(&USERFile);
+    } else {
+        printf("Unable to open %s\n", big_filename);
+    }
+    printf("Write took %lu ms\n", uwTick - start);
 
     //ls();
 
@@ -246,6 +283,18 @@ int main(void)
         }
 
         if (now >= next_ls) {
+
+            uint32_t start = uwTick;
+            if (f_open(&USERFile, big_filename, FA_OPEN_EXISTING | FA_READ) == FR_OK) {
+                while (f_read(&USERFile, &buf, sizeof(buf), &rbytes) == FR_OK && rbytes == sizeof(buf)) {
+
+                }
+                f_close(&USERFile);
+            } else {
+                printf("Unable to open %s\n", big_filename);
+            }
+            printf("Read took %lu ms\n", uwTick - start);
+
             ls();
             next_ls = now + 10000;
         }

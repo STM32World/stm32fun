@@ -23,6 +23,13 @@ char USERPath[4];   /* USER logical drive path */
 FATFS USERFatFS;    /* File system object for USER logical drive */
 FIL USERFile;       /* File object for USER */
 
+/* USER CODE BEGIN VolToPart */
+/* Volume - Partition resolution table should be user defined in case of Multiple partition */
+/* When multi-partition feature is enabled (1), each logical drive number is bound to arbitrary physical drive and partition
+listed in the VolToPart[] */
+PARTITION VolToPart[];
+/* USER CODE END VolToPart */
+
 /* USER CODE BEGIN Variables */
 
 /* USER CODE END Variables */
