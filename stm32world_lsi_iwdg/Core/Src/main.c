@@ -32,7 +32,7 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 
-#define IWDG_REFRESH_INTERVAL 1500 // A case of works for me - but might not work for you
+#define IWDG_REFRESH_INTERVAL 1000 // A case of works for me - but might not work for you
 
 /* USER CODE END PD */
 
@@ -47,11 +47,12 @@ IWDG_HandleTypeDef hiwdg;
 RTC_HandleTypeDef hrtc;
 
 TIM_HandleTypeDef htim5;
+TIM_HandleTypeDef htim6;
 
 UART_HandleTypeDef huart1;
 
 /* USER CODE BEGIN PV */
-uint32_t tim_cnt;
+uint32_t tim_cnt, last_tim_cnt;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -61,6 +62,7 @@ static void MX_RTC_Init(void);
 static void MX_USART1_UART_Init(void);
 static void MX_IWDG_Init(void);
 static void MX_TIM5_Init(void);
+static void MX_TIM6_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -86,6 +88,15 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim) {
 
     if (htim->Instance == TIM5) {
         ++tim_cnt;
+    }
+
+}
+
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
+
+    if (htim->Instance == TIM6) {
+        last_tim_cnt = tim_cnt;
+        tim_cnt = 0;
     }
 
 }
@@ -245,6 +256,7 @@ int main(void)
     MX_USART1_UART_Init();
     MX_IWDG_Init();
     MX_TIM5_Init();
+    MX_TIM6_Init();
     /* USER CODE BEGIN 2 */
 
     //MX_IWDG_Init();
@@ -254,6 +266,7 @@ int main(void)
     printf("The system reset cause is \"%s\"\n", reset_cause_get_name(reset_cause));
 
     HAL_TIM_IC_Start_IT(&htim5, TIM_CHANNEL_4);
+    HAL_TIM_Base_Start_IT(&htim6);
 
     /* USER CODE END 2 */
 
@@ -275,12 +288,10 @@ int main(void)
 
         if (now >= next_tick) {
 
-            printf("Tick %lu (loop = %lu tim = %lu)\n", now / 1000, loop_cnt, tim_cnt);
+            printf("Tick %lu (loop = %lu tim = %lu)\n", now / 1000, loop_cnt, last_tim_cnt);
 
             // Uncomment to crash app after 10 loops
             //if (now / 1000 >= 10) Error_Handler();
-
-            tim_cnt = 0;
 
             loop_cnt = 0;
             next_tick = now + 1000;
@@ -462,6 +473,44 @@ static void MX_TIM5_Init(void)
     /* USER CODE BEGIN TIM5_Init 2 */
 
     /* USER CODE END TIM5_Init 2 */
+
+}
+
+/**
+ * @brief TIM6 Initialization Function
+ * @param None
+ * @retval None
+ */
+static void MX_TIM6_Init(void)
+{
+
+    /* USER CODE BEGIN TIM6_Init 0 */
+
+    /* USER CODE END TIM6_Init 0 */
+
+    TIM_MasterConfigTypeDef sMasterConfig = { 0 };
+
+    /* USER CODE BEGIN TIM6_Init 1 */
+
+    /* USER CODE END TIM6_Init 1 */
+    htim6.Instance = TIM6;
+    htim6.Init.Prescaler = 8400 - 1;
+    htim6.Init.CounterMode = TIM_COUNTERMODE_UP;
+    htim6.Init.Period = 10000 - 1;
+    htim6.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+    if (HAL_TIM_Base_Init(&htim6) != HAL_OK)
+            {
+        Error_Handler();
+    }
+    sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+    sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+    if (HAL_TIMEx_MasterConfigSynchronization(&htim6, &sMasterConfig) != HAL_OK)
+            {
+        Error_Handler();
+    }
+    /* USER CODE BEGIN TIM6_Init 2 */
+
+    /* USER CODE END TIM6_Init 2 */
 
 }
 
