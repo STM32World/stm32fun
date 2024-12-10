@@ -1,6 +1,6 @@
 /**
  * Private configuration file for the SSD1306 library.
- * This example is configured for STM32F0, I2C and including all fonts.
+ * This example is configured for STM32F4, I2C and including all fonts.
  */
 
 #ifndef __SSD1306_CONF_H__
@@ -59,7 +59,7 @@
 // If your screen horizontal axis does not start
 // in column 0 you can use this define to
 // adjust the horizontal offset
-// #define SSD1306_X_OFFSET
+#define SSD1306_X_OFFSET 2 // My device require this - no idea why
 
 // The height can be changed as well if necessary.
 // It can be 32, 64 or 128. The default value is 64.

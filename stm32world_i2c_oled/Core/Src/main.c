@@ -114,8 +114,11 @@ int main(void)
 
     printf("\n\n\n--------\nStarting\n");
 
-    HAL_GPIO_WritePin(OLED_PWR_GPIO_Port, OLED_PWR_Pin, GPIO_PIN_SET);
+    // Switch power off for 100 ms
+    HAL_GPIO_WritePin(OLED_PWR_GPIO_Port, OLED_PWR_Pin, GPIO_PIN_RESET);
     HAL_Delay(100);
+    HAL_GPIO_WritePin(OLED_PWR_GPIO_Port, OLED_PWR_Pin, GPIO_PIN_SET);
+    HAL_Delay(200);
 
     printf("Scan i2c1\n");
     // Go through all possible i2c addresses
@@ -136,12 +139,7 @@ int main(void)
     printf("\n");
 
     // Init lcd using one of the stm32HAL i2c typedefs
-    if (ssd1306_Init(&hi2c1) != 0) {
-      Error_Handler();
-    }
-    HAL_Delay(1000);
-
-    ssd1306_TestAll();
+    ssd1306_Init();
 
     /* USER CODE END 2 */
 
@@ -149,6 +147,9 @@ int main(void)
     /* USER CODE BEGIN WHILE */
     while (1)
     {
+        HAL_Delay(5000);
+        ssd1306_TestAll();
+
         /* USER CODE END WHILE */
 
         /* USER CODE BEGIN 3 */
