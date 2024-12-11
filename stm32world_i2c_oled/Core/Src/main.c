@@ -24,7 +24,7 @@
 #include <stdio.h>
 
 #include "ssd1306.h"
-#include "ssd1306_tests.h"
+//#include "ssd1306_tests.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -48,7 +48,7 @@ I2C_HandleTypeDef hi2c1;
 UART_HandleTypeDef huart1;
 
 /* USER CODE BEGIN PV */
-
+SSD1306_handle_t ssd1306 __attribute__((section(".ccmram")));
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -139,7 +139,12 @@ int main(void)
     printf("\n");
 
     // Init lcd using one of the stm32HAL i2c typedefs
-    ssd1306_Init();
+    if (ssd1306_init(&ssd1306, &hi2c1, SSD1306_DEFAULT_ADDR) != SSD1306_Ok) {
+        printf("Unable to initialize ssd1306 - halting\n");
+        Error_Handler();
+    }
+
+    //ssd1306_SetContrast(0x01);
 
     /* USER CODE END 2 */
 
@@ -148,7 +153,7 @@ int main(void)
     while (1)
     {
         HAL_Delay(5000);
-        ssd1306_TestAll();
+        //ssd1306_TestAll();
 
         /* USER CODE END WHILE */
 
