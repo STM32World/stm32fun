@@ -50,6 +50,8 @@ typedef struct {
     I2C_HandleTypeDef *i2c;
     uint16_t i2c_addr;
     uint8_t fb[SSD1306_BUFFER_SIZE]; // Frame buffer
+    uint8_t is_on;
+    uint8_t is_initialized;
 } SSD1306_handle_t;
 
 typedef enum {
