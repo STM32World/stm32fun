@@ -5,15 +5,15 @@
 ../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_uart.c:591:19:HAL_MultiProcessor_Init	6
 ../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_uart.c:730:13:HAL_UART_MspDeInit	1
 ../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_uart.c:669:19:HAL_UART_DeInit	2
-../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_uart.c:1135:19:HAL_UART_Transmit	20
-../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_uart.c:1221:19:HAL_UART_Receive	24
+../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_uart.c:1135:19:HAL_UART_Transmit	23
+../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_uart.c:1221:19:HAL_UART_Receive	29
 ../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_uart.c:1308:19:HAL_UART_Transmit_IT	4
 ../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_uart.c:1347:19:HAL_UART_Receive_IT	5
 ../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_uart.c:1379:19:HAL_UART_Transmit_DMA	6
 ../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_uart.c:1468:19:HAL_UART_DMAPause	11
 ../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_uart.c:1499:19:HAL_UART_DMAResume	10
 ../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_uart.c:1533:19:HAL_UART_DMAStop	16
-../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_uart.c:1588:19:HAL_UARTEx_ReceiveToIdle	18
+../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_uart.c:1588:19:HAL_UARTEx_ReceiveToIdle	26
 ../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_uart.c:1713:19:HAL_UARTEx_ReceiveToIdle_IT	8
 ../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_uart.c:1841:29:HAL_UARTEx_GetRxEventType	1
 ../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_uart.c:1859:19:HAL_UART_Abort	17
@@ -42,7 +42,7 @@
 ../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_uart.c:3104:13:UART_DMARxHalfCplt	2
 ../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_uart.c:3042:13:UART_DMAReceiveCplt	8
 ../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_uart.c:3594:26:UART_Receive_IT.part.0.isra	10
-../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_uart.c:2350:6:HAL_UART_IRQHandler	69
+../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_uart.c:2350:6:HAL_UART_IRQHandler	70
 ../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_uart.c:2753:19:HAL_LIN_SendBreak	3
 ../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_uart.c:2780:19:HAL_MultiProcessor_EnterMuteMode	3
 ../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_uart.c:2808:19:HAL_MultiProcessor_ExitMuteMode	3

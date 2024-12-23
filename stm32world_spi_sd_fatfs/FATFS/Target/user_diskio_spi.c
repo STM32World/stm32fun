@@ -16,12 +16,6 @@
  ******************************************************************************
  */
 
-//This code was ported by kiwih from a copywrited (C) library written by ChaN
-//available at http://elm-chan.org/fsw/ff/ffsample.zip
-//(text at http://elm-chan.org/fsw/ff/00index_e.html)
-//This file provides the FatFs driver functions and SPI code required to manage
-//an SPI-connected MMC or compatible SD card with FAT
-//It is designed to be wrapped by a cubemx generated user_diskio.c file.
 #include "stm32f4xx_hal.h" /* Provide the low-level HAL functions */
 #include "user_diskio_spi.h"
 
