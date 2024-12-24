@@ -21,6 +21,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 /* USER CODE END Includes */
@@ -170,7 +171,7 @@ int main(void)
     sum3(&s);
     printf("after sum3: a = %d b = %d c = %d\n", s.a, s.b, s.c);
 
-    uint16_t a[] = {
+    uint8_t a[] = {
             1,
             2,
             3,
@@ -182,14 +183,14 @@ int main(void)
         printf("a[%d] = %d\n", n, a[n]);
     }
 
-    // uint16_t *ap = &a[0];
-    uint16_t *ap = a; // or as K&R would have written: uint16_t *ap = &a[0];
+    //uint8_t *ap = &a[0];
+    uint8_t *ap = a;
 
     for (int n = 0; n < sizeof(a) / sizeof(a[0]); ++n) {
         printf("a[%d] = %d\n", n, ap[n]); // indexing a pointer automatically dereference it
     }
 
-    for (int n = 0; n <= sizeof(a) / sizeof(a[0]); ++n) { // deliberately goes outside the size of the array - c will not complain
+    for (int n = 0; n < sizeof(a) / sizeof(a[0]); ++n) { // deliberately goes outside the size of the array - c will not complain
         printf("a[%d] = %d\n", n, *ap); // printf expect value - pointer need to be dereferenced
         //++ap;
         ap += 1; // Or could be ++ap
@@ -202,8 +203,12 @@ int main(void)
     char cstr1[] = "This is";
     char cstr2[] = "a string";
 
-    printf("cstr1 = %s\n", cstr1);
-    printf("cstr2 = %s\n", cstr2);
+    printf("cstr1 len = %d: %s\n", strlen(cstr1), cstr1);
+    printf("cstr2 len = %d: %s\n", strlen(cstr2), cstr2);
+
+//    strcpy(sbuf, cstr1);
+//    strcat(sbuf, " ");
+//    strcat(sbuf, cstr2);
 
     strncpy(sbuf, cstr1, sizeof(sbuf) - strlen(sbuf) - 1);
     strncat(sbuf, " ", sizeof(sbuf) - strlen(sbuf) - 1);
@@ -211,6 +216,27 @@ int main(void)
 
     printf("sbuf = %s\n", sbuf);
 
+    char *sbuf2;
+
+    sbuf2 = malloc(128);
+
+    if (sbuf2) {
+
+        strcpy(sbuf2, sbuf);
+
+        printf("sbuf2 len = %d: %s\n", strlen(sbuf2), sbuf2);
+
+        free(sbuf2);
+    }
+
+    char cstr3[] = "a string";
+
+    if (strcmp(cstr1, cstr3)) printf("cstr1 does not match cstr3\n");
+
+    if (strcmp(cstr2, cstr3)) printf("cstr2 does not match cstr3\n");
+
+    char *loc = strstr(sbuf, "a s");
+    printf("location = %d: %s\n", loc - sbuf, loc);
 
   /* USER CODE END 2 */
 
@@ -310,13 +336,25 @@ static void MX_USART1_UART_Init(void)
   */
 static void MX_GPIO_Init(void)
 {
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
 /* USER CODE BEGIN MX_GPIO_Init_1 */
 /* USER CODE END MX_GPIO_Init_1 */
 
   /* GPIO Ports Clock Enable */
+  __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOH_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);
+
+  /*Configure GPIO pin : LED_Pin */
+  GPIO_InitStruct.Pin = LED_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(LED_GPIO_Port, &GPIO_InitStruct);
 
 /* USER CODE BEGIN MX_GPIO_Init_2 */
 /* USER CODE END MX_GPIO_Init_2 */
