@@ -36,8 +36,12 @@
 /* Entry Point */
 ENTRY(Reset_Handler)
 
+/* Bootloader flag */
+_bflag = ORIGIN(RAM) + LENGTH(RAM) - 4; /* end of "RAM" Ram type memory */
+
 /* Highest address of the user mode stack */
-_estack = ORIGIN(RAM) + LENGTH(RAM); /* end of "RAM" Ram type memory */
+//_estack = ORIGIN(RAM) + LENGTH(RAM); /* end of "RAM" Ram type memory */
+_estack = _bflag;
 
 _Min_Heap_Size = 0x200; /* required amount of heap */
 _Min_Stack_Size = 0x400; /* required amount of stack */
