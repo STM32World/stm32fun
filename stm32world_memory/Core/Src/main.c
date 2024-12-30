@@ -45,9 +45,9 @@ UART_HandleTypeDef huart1;
 
 /* USER CODE BEGIN PV */
 
-const char cstr[4096] = "Foo"; // This will be located in flash
-char dstr[4096] = "Bar";       // This will be located in flash and ram
-//char dstr[4096];             // This will be located in ram only
+const char cstr[4 * 1024] = "Foo"; // This will be located in flash
+char dstr[4 * 1024] = "Bar";       // This will be located in flash and ram
+//char dstr[4 * 1024];             // This will be located in ram only
 
 /* USER CODE END PV */
 
@@ -111,15 +111,12 @@ int main(void)
     MX_USART1_UART_Init();
     /* USER CODE BEGIN 2 */
 
-    printf("Let's try to print a rather long string - definitely long enough to show up in the build analyzer\nLet's try to print a rather long string - definitely long enough to show up in the build analyzer\nLet's try to print a rather long string - definitely long enough to show up in the build analyzer\n");
-    printf("Let's try to print a rather long string - definitely long enough to show up in the build analyzer\nLet's try to print a rather long string - definitely long enough to show up in the build analyzer\nLet's try to print a rather long string - definitely long enough to show up in the build analyzer\n");
-    printf("Let's try to print a rather long string - definitely long enough to show up in the build analyzer\nLet's try to print a rather long string - definitely long enough to show up in the build analyzer\nLet's try to print a rather long string - definitely long enough to show up in the build analyzer\n");
-    printf("Let's try to print a rather long string - definitely long enough to show up in the build analyzer\nLet's try to print a rather long string - definitely long enough to show up in the build analyzer\nLet's try to print a rather long string - definitely long enough to show up in the build analyzer\n");
-    printf("Let's try to print a rather long string - definitely long enough to show up in the build analyzer\nLet's try to print a rather long string - definitely long enough to show up in the build analyzer\nLet's try to print a rather long string - definitely long enough to show up in the build analyzer\n");
-    printf("Let's try to print a rather long string - definitely long enough to show up in the build analyzer\nLet's try to print a rather long string - definitely long enough to show up in the build analyzer\nLet's try to print a rather long string - definitely long enough to show up in the build analyzer\n");
-
+    static char lstr1[1 * 1024] = "Test";
+    char lstr2[1 * 1024] = "Test";
 
     printf("cstr = %s\n", cstr);
+    printf("lstr1 = %s\n", lstr1);
+    printf("lstr2 = %s\n", lstr2);
     printf("dstr = %s\n", dstr);
     strcpy(dstr, cstr);
     printf("dstr = %s\n", dstr);

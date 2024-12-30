@@ -95,7 +95,6 @@ int main(void)
     /* USER CODE BEGIN 1 */
 
     // We handle all this before the HAL Libraries have been initialized.
-
     dfu_boot_flag = (uint32_t*) (&_bflag); // set in linker script
 
     if (*dfu_boot_flag != DFU_BOOT_FLAG) {
