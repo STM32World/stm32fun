@@ -147,7 +147,7 @@ int main(void)
     /* Infinite loop */
     /* USER CODE BEGIN WHILE */
 
-    uint32_t now = 0, next_blink = 100, next_tick = 1000;
+    uint32_t now = 0, next_blink = 100;
 
     while (1) {
 
@@ -156,11 +156,6 @@ int main(void)
         if (now >= next_blink) {
             HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
             next_blink = now + 100;
-        }
-
-        if (now >= next_tick) {
-            printf("Tick %lu\n", now / 1000);
-            next_tick = now + 1000;
         }
 
         /* USER CODE END WHILE */
