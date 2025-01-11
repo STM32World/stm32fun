@@ -46,7 +46,7 @@ UART_HandleTypeDef huart1;
 /* USER CODE BEGIN PV */
 extern int _bflag;
 uint32_t *dfu_boot_flag;
-uint32_t push_count = 0;
+uint32_t press_time = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -80,10 +80,10 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
         GPIO_PinState pinState = HAL_GPIO_ReadPin(BTN_GPIO_Port, BTN_Pin);
         if (pinState == GPIO_PIN_RESET) {
             printf("Button pressed\n");
-            push_count = HAL_GetTick();
+            press_time = HAL_GetTick();
         } else {
             printf("Button released\n");
-            if (HAL_GetTick() - push_count >= 5000) {
+            if (HAL_GetTick() - press_time >= 5000) {
                 // Set the boot flag and reset the mcu.  The bootloader
                 // will detect the flag and stay in dfu mode.  This will
                 // screw up the stack but that won't matter since the device
@@ -91,7 +91,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
                 *dfu_boot_flag = DFU_BOOT_FLAG;
                 HAL_NVIC_SystemReset();
             }
-            push_count = HAL_GetTick();
+            press_time = HAL_GetTick();
         }
 
     }
