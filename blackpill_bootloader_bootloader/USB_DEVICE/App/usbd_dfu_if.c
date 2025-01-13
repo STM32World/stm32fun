@@ -277,9 +277,9 @@ uint16_t MEM_If_GetStatus_FS(uint32_t Add, uint8_t Cmd, uint8_t *buffer)
         buffer[2] = (uint8_t) (FLASH_ERASE_TIME << 8);
         buffer[3] = 0;
         break;
-    default:
-
-        break;
+//    default:
+//
+//        break;
     }
     return (USBD_OK);
   /* USER CODE END 5 */
