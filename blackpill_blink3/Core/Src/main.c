@@ -125,6 +125,8 @@ int main(void)
 
     uint32_t now = 0, next_blink = 500, next_tick = 1000, loop_cnt = 0;
 
+    uint8_t blink_delays_count = sizeof(blink_delays) / sizeof(blink_delays[0]);
+
     while (1) {
 
         now = HAL_GetTick();
@@ -152,9 +154,10 @@ int main(void)
 
             printf("Button pressed\n");
 
-            ++blink_delay;
-            if (blink_delay >= sizeof(blink_delays) / sizeof(blink_delays[0]))
-                blink_delay = 0;
+//            ++blink_delay;
+//            if (blink_delay >= sizeof(blink_delays) / sizeof(blink_delays[0]))
+//                blink_delay = 0;
+            blink_delay = (++blink_delay) % blink_delays_count;
 
             btn_press = 0;
 
