@@ -75,7 +75,7 @@
 /*---------- -----------*/
 #define USBD_LPM_ENABLED     0U
 /*---------- -----------*/
-#define USBD_SELF_POWERED     1U
+#define USBD_SELF_POWERED     0U
 /*---------- -----------*/
 #define USBD_DFU_MAX_ITF_NUM     1U
 /*---------- -----------*/
