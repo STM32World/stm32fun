@@ -24,7 +24,7 @@
 #include <stdio.h>
 
 #include "ssd1306.h"
-//#include "ssd1306_tests.h"
+#include "ssd1306_tests.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -48,7 +48,8 @@ I2C_HandleTypeDef hi2c1;
 UART_HandleTypeDef huart1;
 
 /* USER CODE BEGIN PV */
-SSD1306_handle_t ssd1306 __attribute__((section(".ccmram")));
+//SSD1306_handle_t ssd1306 __attribute__((section(".ccmram")));
+//SSD1306_handle_t ssd1306;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -139,31 +140,35 @@ int main(void)
     printf("\n");
 
     // Init lcd using one of the stm32HAL i2c typedefs
-    if (ssd1306_init(&ssd1306, &hi2c1, SSD1306_DEFAULT_ADDR) != SSD1306_Ok) {
-        printf("Unable to initialize ssd1306 - halting\n");
-        Error_Handler();
-    }
+//    if (ssd1306_init(&ssd1306, &hi2c1, SSD1306_DEFAULT_ADDR) != SSD1306_Ok) {
+//        printf("Unable to initialize ssd1306 - halting\n");
+//        Error_Handler();
+//    }
 
-    //ssd1306_SetContrast(0x01);
+    void ssd1306_Init(void);
+
+    ssd1306_SetContrast(0x01);
+
+    //ssd1306_TestAll();
 
     /* USER CODE END 2 */
 
     /* Infinite loop */
     /* USER CODE BEGIN WHILE */
 
-    uint32_t now, next_blink = 500;
-
+    //uint32_t now, next_blink = 500;
     while (1) {
 
-        now = uwTick;
+//        now = uwTick;
+//
+//        if (now >= next_blink) {
+//            HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+//            next_blink = now + 500;
+//        }
 
-        if (now >= next_blink) {
-            HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-            next_blink = now + 500;
-        }
+        ssd1306_TestAll();
 
-        //HAL_Delay(5000);
-        //ssd1306_TestAll();
+        HAL_Delay(5000);
 
         /* USER CODE END WHILE */
 
