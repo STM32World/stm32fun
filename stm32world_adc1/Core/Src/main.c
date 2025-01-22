@@ -185,7 +185,7 @@ int main(void)
 
         if (now >= next_tick) {
             //printf("Tick %lu (loop %lu)\n", now / 1000, loop_cnt);
-            printf("Tick %lu (loop = %lu cb = %lu) vdda = %0.2f vref = %0.2f temp = %0.2f \n", now / 1000, loop_cnt, cb, vdda, vref, temp);
+            printf("Tick %lu (loop=%lu cb=%lu) vdda=%0.3f vref=%0.3f temp=%0.2f\n", now / 1000, loop_cnt, cb, vdda, vref, temp);
             loop_cnt = 0;
             next_tick = now + 1000;
         }
