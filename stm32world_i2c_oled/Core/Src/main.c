@@ -24,7 +24,8 @@
 #include <stdio.h>
 
 #include "ssd1306.h"
-#include "ssd1306_tests.h"
+#include "image.h"
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -44,17 +45,19 @@
 
 /* Private variables ---------------------------------------------------------*/
 I2C_HandleTypeDef hi2c1;
+DMA_HandleTypeDef hdma_i2c1_tx;
 
 UART_HandleTypeDef huart1;
 
 /* USER CODE BEGIN PV */
-//SSD1306_handle_t ssd1306 __attribute__((section(".ccmram")));
-//SSD1306_handle_t ssd1306;
+extern const unsigned char stm32fan[];
+extern uint8_t SSD1306_Buffer[SSD1306_BUFFER_SIZE];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
+static void MX_DMA_Init(void);
 static void MX_I2C1_Init(void);
 static void MX_USART1_UART_Init(void);
 /* USER CODE BEGIN PFP */
@@ -76,6 +79,150 @@ int _write(int fd, char *ptr, int len) {
             return -1;
     }
     return -1;
+}
+
+// Shift whole screen left 1 pixel
+void ssd1306_ShiftLeft() {
+
+    uint8_t pages = SSD1306_HEIGHT / 8;
+
+    for (uint8_t page = 0; page < pages; ++page) {
+        for (uint8_t column = 0; column < SSD1306_WIDTH - 1; ++column) {
+            SSD1306_Buffer[page * SSD1306_WIDTH + column] = SSD1306_Buffer[page * SSD1306_WIDTH + column + 1];
+        }
+        SSD1306_Buffer[page * SSD1306_WIDTH + SSD1306_WIDTH - 1] = Black;
+    }
+
+}
+
+void drawLines()
+{
+    for (int16_t i = 0; i < ssd1306_GetWidth(); i += 4)
+            {
+        ssd1306_DrawLine(0, 0, i, ssd1306_GetHeight() - 1);
+        ssd1306_UpdateScreen();
+        HAL_Delay(10);
+    }
+    for (int16_t i = 0; i < ssd1306_GetHeight(); i += 4)
+            {
+        ssd1306_DrawLine(0, 0, ssd1306_GetWidth() - 1, i);
+        ssd1306_UpdateScreen();
+        HAL_Delay(10);
+    }
+    HAL_Delay(250);
+
+    ssd1306_Clear();
+    for (int16_t i = 0; i < ssd1306_GetWidth(); i += 4)
+            {
+        ssd1306_DrawLine(0, ssd1306_GetHeight() - 1, i, 0);
+        ssd1306_UpdateScreen();
+        HAL_Delay(10);
+    }
+    for (int16_t i = ssd1306_GetHeight() - 1; i >= 0; i -= 4)
+            {
+        ssd1306_DrawLine(0, ssd1306_GetHeight() - 1, ssd1306_GetWidth() - 1, i);
+        ssd1306_UpdateScreen();
+        HAL_Delay(10);
+    }
+    HAL_Delay(500);
+    ssd1306_Clear();
+    for (int16_t i = ssd1306_GetWidth() - 1; i >= 0; i -= 4)
+            {
+        ssd1306_DrawLine(ssd1306_GetWidth() - 1, ssd1306_GetHeight() - 1, i, 0);
+        ssd1306_UpdateScreen();
+        HAL_Delay(10);
+    }
+    for (int16_t i = ssd1306_GetHeight() - 1; i >= 0; i -= 4)
+            {
+        ssd1306_DrawLine(ssd1306_GetWidth() - 1, ssd1306_GetHeight() - 1, 0, i);
+        ssd1306_UpdateScreen();
+        HAL_Delay(10);
+    }
+    HAL_Delay(500);
+    ssd1306_Clear();
+    for (int16_t i = 0; i < ssd1306_GetHeight(); i += 4)
+            {
+        ssd1306_DrawLine(ssd1306_GetWidth() - 1, 0, 0, i);
+        ssd1306_UpdateScreen();
+        HAL_Delay(10);
+    }
+    for (int16_t i = 0; i < ssd1306_GetWidth(); i += 4)
+            {
+        ssd1306_DrawLine(ssd1306_GetWidth() - 1, 0, i, ssd1306_GetHeight() - 1);
+        ssd1306_UpdateScreen();
+        HAL_Delay(10);
+    }
+    HAL_Delay(500);
+}
+
+// Adapted from Adafruit_SSD1306
+void drawRect(void)
+{
+    for (int16_t i = 0; i < ssd1306_GetHeight() / 2; i += 2)
+            {
+        ssd1306_DrawRect(i, i, ssd1306_GetWidth() - 2 * i, ssd1306_GetHeight() - 2 * i);
+        ssd1306_UpdateScreen();
+        HAL_Delay(10);
+    }
+}
+
+// Adapted from Adafruit_SSD1306
+void fillRect(void) {
+    uint8_t color = 1;
+    for (int16_t i = 0; i < ssd1306_GetHeight() / 2; i += 3)
+            {
+        ssd1306_SetColor((color % 2 == 0) ? Black : White); // alternate colors
+        ssd1306_FillRect(i, i, ssd1306_GetWidth() - i * 2, ssd1306_GetHeight() - i * 2);
+        ssd1306_UpdateScreen();
+        HAL_Delay(10);
+        color++;
+    }
+    // Reset back to WHITE
+    ssd1306_SetColor(White);
+}
+
+// Adapted from Adafruit_SSD1306
+void drawCircle(void)
+{
+    for (int16_t i = 0; i < ssd1306_GetHeight(); i += 4)
+            {
+        ssd1306_DrawCircle(ssd1306_GetWidth() / 2, ssd1306_GetHeight() / 2, i);
+        ssd1306_UpdateScreen();
+        HAL_Delay(10);
+    }
+    HAL_Delay(1000);
+    ssd1306_Clear();
+
+    // This will draw the part of the circel in quadrant 1
+    // Quadrants are numberd like this:
+    //   0010 | 0001
+    //  ------|-----
+    //   0100 | 1000
+    //
+    ssd1306_DrawCircleQuads(ssd1306_GetWidth() / 2, ssd1306_GetHeight() / 2, ssd1306_GetHeight() / 4, 0x01 /*0b00000001*/);
+    ssd1306_UpdateScreen();
+    HAL_Delay(200);
+    ssd1306_DrawCircleQuads(ssd1306_GetWidth() / 2, ssd1306_GetHeight() / 2, ssd1306_GetHeight() / 4, 0x03 /*0b00000011*/);
+    ssd1306_UpdateScreen();
+    HAL_Delay(200);
+    ssd1306_DrawCircleQuads(ssd1306_GetWidth() / 2, ssd1306_GetHeight() / 2, ssd1306_GetHeight() / 4, 0x07 /*0b00000111*/);
+    ssd1306_UpdateScreen();
+    HAL_Delay(200);
+    ssd1306_DrawCircleQuads(ssd1306_GetWidth() / 2, ssd1306_GetHeight() / 2, ssd1306_GetHeight() / 4, 0x0F /*0b00001111*/);
+    ssd1306_UpdateScreen();
+}
+
+void drawProgressBarDemo(int counter)
+{
+    char str[128];
+    // draw the progress bar
+    ssd1306_DrawProgressBar(0, 32, 120, 10, counter);
+
+    // draw the percentage as String
+    ssd1306_SetCursor(55, 15);
+    sprintf(str, "%i%%", counter);
+    ssd1306_WriteString(str, Font_7x10);
+    ssd1306_UpdateScreen();
 }
 
 /* USER CODE END 0 */
@@ -109,6 +256,7 @@ int main(void)
 
     /* Initialize all configured peripherals */
     MX_GPIO_Init();
+    MX_DMA_Init();
     MX_I2C1_Init();
     MX_USART1_UART_Init();
     /* USER CODE BEGIN 2 */
@@ -145,9 +293,10 @@ int main(void)
 //        Error_Handler();
 //    }
 
-    void ssd1306_Init(void);
-
-    ssd1306_SetContrast(0x01);
+    ssd1306_Init();
+    ssd1306_FlipScreenVertically();
+    ssd1306_Clear();
+    ssd1306_SetColor(White);
 
     //ssd1306_TestAll();
 
@@ -159,16 +308,57 @@ int main(void)
     //uint32_t now, next_blink = 500;
     while (1) {
 
-//        now = uwTick;
-//
-//        if (now >= next_blink) {
-//            HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-//            next_blink = now + 500;
-//        }
+        ssd1306_Clear();
+        ssd1306_DrawBitmap(0, 0, 128, 64, stm32fan);
+        ssd1306_UpdateScreen();
+        HAL_Delay(500);
 
-        ssd1306_TestAll();
+        for (int i = 0; i < 128; ++i) {
+            uint32_t start = uwTick;
+            ssd1306_ShiftLeft();
+            ssd1306_UpdateScreen();
+            printf("LShift t = %lu\n", uwTick - start);
+            HAL_Delay(5);
+        }
 
-        HAL_Delay(5000);
+        drawLines();
+        HAL_Delay(1000);
+        ssd1306_Clear();
+
+        drawRect();
+        HAL_Delay(1000);
+        ssd1306_Clear();
+
+        fillRect();
+        HAL_Delay(1000);
+        ssd1306_Clear();
+
+        drawCircle();
+        HAL_Delay(1000);
+        ssd1306_Clear();
+
+        for (int i = 0; i < 100; i++)
+                {
+            drawProgressBarDemo(i);
+            HAL_Delay(25);
+            while (!ssd1306_UpdateScreenCompleted())
+                ;
+            ssd1306_Clear();
+        }
+
+        ssd1306_DrawRect(0, 0, ssd1306_GetWidth(), ssd1306_GetHeight());
+        ssd1306_SetCursor(8, 20);
+        ssd1306_WriteString("SSD1306", Font_16x26);
+        ssd1306_UpdateScreen();
+        HAL_Delay(2000);
+        ssd1306_Clear();
+        ssd1306_DrawBitmap(0, 0, 128, 64, stm32fan);
+        ssd1306_UpdateScreen();
+        HAL_Delay(2000);
+        ssd1306_InvertDisplay();
+        HAL_Delay(2000);
+        ssd1306_NormalDisplay();
+        ssd1306_Clear();
 
         /* USER CODE END WHILE */
 
@@ -286,6 +476,22 @@ static void MX_USART1_UART_Init(void)
     /* USER CODE BEGIN USART1_Init 2 */
 
     /* USER CODE END USART1_Init 2 */
+
+}
+
+/**
+ * Enable DMA controller clock
+ */
+static void MX_DMA_Init(void)
+{
+
+    /* DMA controller clock enable */
+    __HAL_RCC_DMA1_CLK_ENABLE();
+
+    /* DMA interrupt init */
+    /* DMA1_Stream6_IRQn interrupt configuration */
+    HAL_NVIC_SetPriority(DMA1_Stream6_IRQn, 0, 0);
+    HAL_NVIC_EnableIRQ(DMA1_Stream6_IRQn);
 
 }
 

@@ -1,28 +1,27 @@
-/*
- * ssd1306.h
+/**
+ ******************************************************************************
+ * @file           : ssd1306.h
+ * @brief          : SSD1306 Library Header
+ ******************************************************************************
+ * @attention
  *
- *  Created on: 14/04/2018
- *  Update on: 10/04/2019
- *      Author: Andriy Honcharenko
- *      version: 2
+ * Copyright (c) 2024 Lars Boegild Thomsen <lbthomsen@gmail.com>
+ * Copyright (c) 2019 Andriy Honcharenko
+ * Copyright (c) 2021 Roberto Benjami
+ * All rights reserved.
  *
- *  Modify on: 06/11/2021
- *      Author: Roberto Benjami
- *  Added features in DMA mode:
- *  - ssd1306_UpdateScreen works without blocking
- *  - you can query that UpdateScreen is complete (if ssd1306_UpdateScreenCompleted() == 1)
- *  - callback function if UpdateScreen is complete (ssd1306_UpdateCompletedCallback)
- *  Added features in DMA mode with continuous display update:
- *  - enable continuous display update
- *  - disable continuous display update
- *  - enable raster interrupt(s) of PAGEx (you can set which PAGE(s) )
+ * This software is licensed under terms that can be found in the LICENSE file
+ * in the root directory of this software component.
+ * If no LICENSE file comes with this software, it is provided AS-IS.
+ *
+ ******************************************************************************
  */
 
 #ifndef SSD1306_H_
 #define SSD1306_H_
 
+#include <ssd1306_fonts.h>
 #include "ssd1306_defines.h"
-#include "fonts.h"
 #include "main.h"
 #include <stdlib.h>
 #include <string.h>
