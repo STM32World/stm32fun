@@ -95,6 +95,7 @@ int main(void)
     if (*bootloader_flag == BOOTLOADER_FLAG)
     {
 
+        // Clear the bootloader flag so it won't go into the system bootloader at next boot
         *bootloader_flag = 0;
 
         pFunction JumpToApplication;
