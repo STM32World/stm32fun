@@ -85,9 +85,12 @@ int _write(int fd, char *ptr, int len) {
 //}
 
 void delay_us(uint32_t us) {
+
+    uint32_t *cnt = &htim5.Instance->CNT;
+
     __HAL_TIM_SET_COUNTER(&htim5, us);
     HAL_TIM_Base_Start(&htim5);
-    while (htim5.Instance->CNT != 0) {
+    while (*cnt != 0) {
     } // Just wait
 }
 
