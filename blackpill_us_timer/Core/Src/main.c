@@ -74,13 +74,21 @@ int _write(int fd, char *ptr, int len) {
     return -1;
 }
 
+// Old buggy version:
+//void delay_us(uint32_t us) {
+//    uint32_t start = htim5.Instance->CNT;
+//    uint32_t end = start + us;
+//
+//    while (htim5.Instance->CNT < end)
+//        ; // Do nothing - will fail to delay at wraparound
+//
+//}
+
 void delay_us(uint32_t us) {
-    uint32_t start = htim5.Instance->CNT;
-    uint32_t end = start + us;
-
-    while (htim5.Instance->CNT < end)
-        ; // Do nothing - will fail to delay at wraparound
-
+    __HAL_TIM_SET_COUNTER(&htim5, us);
+    HAL_TIM_Base_Start(&htim5);
+    while (htim5.Instance->CNT != 0) {
+    } // Just wait
 }
 
 /* USER CODE END 0 */
@@ -120,7 +128,7 @@ int main(void)
 
     printf("\n\n\n-------\nStarting\n");
 
-    HAL_TIM_Base_Start(&htim5);
+    //HAL_TIM_Base_Start(&htim5);
 
     /* USER CODE END 2 */
 
@@ -144,7 +152,7 @@ int main(void)
             next_tick = now + 1000;
         }
 
-        delay_us(20);
+        delay_us(10);
 
         ++loop_cnt;
 
@@ -220,10 +228,10 @@ static void MX_TIM5_Init(void)
     /* USER CODE END TIM5_Init 1 */
     htim5.Instance = TIM5;
     htim5.Init.Prescaler = 100 - 1;
-    htim5.Init.CounterMode = TIM_COUNTERMODE_UP;
+    htim5.Init.CounterMode = TIM_COUNTERMODE_DOWN;
     htim5.Init.Period = 4294967295;
     htim5.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-    htim5.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
+    htim5.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
     if (HAL_TIM_Base_Init(&htim5) != HAL_OK)
             {
         Error_Handler();
