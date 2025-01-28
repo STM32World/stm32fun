@@ -21,6 +21,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include <stdlib.h>
 #include <stdio.h>
 
 #include <math.h>
@@ -37,6 +38,8 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 #define DMA_BUFFER_SIZE 32
+#define SAMPLE_BUFFER_COUNT 10
+#define SAMPLE_BUFFER_SIZE SAMPLE_BUFFER_COUNT * DMA_BUFFER_SIZE
 #define SAMPLE_FREQ 100000
 #define OUTPUT_MID 2048
 /* USER CODE END PD */
@@ -81,6 +84,7 @@ uint32_t dac_cb = 0, adc_cb = 0;
 
 uint16_t dma_out_buffer[2 * DMA_BUFFER_SIZE];
 uint16_t dma_in_buffer[2 * DMA_BUFFER_SIZE];
+uint16_t sample_buffer[SAMPLE_BUFFER_SIZE];
 
 float angle = 0;
 float angle_change = 2 * (2 * M_PI / SAMPLE_FREQ);
@@ -157,6 +161,9 @@ void do_adc(uint16_t *buffer) {
 //
 //    // Temperature can be calculated based on the
 //    temp = (float) ((float) ((float) (TEMPSENSOR_CAL2_TEMP - TEMPSENSOR_CAL1_TEMP) / (float) (*TEMPSENSOR_CAL2_ADDR - *TEMPSENSOR_CAL1_ADDR)) * (temp_avg - *TEMPSENSOR_CAL1_ADDR) + TEMPSENSOR_CAL1_TEMP);
+
+    memcpy(sample_buffer, sample_buffer[DMA_BUFFER_SIZE], 2 * DMA_BUFFER_SIZE * (SAMPLE_BUFFER_COUNT - 1));
+    memcpy(sample_buffer[DMA_BUFFER_SIZE * (SAMPLE_BUFFER_COUNT - 1)], buffer, DMA_BUFFER_SIZE * 2);
 
     y_value = buffer[0];
 
