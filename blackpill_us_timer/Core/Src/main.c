@@ -86,12 +86,12 @@ int _write(int fd, char *ptr, int len) {
 
 void delay_us(uint32_t us) {
 
-    uint32_t *cnt = &htim5.Instance->CNT;
+    volatile uint32_t *cnt = &htim5.Instance->CNT;
 
-    __HAL_TIM_SET_COUNTER(&htim5, us);
-    HAL_TIM_Base_Start(&htim5);
-    while (*cnt != 0) {
-    } // Just wait
+    __HAL_TIM_SET_COUNTER(&htim5, us); // Set the counter to number of us
+    HAL_TIM_Base_Start(&htim5);        // Fire up the timer
+    while (*cnt != 0);                 // Just wait until 0
+
 }
 
 /* USER CODE END 0 */
