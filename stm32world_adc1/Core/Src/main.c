@@ -33,7 +33,7 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 
-#define ADC_RESOLUTION pow(2, 12)
+#define ADC_RESOLUTION 4096
 #define DMA_SAMPLES 10
 #define DMA_BUFFER_SIZE 3 * DMA_SAMPLES
 

@@ -112,27 +112,27 @@ int main(void)
     /* Infinite loop */
     /* USER CODE BEGIN WHILE */
 
-    uint32_t now = 0, last_blink = 0, last_tick = 0, loop_cnt = 0;
+    uint32_t now = 0, next_blink = 500, next_tick = 1000, loop_cnt = 0;
 
     while (1) {
 
-        now = HAL_GetTick();
+        now = uwTick;
 
-        if (now - last_blink >= 500) {
+        if (now >= next_blink) {
 
             printf("Toggling GPIO\n");
 
             HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
 
-            last_blink = now;
+            next_blink = now + 500;
         }
 
-        if (now - last_tick >= 1000) {
+        if (now >= next_tick) {
 
             printf("Tick %lu (loop count = %lu)\n", now / 1000, loop_cnt);
 
             loop_cnt = 0;
-            last_tick = now;
+            next_tick = now + 1000;
 
         }
 
@@ -206,7 +206,7 @@ static void MX_USART1_UART_Init(void)
 
     /* USER CODE END USART1_Init 1 */
     huart1.Instance = USART1;
-    huart1.Init.BaudRate = 921600;
+    huart1.Init.BaudRate = 2000000;
     huart1.Init.WordLength = UART_WORDLENGTH_8B;
     huart1.Init.StopBits = UART_STOPBITS_1;
     huart1.Init.Parity = UART_PARITY_NONE;

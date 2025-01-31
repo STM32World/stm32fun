@@ -27,9 +27,9 @@
 ../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim_ex.c:1619:19:HAL_TIMEx_OnePulseN_Stop	6
 ../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim_ex.c:1658:19:HAL_TIMEx_OnePulseN_Start_IT	6
 ../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim_ex.c:1713:19:HAL_TIMEx_OnePulseN_Stop_IT	6
-../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim_ex.c:1792:19:HAL_TIMEx_ConfigCommutEvent	6
-../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim_ex.c:1848:19:HAL_TIMEx_ConfigCommutEvent_IT	6
-../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim_ex.c:1905:19:HAL_TIMEx_ConfigCommutEvent_DMA	6
+../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim_ex.c:1792:19:HAL_TIMEx_ConfigCommutEvent	7
+../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim_ex.c:1848:19:HAL_TIMEx_ConfigCommutEvent_IT	7
+../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim_ex.c:1905:19:HAL_TIMEx_ConfigCommutEvent_DMA	7
 ../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim_ex.c:1954:19:HAL_TIMEx_MasterConfigSynchronization	10
 ../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim_ex.c:2015:19:HAL_TIMEx_ConfigBreakDeadTime	2
 ../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim_ex.c:2091:19:HAL_TIMEx_RemapConfig	2
