@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "fatfs.h"
 #include "usb_device.h"
 
 /* Private includes ----------------------------------------------------------*/
@@ -32,6 +33,8 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+
+#define I2S_DMA_BUFFER_SIZE 1 * 1024
 
 /* USER CODE END PD */
 
@@ -49,6 +52,23 @@ SD_HandleTypeDef hsd;
 UART_HandleTypeDef huart1;
 
 /* USER CODE BEGIN PV */
+
+const char total_uptime_filename[] = "uptime.dat";
+const char tick_filename[] = "tick.txt";
+
+uint8_t i2s_dma_buffer[2 * I2S_DMA_BUFFER_SIZE];
+
+uint8_t *dma_buffer_to_fill = NULL;
+
+uint32_t i2c_cb, i2c_hcb;
+uint32_t total_uptime;
+
+uint8_t open_next_file = 1;
+
+FRESULT res;
+DIR dir;
+FIL music_file;
+FILINFO music_file_info;
 
 /* USER CODE END PV */
 
@@ -78,6 +98,70 @@ int _write(int fd, char *ptr, int len) {
             return -1;
     }
     return -1;
+}
+
+void ls() {
+
+    char *path;
+
+    path = ""; // where you want to list
+
+    res = f_opendir(&dir, path);
+
+#ifdef DEBUG
+    if (res != FR_OK)
+        printf("res = %d f_opendir\n", res);
+#endif
+
+    if (res == FR_OK) {
+        while (1) {
+
+            FILINFO fno;
+
+            res = f_readdir(&dir, &fno);
+
+#ifdef DEBUG
+            if (res != FR_OK)
+                printf("res = %d f_readdir\n", res);
+#endif
+
+            if ((res != FR_OK) || (fno.fname[0] == 0))
+                break;
+
+            printf("%c%c%c%c %10d %s/%s\n",
+                    ((fno.fattrib & AM_DIR) ? 'D' : '-'),
+                    ((fno.fattrib & AM_RDO) ? 'R' : '-'),
+                    ((fno.fattrib & AM_SYS) ? 'S' : '-'),
+                    ((fno.fattrib & AM_HID) ? 'H' : '-'),
+                    (int) fno.fsize, path, fno.fname);
+        }
+
+    }
+
+    uint32_t free_clusters;
+    FATFS *fs_ptr;
+
+    res = f_getfree("", &free_clusters, &fs_ptr);
+    if (res == FR_OK) {
+        uint32_t totalBlocks = (fs_ptr->n_fatent - 2) * fs_ptr->csize;
+        uint32_t freeBlocks = free_clusters * fs_ptr->csize;
+
+        printf("Total blocks: %lu (%lu Mb)\n", totalBlocks, totalBlocks / 2000);
+        printf("Free blocks : %lu (%lu Mb)\n", freeBlocks, freeBlocks / 2000);
+    } else {
+        printf("Unable to get free space\n");
+    }
+
+}
+
+void HAL_I2S_TxCpltCallback(I2S_HandleTypeDef *hi2s) {
+    dma_buffer_to_fill = &i2s_dma_buffer[I2S_DMA_BUFFER_SIZE]; // Second half
+    ++i2c_cb;
+}
+
+void HAL_I2S_TxHalfCpltCallback(I2S_HandleTypeDef *hi2s) {
+    dma_buffer_to_fill = &i2s_dma_buffer[0];
+    ++i2c_hcb;
 }
 
 /* USER CODE END 0 */
@@ -116,9 +200,61 @@ int main(void)
     MX_SDIO_SD_Init();
     MX_I2S2_Init();
     MX_USB_DEVICE_Init();
+    MX_FATFS_Init();
     /* USER CODE BEGIN 2 */
 
     printf("\n\n\n---------------------\nStarting music player\n");
+
+    printf("SD Card Information:\n");
+    printf("Block size  : %lu\n", hsd.SdCard.BlockSize);
+    printf("Block nmbr  : %lu\n", hsd.SdCard.BlockNbr);
+    printf("Card size   : %lu\n", (hsd.SdCard.BlockSize * hsd.SdCard.BlockNbr) / 1000);
+    printf("Card version: %lu\n", hsd.SdCard.CardVersion);
+
+    uint32_t wbytes, rbytes;
+
+    if (f_mount(&SDFatFS, (TCHAR const*) SDPath, 0) != FR_OK) {
+        printf("Unable to mount disk\n");
+        Error_Handler();
+    }
+
+    if (f_open(&SDFile, total_uptime_filename, FA_OPEN_EXISTING | FA_READ) == FR_OK) {
+        if (f_read(&SDFile, &total_uptime, sizeof(total_uptime), (void*) &rbytes) == FR_OK) {
+            printf("Total uptime = %lu\n", total_uptime);
+            f_close(&SDFile);
+        } else {
+            printf("Unable to read\n");
+            Error_Handler();
+        }
+    } else {
+        // File did not exist - let's create it
+        if (f_open(&SDFile, total_uptime_filename, FA_CREATE_ALWAYS | FA_WRITE) == FR_OK) {
+            if (f_write(&SDFile, &total_uptime, sizeof(total_uptime), (void*) &wbytes) == FR_OK) {
+                printf("File %s created\n", total_uptime_filename);
+                f_close(&SDFile);
+            } else {
+                printf("Unable to write\n");
+                Error_Handler();
+            }
+        } else {
+            printf("Unable to create\n");
+            Error_Handler();
+        }
+    }
+
+    // Create tick file always
+    if (f_open(&SDFile, tick_filename, FA_CREATE_ALWAYS | FA_WRITE) == FR_OK) {
+        f_close(&SDFile);
+    }
+
+    //ls();
+
+    //HAL_I2S_Transmit_DMA(&hi2s2, &i2s_dma_buffer, 2 * I2S_DMA_BUFFER_SIZE);
+
+//    res = f_findfirst(&dir, &music_file_info, "", "*.wav");
+//    if (res == FR_OK) {
+//        printf("Found file: %s\n", music_file_info.fname);
+//    }
 
     /* USER CODE END 2 */
 
@@ -140,10 +276,39 @@ int main(void)
 
         if (now >= next_tick) {
 
-            printf("Tick %lu (loop count = %lu)\n", now / 1000, loop_cnt);
+            printf("Tick %lu (loop count=%lu hcb=%lu cb=%lu)\n", now / 1000, loop_cnt, i2c_hcb, i2c_cb);
+
+            ++total_uptime;
+
+            // Update the total uptime file
+            if (f_open(&SDFile, total_uptime_filename, FA_OPEN_EXISTING | FA_WRITE) == FR_OK) {
+                if (f_write(&SDFile, &total_uptime, sizeof(total_uptime), (void*) &wbytes) != FR_OK) {
+                    printf("Unable to write\n");
+                }
+                f_close(&SDFile);
+            } else {
+                printf("Unable to open file\n");
+            }
+
+            open_next_file = 0;
 
             loop_cnt = 0;
             next_tick = now + 1000;
+
+        }
+
+        if (open_next_file) {
+
+            // Experimental advance to next
+            res = f_findnext(&dir, &music_file_info);
+
+            if (res != FR_OK || music_file_info.fsize == 0) {
+                res = f_findfirst(&dir, &music_file_info, "", "*.wav");
+            }
+            printf("Next file: %s\n", music_file_info.fname);
+
+
+            open_next_file = 0;
 
         }
 
@@ -257,10 +422,6 @@ static void MX_SDIO_SD_Init(void)
     hsd.Init.BusWide = SDIO_BUS_WIDE_1B;
     hsd.Init.HardwareFlowControl = SDIO_HARDWARE_FLOW_CONTROL_DISABLE;
     hsd.Init.ClockDiv = 0;
-    if (HAL_SD_Init(&hsd) != HAL_OK)
-            {
-        Error_Handler();
-    }
     /* USER CODE BEGIN SDIO_Init 2 */
 
     // First init with 1B bus - SD card will not initialize with 4 bits
@@ -269,10 +430,10 @@ static void MX_SDIO_SD_Init(void)
         Error_Handler();
     }
 
-    // Now we can switch to 4 bit mode
-    if (HAL_SD_ConfigWideBusOperation(&hsd, SDIO_BUS_WIDE_4B) != HAL_OK) {
-        Error_Handler();
-    }
+//    // Now we can switch to 4 bit mode
+//    if (HAL_SD_ConfigWideBusOperation(&hsd, SDIO_BUS_WIDE_4B) != HAL_OK) {
+//        Error_Handler();
+//    }
 
     /* USER CODE END SDIO_Init 2 */
 
@@ -364,7 +525,7 @@ static void MX_GPIO_Init(void)
     /*Configure GPIO pin : SD_DET_Pin */
     GPIO_InitStruct.Pin = SD_DET_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Pull = GPIO_PULLDOWN;
     HAL_GPIO_Init(SD_DET_GPIO_Port, &GPIO_InitStruct);
 
     /* USER CODE BEGIN MX_GPIO_Init_2 */

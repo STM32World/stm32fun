@@ -1,0 +1,17 @@
+../FATFS/Target/bsp_driver_sd.c:70:16:BSP_SD_ITConfig	1
+../FATFS/Target/bsp_driver_sd.c:79:13:BSP_SD_DetectIT	1
+../FATFS/Target/bsp_driver_sd.c:96:16:BSP_SD_ReadBlocks	2
+../FATFS/Target/bsp_driver_sd.c:119:16:BSP_SD_WriteBlocks	2
+../FATFS/Target/bsp_driver_sd.c:141:16:BSP_SD_ReadBlocks_DMA	2
+../FATFS/Target/bsp_driver_sd.c:164:16:BSP_SD_WriteBlocks_DMA	2
+../FATFS/Target/bsp_driver_sd.c:186:16:BSP_SD_Erase	2
+../FATFS/Target/bsp_driver_sd.c:206:16:BSP_SD_GetCardState	1
+../FATFS/Target/bsp_driver_sd.c:216:13:BSP_SD_GetCardInfo	1
+../FATFS/Target/bsp_driver_sd.c:261:13:BSP_SD_AbortCallback	1
+../FATFS/Target/bsp_driver_sd.c:230:6:HAL_SD_AbortCallback	1
+../FATFS/Target/bsp_driver_sd.c:271:13:BSP_SD_WriteCpltCallback	1
+../FATFS/Target/bsp_driver_sd.c:240:6:HAL_SD_TxCpltCallback	1
+../FATFS/Target/bsp_driver_sd.c:281:13:BSP_SD_ReadCpltCallback	1
+../FATFS/Target/bsp_driver_sd.c:250:6:HAL_SD_RxCpltCallback	1
+../FATFS/Target/bsp_driver_sd.c:293:16:BSP_SD_IsDetected	2
+../FATFS/Target/bsp_driver_sd.c:48:16:BSP_SD_Init	2
