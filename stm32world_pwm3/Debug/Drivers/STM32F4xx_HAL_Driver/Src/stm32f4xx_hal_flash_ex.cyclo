@@ -1,6 +1,0 @@
-../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash_ex.c:231:19:HAL_FLASHEx_Erase_IT	3
-../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash_ex.c:281:19:HAL_FLASHEx_OBProgram	11
-../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash_ex.c:340:6:HAL_FLASHEx_OBGetConfig	2
-../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash_ex.c:977:6:FLASH_Erase_Sector	2
-../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash_ex.c:1306:6:FLASH_FlushCaches	3
-../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash_ex.c:160:19:HAL_FLASHEx_Erase	8

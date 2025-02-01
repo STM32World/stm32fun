@@ -1,4 +1,5 @@
 language.settings.xml
+Debug/
 test/
 # Prerequisites
 *.d
