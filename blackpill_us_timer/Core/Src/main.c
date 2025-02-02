@@ -91,6 +91,7 @@ void delay_us(uint32_t us) {
     __HAL_TIM_SET_COUNTER(&htim5, us); // Set the counter to number of us
     HAL_TIM_Base_Start(&htim5);        // Fire up the timer
     while (*cnt != 0);                 // Just wait until 0
+    HAL_TIM_Base_Stop(&htim5);
 
 }
 
