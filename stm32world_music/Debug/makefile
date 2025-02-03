@@ -69,7 +69,7 @@ main-build: stm32world_music.elf secondary-outputs
 
 # Tool invocations
 stm32world_music.elf stm32world_music.map: $(OBJS) $(USER_OBJS) /home/lth/src/stm32fun/stm32world_music/STM32F405RGTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "stm32world_music.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"/home/lth/src/stm32fun/stm32world_music/STM32F405RGTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="stm32world_music.map" -Wl,--gc-sections -static -L"/home/lth/src/stm32fun/stm32world_music/SpiritDSP_MP3_Dec/lib" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+	arm-none-eabi-gcc -o "stm32world_music.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"/home/lth/src/stm32fun/stm32world_music/STM32F405RGTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="stm32world_music.map" -Wl,--gc-sections -static -L"/home/lth/src/stm32fun/stm32world_music/SpiritDSP_MP3_Dec/lib" -L../Middlewares/Third_Party/ARM_CMSIS/CMSIS/DSP/Lib/GCC --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
