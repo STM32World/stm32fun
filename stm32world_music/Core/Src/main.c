@@ -71,7 +71,7 @@ float angle_change[2] = {
 };
 
 float amplification[2] = {
-        0.4,
+        0.5,
         0.4
 };
 
@@ -190,37 +190,20 @@ void ls() {
 
 }
 
-//static inline void do_dac(uint16_t *buffer) {
-//    for (int i = 0; i < DMA_BUFFER_SIZE; ++i) {
-//        buffer[i] = OUTPUT_MID - (amplifier * (OUTPUT_MID * arm_cos_f32(angle)));
-//        angle += angle_change;
-//        if (angle >= two_pi) {
-//            angle -= two_pi;
-//        }
-//    }
-//}
-
-//! Byte swap short
-int16_t swap_int16(int16_t val) {
-    return (val << 8) | ((val >> 8) & 0xFF);
-}
-
-inline void process_buffer(uint16_t *buffer) {
+inline void process_buffer(int16_t *buffer) {
 
     dma_buffer_processing = 1;
 
     for (int i = 0; i < I2S_DMA_BUFFER_SAMPLES; ++i) {
-        dma_buffer_to_fill[0] = (int16_t) (amplification[0] * (OUTPUT_MID * arm_cos_f32(angle[0])));
-        dma_buffer_to_fill[1] = (int16_t) (amplification[1] * (OUTPUT_MID * arm_cos_f32(angle[1])));
+        buffer[0] = (int16_t) (amplification[0] * (OUTPUT_MID * arm_cos_f32(angle[0])));
+        buffer[1] = (int16_t) (amplification[1] * (OUTPUT_MID * arm_cos_f32(angle[1])));
         angle[0] += angle_change[0];
         angle[1] += angle_change[1];
-        if (angle[0] >= two_pi) {
+        if (angle[0] >= two_pi)
             angle[0] -= two_pi;
-        }
-        if (angle[1] >= two_pi) {
+        if (angle[1] >= two_pi)
             angle[1] -= two_pi;
-        }
-        dma_buffer_to_fill += 2;
+        buffer += 2;
     }
 
     dma_buffer_processing = 0;
@@ -231,18 +214,19 @@ void HAL_I2S_TxCpltCallback(I2S_HandleTypeDef *hi2s) {
     if (dma_buffer_processing) {
         ++dma_overflow; // Still processing previous buffer
     } else {
-        dma_buffer_to_fill = &i2s_dma_buffer[2 * I2S_DMA_BUFFER_SAMPLES]; // Second half
+        process_buffer(&i2s_dma_buffer[2 * I2S_DMA_BUFFER_SAMPLES]); // Second half
+        ++i2c_cb;
     }
-    ++i2c_cb;
 }
 
 void HAL_I2S_TxHalfCpltCallback(I2S_HandleTypeDef *hi2s) {
     if (dma_buffer_processing) {
         ++dma_overflow; // Still processing previous buffer
     } else {
-        dma_buffer_to_fill = &i2s_dma_buffer[0];
+        process_buffer(&i2s_dma_buffer[0]);
+        ++i2c_hcb;
     }
-    ++i2c_hcb;
+
 }
 
 /* USER CODE END 0 */
