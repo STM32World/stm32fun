@@ -36,7 +36,8 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 
-#define I2S_DMA_BUFFER_SAMPLES 1 * 1000
+#define TAU 6.28318530717958647692
+#define I2S_DMA_BUFFER_SAMPLES 480
 #define I2S_DMA_BUFFER_SIZE 2 * 2 * I2S_DMA_BUFFER_SAMPLES // 2 full buffers L+R samples
 #define SAMPLE_FREQ 48000
 #define OUTPUT_MID 32768
@@ -58,20 +59,19 @@ UART_HandleTypeDef huart1;
 
 /* USER CODE BEGIN PV */
 
-const float two_pi = 2 * M_PI;
-
+//const float two_pi = 2 * M_PI;
 float angle[2] = {
         0,
         0
 };
 
 float angle_change[2] = {
-        100 * (2 * M_PI / SAMPLE_FREQ),
-        440 * (2 * M_PI / SAMPLE_FREQ)
+        100.0 * (TAU / SAMPLE_FREQ), // left
+        50.0 * (TAU / SAMPLE_FREQ)  // right
 };
 
 float amplification[2] = {
-        0.5,
+        1,
         0.4
 };
 
@@ -80,7 +80,7 @@ const char tick_filename[] = "tick.txt";
 
 int16_t i2s_dma_buffer[I2S_DMA_BUFFER_SIZE];
 
-int16_t *dma_buffer_to_fill;
+//int16_t *dma_buffer_to_fill;
 
 uint8_t dma_buffer_processing = 0;
 uint32_t dma_overflow = 0;
@@ -127,7 +127,7 @@ int _write(int fd, char *ptr, int len) {
 
 uint8_t BSP_SD_IsDetected(void)
 {
-    __IO uint8_t status = SD_PRESENT;
+    __IO uint8_t status = SD_PRESENT; // Just ignore the thing
 
 //    if (HAL_GPIO_ReadPin(SD_DETECT_GPIO_PORT, SD_DETECT_PIN) != GPIO_PIN_RESET) {
 //        status = SD_NOT_PRESENT;
@@ -190,20 +190,19 @@ void ls() {
 
 }
 
-inline void process_buffer(int16_t *buffer) {
+void process_buffer(int16_t *buffer) {
 
     dma_buffer_processing = 1;
 
-    for (int i = 0; i < I2S_DMA_BUFFER_SAMPLES; ++i) {
-        buffer[0] = (int16_t) (amplification[0] * (OUTPUT_MID * arm_cos_f32(angle[0])));
-        buffer[1] = (int16_t) (amplification[1] * (OUTPUT_MID * arm_cos_f32(angle[1])));
+    for (int i = 0; i < 2 * I2S_DMA_BUFFER_SAMPLES; i += 2) { // Two samples left/right per step
+        buffer[i] = OUTPUT_MID * amplification[0] * arm_cos_f32(angle[0]);      // Left
+        buffer[i + 1] = OUTPUT_MID * amplification[1] * arm_cos_f32(angle[1]);  // Right
         angle[0] += angle_change[0];
         angle[1] += angle_change[1];
-        if (angle[0] >= two_pi)
-            angle[0] -= two_pi;
-        if (angle[1] >= two_pi)
-            angle[1] -= two_pi;
-        buffer += 2;
+        if (angle[0] > TAU)
+            angle[0] -= TAU;
+        if (angle[1] > TAU)
+            angle[1] -= TAU;
     }
 
     dma_buffer_processing = 0;
@@ -312,7 +311,7 @@ int main(void)
         f_close(&SDFile);
     }
 
-    HAL_I2S_Transmit_DMA(&hi2s2, (uint16_t*) &i2s_dma_buffer, I2S_DMA_BUFFER_SAMPLES);
+    HAL_I2S_Transmit_DMA(&hi2s2, (uint16_t*) &i2s_dma_buffer, 2 * I2S_DMA_BUFFER_SAMPLES);
 
     /* USER CODE END 2 */
 
