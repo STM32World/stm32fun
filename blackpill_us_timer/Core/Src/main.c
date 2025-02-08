@@ -152,6 +152,20 @@ int main(void)
 
         if (now >= next_tick) {
             printf("Tick %lu (loop=%lu)\n", now / 1000, loop_cnt);
+
+            uint32_t tim_delay = 100;
+            uint16_t tim_cnt = 65530;
+            uint32_t tim_start = tim_cnt;
+
+            tim_cnt += 5;
+
+            if (tim_cnt - tim_start < tim_delay) printf("Waiting\n");
+
+            tim_cnt += 5;
+
+            if (tim_cnt - tim_start < tim_delay) printf("Waiting\n");
+            else printf("Done\n");
+
             loop_cnt = 0;
             next_tick = now + 1000;
         }
