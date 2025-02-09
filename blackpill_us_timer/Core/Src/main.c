@@ -90,7 +90,8 @@ void delay_us(uint32_t us) {
 
     __HAL_TIM_SET_COUNTER(&htim5, us); // Set the counter to number of us
     HAL_TIM_Base_Start(&htim5);        // Fire up the timer
-    while (*cnt != 0);                 // Just wait until 0
+    while (*cnt != 0)
+        ;                 // Just wait until 0
     HAL_TIM_Base_Stop(&htim5);
 
 }
@@ -153,24 +154,27 @@ int main(void)
         if (now >= next_tick) {
             printf("Tick %lu (loop=%lu)\n", now / 1000, loop_cnt);
 
-            uint32_t tim_delay = 100;
-            uint16_t tim_cnt = 65530;
-            uint32_t tim_start = tim_cnt;
-
-            tim_cnt += 5;
-
-            if (tim_cnt - tim_start < tim_delay) printf("Waiting\n");
-
-            tim_cnt += 5;
-
-            if (tim_cnt - tim_start < tim_delay) printf("Waiting\n");
-            else printf("Done\n");
+//            uint32_t tim_delay = 100;
+//            uint16_t tim_cnt = 65530;
+//            uint32_t tim_start = tim_cnt;
+//
+//            tim_cnt += 5;
+//
+//            if (tim_cnt - tim_start < tim_delay)
+//                printf("Waiting\n");
+//
+//            tim_cnt += 5;
+//
+//            if (tim_cnt - tim_start < tim_delay)
+//                printf("Waiting\n");
+//            else
+//                printf("Done\n");
 
             loop_cnt = 0;
             next_tick = now + 1000;
         }
 
-        delay_us(10);
+        delay_us(20);
 
         ++loop_cnt;
 
