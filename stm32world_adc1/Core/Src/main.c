@@ -92,7 +92,7 @@ int _write(int fd, char *ptr, int len) {
     return -1;
 }
 
-void process_buffer(uint16_t *buffer) {
+__attribute__((section(".ccmram"))) void process_buffer(uint16_t *buffer) {
 
     uint32_t temp_sum = 0, vref_sum = 0, vbat_sum = 0;
 
