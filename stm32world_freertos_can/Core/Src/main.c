@@ -18,7 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "cmsis_os.h"
+#include "cmsis_os2.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -51,50 +51,74 @@ UART_HandleTypeDef huart1;
 /* Definitions for defaultTask */
 osThreadId_t defaultTaskHandle;
 const osThreadAttr_t defaultTask_attributes = {
-  .name = "defaultTask",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityNormal,
+        .name = "defaultTask",
+        .stack_size = 128 * 4,
+        .priority = (osPriority_t) osPriorityNormal,
 };
 /* Definitions for ledTask */
 osThreadId_t ledTaskHandle;
 const osThreadAttr_t ledTask_attributes = {
-  .name = "ledTask",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityLow,
+        .name = "ledTask",
+        .stack_size = 128 * 4,
+        .priority = (osPriority_t) osPriorityLow,
 };
 /* Definitions for tickTask */
 osThreadId_t tickTaskHandle;
 const osThreadAttr_t tickTask_attributes = {
-  .name = "tickTask",
-  .stack_size = 196 * 4,
-  .priority = (osPriority_t) osPriorityLow,
+        .name = "tickTask",
+        .stack_size = 196 * 4,
+        .priority = (osPriority_t) osPriorityLow,
 };
 /* Definitions for statsTask */
 osThreadId_t statsTaskHandle;
 const osThreadAttr_t statsTask_attributes = {
-  .name = "statsTask",
-  .stack_size = 256 * 4,
-  .priority = (osPriority_t) osPriorityLow,
+        .name = "statsTask",
+        .stack_size = 256 * 4,
+        .priority = (osPriority_t) osPriorityLow,
+};
+/* Definitions for canHandler1 */
+osThreadId_t canHandler1Handle;
+const osThreadAttr_t canHandler1_attributes = {
+        .name = "canHandler1",
+        .stack_size = 128 * 4,
+        .priority = (osPriority_t) osPriorityLow,
+};
+/* Definitions for canHandler2 */
+osThreadId_t canHandler2Handle;
+const osThreadAttr_t canHandler2_attributes = {
+        .name = "canHandler2",
+        .stack_size = 128 * 4,
+        .priority = (osPriority_t) osPriorityLow,
 };
 /* Definitions for tickQueue */
 osMessageQueueId_t tickQueueHandle;
 const osMessageQueueAttr_t tickQueue_attributes = {
-  .name = "tickQueue"
+        .name = "tickQueue"
+};
+/* Definitions for canMessage */
+osMessageQueueId_t canMessageHandle;
+const osMessageQueueAttr_t canMessage_attributes = {
+        .name = "canMessage"
 };
 /* Definitions for ledMutex */
 osMutexId_t ledMutexHandle;
 const osMutexAttr_t ledMutex_attributes = {
-  .name = "ledMutex"
+        .name = "ledMutex"
 };
 /* Definitions for printMutex */
 osMutexId_t printMutexHandle;
 const osMutexAttr_t printMutex_attributes = {
-  .name = "printMutex"
+        .name = "printMutex"
 };
 /* Definitions for ledSemaphore */
 osSemaphoreId_t ledSemaphoreHandle;
 const osSemaphoreAttr_t ledSemaphore_attributes = {
-  .name = "ledSemaphore"
+        .name = "ledSemaphore"
+};
+/* Definitions for canReceiveEvent */
+osEventFlagsId_t canReceiveEventHandle;
+const osEventFlagsAttr_t canReceiveEvent_attributes = {
+        .name = "canReceiveEvent"
 };
 /* USER CODE BEGIN PV */
 
@@ -119,6 +143,8 @@ void StartDefaultTask(void *argument);
 void StartLedTask(void *argument);
 void StartTickTask(void *argument);
 void StartStatsTask(void *argument);
+void startCanHandler1(void *argument);
+void startCanHandler2(void *argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -153,326 +179,338 @@ unsigned long getRunTimeCounterValue(void) {
 /* USER CODE END 0 */
 
 /**
-  * @brief  The application entry point.
-  * @retval int
-  */
+ * @brief  The application entry point.
+ * @retval int
+ */
 int main(void)
 {
 
-  /* USER CODE BEGIN 1 */
+    /* USER CODE BEGIN 1 */
 
-  /* USER CODE END 1 */
+    /* USER CODE END 1 */
 
-  /* MCU Configuration--------------------------------------------------------*/
+    /* MCU Configuration--------------------------------------------------------*/
 
-  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
-  HAL_Init();
+    /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
+    HAL_Init();
 
-  /* USER CODE BEGIN Init */
+    /* USER CODE BEGIN Init */
 
-  /* USER CODE END Init */
+    /* USER CODE END Init */
 
-  /* Configure the system clock */
-  SystemClock_Config();
+    /* Configure the system clock */
+    SystemClock_Config();
 
-  /* USER CODE BEGIN SysInit */
+    /* USER CODE BEGIN SysInit */
 
-  /* USER CODE END SysInit */
+    /* USER CODE END SysInit */
 
-  /* Initialize all configured peripherals */
-  MX_GPIO_Init();
-  MX_USART1_UART_Init();
-  MX_TIM13_Init();
-  MX_CAN1_Init();
-  MX_CAN2_Init();
-  /* USER CODE BEGIN 2 */
+    /* Initialize all configured peripherals */
+    MX_GPIO_Init();
+    MX_USART1_UART_Init();
+    MX_TIM13_Init();
+    MX_CAN1_Init();
+    MX_CAN2_Init();
+    /* USER CODE BEGIN 2 */
 
     printf("\n\n\n--------\nStarting\n");
 
-  /* USER CODE END 2 */
+    /* USER CODE END 2 */
 
-  /* Init scheduler */
-  osKernelInitialize();
-  /* Create the mutex(es) */
-  /* creation of ledMutex */
-  ledMutexHandle = osMutexNew(&ledMutex_attributes);
+    /* Init scheduler */
+    osKernelInitialize();
+    /* Create the mutex(es) */
+    /* creation of ledMutex */
+    ledMutexHandle = osMutexNew(&ledMutex_attributes);
 
-  /* creation of printMutex */
-  printMutexHandle = osMutexNew(&printMutex_attributes);
+    /* creation of printMutex */
+    printMutexHandle = osMutexNew(&printMutex_attributes);
 
-  /* USER CODE BEGIN RTOS_MUTEX */
+    /* USER CODE BEGIN RTOS_MUTEX */
     /* add mutexes, ... */
-  /* USER CODE END RTOS_MUTEX */
+    /* USER CODE END RTOS_MUTEX */
 
-  /* Create the semaphores(s) */
-  /* creation of ledSemaphore */
-  ledSemaphoreHandle = osSemaphoreNew(1, 1, &ledSemaphore_attributes);
+    /* Create the semaphores(s) */
+    /* creation of ledSemaphore */
+    ledSemaphoreHandle = osSemaphoreNew(1, 1, &ledSemaphore_attributes);
 
-  /* USER CODE BEGIN RTOS_SEMAPHORES */
+    /* USER CODE BEGIN RTOS_SEMAPHORES */
     /* add semaphores, ... */
-  /* USER CODE END RTOS_SEMAPHORES */
+    /* USER CODE END RTOS_SEMAPHORES */
 
-  /* USER CODE BEGIN RTOS_TIMERS */
+    /* USER CODE BEGIN RTOS_TIMERS */
     /* start timers, add new ones, ... */
-  /* USER CODE END RTOS_TIMERS */
+    /* USER CODE END RTOS_TIMERS */
 
-  /* Create the queue(s) */
-  /* creation of tickQueue */
-  tickQueueHandle = osMessageQueueNew (16, sizeof(uint32_t), &tickQueue_attributes);
+    /* Create the queue(s) */
+    /* creation of tickQueue */
+    tickQueueHandle = osMessageQueueNew(16, sizeof(uint32_t), &tickQueue_attributes);
 
-  /* USER CODE BEGIN RTOS_QUEUES */
+    /* creation of canMessage */
+    canMessageHandle = osMessageQueueNew(16, sizeof(uint32_t), &canMessage_attributes);
+
+    /* USER CODE BEGIN RTOS_QUEUES */
     /* add queues, ... */
-  /* USER CODE END RTOS_QUEUES */
+    /* USER CODE END RTOS_QUEUES */
 
-  /* Create the thread(s) */
-  /* creation of defaultTask */
-  defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
+    /* Create the thread(s) */
+    /* creation of defaultTask */
+    defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
 
-  /* creation of ledTask */
-  ledTaskHandle = osThreadNew(StartLedTask, NULL, &ledTask_attributes);
+    /* creation of ledTask */
+    ledTaskHandle = osThreadNew(StartLedTask, NULL, &ledTask_attributes);
 
-  /* creation of tickTask */
-  tickTaskHandle = osThreadNew(StartTickTask, NULL, &tickTask_attributes);
+    /* creation of tickTask */
+    tickTaskHandle = osThreadNew(StartTickTask, NULL, &tickTask_attributes);
 
-  /* creation of statsTask */
-  statsTaskHandle = osThreadNew(StartStatsTask, NULL, &statsTask_attributes);
+    /* creation of statsTask */
+    statsTaskHandle = osThreadNew(StartStatsTask, NULL, &statsTask_attributes);
 
-  /* USER CODE BEGIN RTOS_THREADS */
+    /* creation of canHandler1 */
+    canHandler1Handle = osThreadNew(startCanHandler1, NULL, &canHandler1_attributes);
+
+    /* creation of canHandler2 */
+    canHandler2Handle = osThreadNew(startCanHandler2, NULL, &canHandler2_attributes);
+
+    /* USER CODE BEGIN RTOS_THREADS */
     /* add threads, ... */
-  /* USER CODE END RTOS_THREADS */
+    /* USER CODE END RTOS_THREADS */
 
-  /* USER CODE BEGIN RTOS_EVENTS */
+    /* creation of canReceiveEvent */
+    canReceiveEventHandle = osEventFlagsNew(&canReceiveEvent_attributes);
+
+    /* USER CODE BEGIN RTOS_EVENTS */
     /* add events, ... */
-  /* USER CODE END RTOS_EVENTS */
+    /* USER CODE END RTOS_EVENTS */
 
-  /* Start scheduler */
-  osKernelStart();
+    /* Start scheduler */
+    osKernelStart();
 
-  /* We should never get here as control is now taken by the scheduler */
+    /* We should never get here as control is now taken by the scheduler */
 
-  /* Infinite loop */
-  /* USER CODE BEGIN WHILE */
+    /* Infinite loop */
+    /* USER CODE BEGIN WHILE */
     while (1)
     {
-    /* USER CODE END WHILE */
+        /* USER CODE END WHILE */
 
-    /* USER CODE BEGIN 3 */
+        /* USER CODE BEGIN 3 */
     }
-  /* USER CODE END 3 */
+    /* USER CODE END 3 */
 }
 
 /**
-  * @brief System Clock Configuration
-  * @retval None
-  */
+ * @brief System Clock Configuration
+ * @retval None
+ */
 void SystemClock_Config(void)
 {
-  RCC_OscInitTypeDef RCC_OscInitStruct = {0};
-  RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+    RCC_OscInitTypeDef RCC_OscInitStruct = { 0 };
+    RCC_ClkInitTypeDef RCC_ClkInitStruct = { 0 };
 
-  /** Configure the main internal regulator output voltage
-  */
-  __HAL_RCC_PWR_CLK_ENABLE();
-  __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
+    /** Configure the main internal regulator output voltage
+     */
+    __HAL_RCC_PWR_CLK_ENABLE();
+    __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
 
-  /** Initializes the RCC Oscillators according to the specified parameters
-  * in the RCC_OscInitTypeDef structure.
-  */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
-  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
-  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
-  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
-  RCC_OscInitStruct.PLL.PLLM = 8;
-  RCC_OscInitStruct.PLL.PLLN = 168;
-  RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
-  RCC_OscInitStruct.PLL.PLLQ = 4;
-  if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
-  {
-    Error_Handler();
-  }
+    /** Initializes the RCC Oscillators according to the specified parameters
+     * in the RCC_OscInitTypeDef structure.
+     */
+    RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+    RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+    RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+    RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
+    RCC_OscInitStruct.PLL.PLLM = 8;
+    RCC_OscInitStruct.PLL.PLLN = 168;
+    RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
+    RCC_OscInitStruct.PLL.PLLQ = 4;
+    if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
+            {
+        Error_Handler();
+    }
 
-  /** Initializes the CPU, AHB and APB buses clocks
-  */
-  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
-                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
-  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
-  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
-  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
-  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
+    /** Initializes the CPU, AHB and APB buses clocks
+     */
+    RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK
+            | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
+    RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+    RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+    RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
+    RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_5) != HAL_OK)
-  {
-    Error_Handler();
-  }
+    if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_5) != HAL_OK)
+            {
+        Error_Handler();
+    }
 }
 
 /**
-  * @brief CAN1 Initialization Function
-  * @param None
-  * @retval None
-  */
+ * @brief CAN1 Initialization Function
+ * @param None
+ * @retval None
+ */
 static void MX_CAN1_Init(void)
 {
 
-  /* USER CODE BEGIN CAN1_Init 0 */
+    /* USER CODE BEGIN CAN1_Init 0 */
 
-  /* USER CODE END CAN1_Init 0 */
+    /* USER CODE END CAN1_Init 0 */
 
-  /* USER CODE BEGIN CAN1_Init 1 */
+    /* USER CODE BEGIN CAN1_Init 1 */
 
-  /* USER CODE END CAN1_Init 1 */
-  hcan1.Instance = CAN1;
-  hcan1.Init.Prescaler = 16;
-  hcan1.Init.Mode = CAN_MODE_NORMAL;
-  hcan1.Init.SyncJumpWidth = CAN_SJW_1TQ;
-  hcan1.Init.TimeSeg1 = CAN_BS1_1TQ;
-  hcan1.Init.TimeSeg2 = CAN_BS2_1TQ;
-  hcan1.Init.TimeTriggeredMode = DISABLE;
-  hcan1.Init.AutoBusOff = DISABLE;
-  hcan1.Init.AutoWakeUp = DISABLE;
-  hcan1.Init.AutoRetransmission = DISABLE;
-  hcan1.Init.ReceiveFifoLocked = DISABLE;
-  hcan1.Init.TransmitFifoPriority = DISABLE;
-  if (HAL_CAN_Init(&hcan1) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN CAN1_Init 2 */
+    /* USER CODE END CAN1_Init 1 */
+    hcan1.Instance = CAN1;
+    hcan1.Init.Prescaler = 3;
+    hcan1.Init.Mode = CAN_MODE_NORMAL;
+    hcan1.Init.SyncJumpWidth = CAN_SJW_1TQ;
+    hcan1.Init.TimeSeg1 = CAN_BS1_11TQ;
+    hcan1.Init.TimeSeg2 = CAN_BS2_2TQ;
+    hcan1.Init.TimeTriggeredMode = DISABLE;
+    hcan1.Init.AutoBusOff = DISABLE;
+    hcan1.Init.AutoWakeUp = DISABLE;
+    hcan1.Init.AutoRetransmission = DISABLE;
+    hcan1.Init.ReceiveFifoLocked = DISABLE;
+    hcan1.Init.TransmitFifoPriority = DISABLE;
+    if (HAL_CAN_Init(&hcan1) != HAL_OK)
+            {
+        Error_Handler();
+    }
+    /* USER CODE BEGIN CAN1_Init 2 */
 
-  /* USER CODE END CAN1_Init 2 */
+    /* USER CODE END CAN1_Init 2 */
 
 }
 
 /**
-  * @brief CAN2 Initialization Function
-  * @param None
-  * @retval None
-  */
+ * @brief CAN2 Initialization Function
+ * @param None
+ * @retval None
+ */
 static void MX_CAN2_Init(void)
 {
 
-  /* USER CODE BEGIN CAN2_Init 0 */
+    /* USER CODE BEGIN CAN2_Init 0 */
 
-  /* USER CODE END CAN2_Init 0 */
+    /* USER CODE END CAN2_Init 0 */
 
-  /* USER CODE BEGIN CAN2_Init 1 */
+    /* USER CODE BEGIN CAN2_Init 1 */
 
-  /* USER CODE END CAN2_Init 1 */
-  hcan2.Instance = CAN2;
-  hcan2.Init.Prescaler = 16;
-  hcan2.Init.Mode = CAN_MODE_NORMAL;
-  hcan2.Init.SyncJumpWidth = CAN_SJW_1TQ;
-  hcan2.Init.TimeSeg1 = CAN_BS1_1TQ;
-  hcan2.Init.TimeSeg2 = CAN_BS2_1TQ;
-  hcan2.Init.TimeTriggeredMode = DISABLE;
-  hcan2.Init.AutoBusOff = DISABLE;
-  hcan2.Init.AutoWakeUp = DISABLE;
-  hcan2.Init.AutoRetransmission = DISABLE;
-  hcan2.Init.ReceiveFifoLocked = DISABLE;
-  hcan2.Init.TransmitFifoPriority = DISABLE;
-  if (HAL_CAN_Init(&hcan2) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN CAN2_Init 2 */
+    /* USER CODE END CAN2_Init 1 */
+    hcan2.Instance = CAN2;
+    hcan2.Init.Prescaler = 3;
+    hcan2.Init.Mode = CAN_MODE_NORMAL;
+    hcan2.Init.SyncJumpWidth = CAN_SJW_1TQ;
+    hcan2.Init.TimeSeg1 = CAN_BS1_11TQ;
+    hcan2.Init.TimeSeg2 = CAN_BS2_2TQ;
+    hcan2.Init.TimeTriggeredMode = DISABLE;
+    hcan2.Init.AutoBusOff = DISABLE;
+    hcan2.Init.AutoWakeUp = DISABLE;
+    hcan2.Init.AutoRetransmission = DISABLE;
+    hcan2.Init.ReceiveFifoLocked = DISABLE;
+    hcan2.Init.TransmitFifoPriority = DISABLE;
+    if (HAL_CAN_Init(&hcan2) != HAL_OK)
+            {
+        Error_Handler();
+    }
+    /* USER CODE BEGIN CAN2_Init 2 */
 
-  /* USER CODE END CAN2_Init 2 */
+    /* USER CODE END CAN2_Init 2 */
 
 }
 
 /**
-  * @brief TIM13 Initialization Function
-  * @param None
-  * @retval None
-  */
+ * @brief TIM13 Initialization Function
+ * @param None
+ * @retval None
+ */
 static void MX_TIM13_Init(void)
 {
 
-  /* USER CODE BEGIN TIM13_Init 0 */
+    /* USER CODE BEGIN TIM13_Init 0 */
 
-  /* USER CODE END TIM13_Init 0 */
+    /* USER CODE END TIM13_Init 0 */
 
-  /* USER CODE BEGIN TIM13_Init 1 */
+    /* USER CODE BEGIN TIM13_Init 1 */
 
-  /* USER CODE END TIM13_Init 1 */
-  htim13.Instance = TIM13;
-  htim13.Init.Prescaler = 0;
-  htim13.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim13.Init.Period = 840 - 1;
-  htim13.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-  htim13.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-  if (HAL_TIM_Base_Init(&htim13) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN TIM13_Init 2 */
+    /* USER CODE END TIM13_Init 1 */
+    htim13.Instance = TIM13;
+    htim13.Init.Prescaler = 0;
+    htim13.Init.CounterMode = TIM_COUNTERMODE_UP;
+    htim13.Init.Period = 840 - 1;
+    htim13.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+    htim13.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+    if (HAL_TIM_Base_Init(&htim13) != HAL_OK)
+            {
+        Error_Handler();
+    }
+    /* USER CODE BEGIN TIM13_Init 2 */
 
-  /* USER CODE END TIM13_Init 2 */
+    /* USER CODE END TIM13_Init 2 */
 
 }
 
 /**
-  * @brief USART1 Initialization Function
-  * @param None
-  * @retval None
-  */
+ * @brief USART1 Initialization Function
+ * @param None
+ * @retval None
+ */
 static void MX_USART1_UART_Init(void)
 {
 
-  /* USER CODE BEGIN USART1_Init 0 */
+    /* USER CODE BEGIN USART1_Init 0 */
 
-  /* USER CODE END USART1_Init 0 */
+    /* USER CODE END USART1_Init 0 */
 
-  /* USER CODE BEGIN USART1_Init 1 */
+    /* USER CODE BEGIN USART1_Init 1 */
 
-  /* USER CODE END USART1_Init 1 */
-  huart1.Instance = USART1;
-  huart1.Init.BaudRate = 2000000;
-  huart1.Init.WordLength = UART_WORDLENGTH_8B;
-  huart1.Init.StopBits = UART_STOPBITS_1;
-  huart1.Init.Parity = UART_PARITY_NONE;
-  huart1.Init.Mode = UART_MODE_TX_RX;
-  huart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
-  huart1.Init.OverSampling = UART_OVERSAMPLING_16;
-  if (HAL_UART_Init(&huart1) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN USART1_Init 2 */
+    /* USER CODE END USART1_Init 1 */
+    huart1.Instance = USART1;
+    huart1.Init.BaudRate = 2000000;
+    huart1.Init.WordLength = UART_WORDLENGTH_8B;
+    huart1.Init.StopBits = UART_STOPBITS_1;
+    huart1.Init.Parity = UART_PARITY_NONE;
+    huart1.Init.Mode = UART_MODE_TX_RX;
+    huart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+    huart1.Init.OverSampling = UART_OVERSAMPLING_16;
+    if (HAL_UART_Init(&huart1) != HAL_OK)
+            {
+        Error_Handler();
+    }
+    /* USER CODE BEGIN USART1_Init 2 */
 
-  /* USER CODE END USART1_Init 2 */
+    /* USER CODE END USART1_Init 2 */
 
 }
 
 /**
-  * @brief GPIO Initialization Function
-  * @param None
-  * @retval None
-  */
+ * @brief GPIO Initialization Function
+ * @param None
+ * @retval None
+ */
 static void MX_GPIO_Init(void)
 {
-  GPIO_InitTypeDef GPIO_InitStruct = {0};
-/* USER CODE BEGIN MX_GPIO_Init_1 */
-/* USER CODE END MX_GPIO_Init_1 */
+    GPIO_InitTypeDef GPIO_InitStruct = { 0 };
+    /* USER CODE BEGIN MX_GPIO_Init_1 */
+    /* USER CODE END MX_GPIO_Init_1 */
 
-  /* GPIO Ports Clock Enable */
-  __HAL_RCC_GPIOC_CLK_ENABLE();
-  __HAL_RCC_GPIOH_CLK_ENABLE();
-  __HAL_RCC_GPIOB_CLK_ENABLE();
-  __HAL_RCC_GPIOA_CLK_ENABLE();
+    /* GPIO Ports Clock Enable */
+    __HAL_RCC_GPIOC_CLK_ENABLE();
+    __HAL_RCC_GPIOH_CLK_ENABLE();
+    __HAL_RCC_GPIOB_CLK_ENABLE();
+    __HAL_RCC_GPIOA_CLK_ENABLE();
 
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);
+    /*Configure GPIO pin Output Level */
+    HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);
 
-  /*Configure GPIO pin : LED_Pin */
-  GPIO_InitStruct.Pin = LED_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(LED_GPIO_Port, &GPIO_InitStruct);
+    /*Configure GPIO pin : LED_Pin */
+    GPIO_InitStruct.Pin = LED_Pin;
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+    HAL_GPIO_Init(LED_GPIO_Port, &GPIO_InitStruct);
 
-/* USER CODE BEGIN MX_GPIO_Init_2 */
-/* USER CODE END MX_GPIO_Init_2 */
+    /* USER CODE BEGIN MX_GPIO_Init_2 */
+    /* USER CODE END MX_GPIO_Init_2 */
 }
 
 /* USER CODE BEGIN 4 */
@@ -488,7 +526,7 @@ static void MX_GPIO_Init(void)
 /* USER CODE END Header_StartDefaultTask */
 void StartDefaultTask(void *argument)
 {
-  /* USER CODE BEGIN 5 */
+    /* USER CODE BEGIN 5 */
 
     uint32_t loop_cnt = 0;
 
@@ -513,7 +551,7 @@ void StartDefaultTask(void *argument)
 
         ++loop_cnt;
     }
-  /* USER CODE END 5 */
+    /* USER CODE END 5 */
 }
 
 /* USER CODE BEGIN Header_StartLedTask */
@@ -525,7 +563,7 @@ void StartDefaultTask(void *argument)
 /* USER CODE END Header_StartLedTask */
 void StartLedTask(void *argument)
 {
-  /* USER CODE BEGIN StartLedTask */
+    /* USER CODE BEGIN StartLedTask */
 
     osStatus_t ret;
 
@@ -545,7 +583,7 @@ void StartLedTask(void *argument)
         }
 
     }
-  /* USER CODE END StartLedTask */
+    /* USER CODE END StartLedTask */
 }
 
 /* USER CODE BEGIN Header_StartTickTask */
@@ -557,7 +595,7 @@ void StartLedTask(void *argument)
 /* USER CODE END Header_StartTickTask */
 void StartTickTask(void *argument)
 {
-  /* USER CODE BEGIN StartTickTask */
+    /* USER CODE BEGIN StartTickTask */
 
     osStatus_t ret;
 
@@ -580,7 +618,7 @@ void StartTickTask(void *argument)
 
     }
 
-  /* USER CODE END StartTickTask */
+    /* USER CODE END StartTickTask */
 }
 
 /* USER CODE BEGIN Header_StartStatsTask */
@@ -592,7 +630,7 @@ void StartTickTask(void *argument)
 /* USER CODE END Header_StartStatsTask */
 void StartStatsTask(void *argument)
 {
-  /* USER CODE BEGIN StartStatsTask */
+    /* USER CODE BEGIN StartStatsTask */
 
     TaskStatus_t *pxTaskStatusArray;
     volatile UBaseType_t uxArraySize, x;
@@ -644,43 +682,80 @@ void StartStatsTask(void *argument)
 
     }
 
-  /* USER CODE END StartStatsTask */
+    /* USER CODE END StartStatsTask */
+}
+
+/* USER CODE BEGIN Header_startCanHandler1 */
+/**
+ * @brief Function implementing the canHandler1 thread.
+ * @param argument: Not used
+ * @retval None
+ */
+/* USER CODE END Header_startCanHandler1 */
+void startCanHandler1(void *argument)
+{
+    /* USER CODE BEGIN startCanHandler1 */
+    /* Infinite loop */
+    for (;;) {
+
+        ret = osMessagePeek(canQueueHandle);
+        ret = osMessageQueueGet(tickQueueHandle, &tick, NULL, osWaitForever);
+    }
+    /* USER CODE END startCanHandler1 */
+}
+
+/* USER CODE BEGIN Header_startCanHandler2 */
+/**
+ * @brief Function implementing the canHandler2 thread.
+ * @param argument: Not used
+ * @retval None
+ */
+/* USER CODE END Header_startCanHandler2 */
+void startCanHandler2(void *argument)
+{
+    /* USER CODE BEGIN startCanHandler2 */
+    /* Infinite loop */
+    for (;;)
+            {
+        osDelay(1);
+    }
+    /* USER CODE END startCanHandler2 */
 }
 
 /**
-  * @brief  Period elapsed callback in non blocking mode
-  * @note   This function is called  when TIM14 interrupt took place, inside
-  * HAL_TIM_IRQHandler(). It makes a direct call to HAL_IncTick() to increment
-  * a global variable "uwTick" used as application time base.
-  * @param  htim : TIM handle
-  * @retval None
-  */
+ * @brief  Period elapsed callback in non blocking mode
+ * @note   This function is called  when TIM14 interrupt took place, inside
+ * HAL_TIM_IRQHandler(). It makes a direct call to HAL_IncTick() to increment
+ * a global variable "uwTick" used as application time base.
+ * @param  htim : TIM handle
+ * @retval None
+ */
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
-  /* USER CODE BEGIN Callback 0 */
+    /* USER CODE BEGIN Callback 0 */
 
-  /* USER CODE END Callback 0 */
-  if (htim->Instance == TIM14) {
-    HAL_IncTick();
-  }
-  /* USER CODE BEGIN Callback 1 */
+    /* USER CODE END Callback 0 */
+    if (htim->Instance == TIM14) {
+        HAL_IncTick();
+    }
+    /* USER CODE BEGIN Callback 1 */
 
-  /* USER CODE END Callback 1 */
+    /* USER CODE END Callback 1 */
 }
 
 /**
-  * @brief  This function is executed in case of error occurrence.
-  * @retval None
-  */
+ * @brief  This function is executed in case of error occurrence.
+ * @retval None
+ */
 void Error_Handler(void)
 {
-  /* USER CODE BEGIN Error_Handler_Debug */
+    /* USER CODE BEGIN Error_Handler_Debug */
     /* User can add his own implementation to report the HAL error return state */
     __disable_irq();
     while (1)
     {
     }
-  /* USER CODE END Error_Handler_Debug */
+    /* USER CODE END Error_Handler_Debug */
 }
 
 #ifdef  USE_FULL_ASSERT
