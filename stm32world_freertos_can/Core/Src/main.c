@@ -18,11 +18,12 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "cmsis_os2.h"
+#include "cmsis_os.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
+#include "freertos_extras.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -90,6 +91,13 @@ const osThreadAttr_t canHandler2_attributes = {
         .stack_size = 128 * 4,
         .priority = (osPriority_t) osPriorityLow,
 };
+/* Definitions for canClean */
+osThreadId_t canCleanHandle;
+const osThreadAttr_t canClean_attributes = {
+        .name = "canClean",
+        .stack_size = 128 * 4,
+        .priority = (osPriority_t) osPriorityLow,
+};
 /* Definitions for tickQueue */
 osMessageQueueId_t tickQueueHandle;
 const osMessageQueueAttr_t tickQueue_attributes = {
@@ -115,10 +123,10 @@ osSemaphoreId_t ledSemaphoreHandle;
 const osSemaphoreAttr_t ledSemaphore_attributes = {
         .name = "ledSemaphore"
 };
-/* Definitions for canReceiveEvent */
-osEventFlagsId_t canReceiveEventHandle;
-const osEventFlagsAttr_t canReceiveEvent_attributes = {
-        .name = "canReceiveEvent"
+/* Definitions for canHandlerEvent */
+osEventFlagsId_t canHandlerEventHandle;
+const osEventFlagsAttr_t canHandlerEvent_attributes = {
+        .name = "canHandlerEvent"
 };
 /* USER CODE BEGIN PV */
 
@@ -145,6 +153,7 @@ void StartTickTask(void *argument);
 void StartStatsTask(void *argument);
 void startCanHandler1(void *argument);
 void startCanHandler2(void *argument);
+void startCanClean(void *argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -272,12 +281,15 @@ int main(void)
     /* creation of canHandler2 */
     canHandler2Handle = osThreadNew(startCanHandler2, NULL, &canHandler2_attributes);
 
+    /* creation of canClean */
+    canCleanHandle = osThreadNew(startCanClean, NULL, &canClean_attributes);
+
     /* USER CODE BEGIN RTOS_THREADS */
     /* add threads, ... */
     /* USER CODE END RTOS_THREADS */
 
-    /* creation of canReceiveEvent */
-    canReceiveEventHandle = osEventFlagsNew(&canReceiveEvent_attributes);
+    /* creation of canHandlerEvent */
+    canHandlerEventHandle = osEventFlagsNew(&canHandlerEvent_attributes);
 
     /* USER CODE BEGIN RTOS_EVENTS */
     /* add events, ... */
@@ -434,7 +446,7 @@ static void MX_TIM13_Init(void)
 
     /* USER CODE END TIM13_Init 1 */
     htim13.Instance = TIM13;
-    htim13.Init.Prescaler = 0;
+    htim13.Init.Prescaler = 10 - 1;
     htim13.Init.CounterMode = TIM_COUNTERMODE_UP;
     htim13.Init.Period = 840 - 1;
     htim13.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
@@ -547,6 +559,14 @@ void StartDefaultTask(void *argument)
 
             osSemaphoreRelease(ledSemaphoreHandle);
 
+        }
+
+        if (loop_cnt % 20 == 0) {
+            osEventFlagsSet(canHandlerEventHandle, 0b00000001);
+        }
+
+        if (loop_cnt % 40 == 0) {
+            osEventFlagsSet(canHandlerEventHandle, 0b00000010);
         }
 
         ++loop_cnt;
@@ -697,9 +717,9 @@ void startCanHandler1(void *argument)
     /* USER CODE BEGIN startCanHandler1 */
     /* Infinite loop */
     for (;;) {
-
-        ret = osMessagePeek(canQueueHandle);
-        ret = osMessageQueueGet(tickQueueHandle, &tick, NULL, osWaitForever);
+        osDelay(1);
+//        ret = osMessagePeek(canQueueHandle);
+//        ret = osMessageQueueGet(tickQueueHandle, &tick, NULL, osWaitForever);
     }
     /* USER CODE END startCanHandler1 */
 }
@@ -720,6 +740,30 @@ void startCanHandler2(void *argument)
         osDelay(1);
     }
     /* USER CODE END startCanHandler2 */
+}
+
+/* USER CODE BEGIN Header_startCanClean */
+/**
+ * @brief Function implementing the canClean thread.
+ * @param argument: Not used
+ * @retval None
+ */
+/* USER CODE END Header_startCanClean */
+void startCanClean(void *argument)
+{
+    /* USER CODE BEGIN startCanClean */
+    /* Infinite loop */
+    for (;;) {
+
+        osEventFlagsWait(canHandlerEventHandle, 0b00000011, osFlagsWaitAll, osWaitForever);
+
+        osMutexWait(printMutexHandle, osWaitForever);
+        printf("Got Event Flags\n");
+        osMutexRelease(printMutexHandle);
+
+        osEventFlagsClear(canHandlerEventHandle, 0b00000011);
+    }
+    /* USER CODE END startCanClean */
 }
 
 /**

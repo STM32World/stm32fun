@@ -105,7 +105,7 @@ inline void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 
 }
 
-static inline void do_dac(uint16_t *buffer) {
+void do_dac(uint16_t *buffer) {
     for (int i = 0; i < DMA_BUFFER_SIZE; ++i) {
         buffer[i] = OUTPUT_MID - (amplifier * (OUTPUT_MID * arm_cos_f32(angle)));
         angle += angle_change;
@@ -115,12 +115,12 @@ static inline void do_dac(uint16_t *buffer) {
     }
 }
 
-inline void HAL_DAC_ConvCpltCallbackCh1(DAC_HandleTypeDef *hdac) {
+void HAL_DAC_ConvCpltCallbackCh1(DAC_HandleTypeDef *hdac) {
     ++cb_full;
     do_dac(&dma_buffer[DMA_BUFFER_SIZE]);
 }
 
-inline void HAL_DAC_ConvHalfCpltCallbackCh1(DAC_HandleTypeDef *hdac) {
+void HAL_DAC_ConvHalfCpltCallbackCh1(DAC_HandleTypeDef *hdac) {
     ++cb_half;
     do_dac(&dma_buffer[0]);
 }
@@ -347,7 +347,7 @@ static void MX_USART1_UART_Init(void)
 
     /* USER CODE END USART1_Init 1 */
     huart1.Instance = USART1;
-    huart1.Init.BaudRate = 921600;
+    huart1.Init.BaudRate = 2000000;
     huart1.Init.WordLength = UART_WORDLENGTH_8B;
     huart1.Init.StopBits = UART_STOPBITS_1;
     huart1.Init.Parity = UART_PARITY_NONE;
