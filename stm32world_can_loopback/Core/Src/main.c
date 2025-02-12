@@ -34,6 +34,14 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 
+#define CAN_ID_0     0b10111111100
+#define CAN_ID_1     0b10111111101
+#define CAN_ID_2     0b10111111110
+#define CAN_ID_3     0b10111111111
+
+#define CAN_RX_ID    0b10111111100
+#define CAN_RX_MASK  0b11111111100
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -185,54 +193,38 @@ int main(void)
 
     CAN_FilterTypeDef canfilterconfig;
 
-//    canfilterconfig.FilterActivation = CAN_FILTER_ENABLE;
-//    canfilterconfig.FilterBank = 12;  // anything between 0 to SlaveStartFilterBank
-//    canfilterconfig.FilterFIFOAssignment = CAN_RX_FIFO0;
-//    canfilterconfig.FilterIdHigh = 0x0000;
-//    canfilterconfig.FilterIdLow = 0x0000;
-//    canfilterconfig.FilterMaskIdHigh = 0x0000; // Accept everything
-//    canfilterconfig.FilterMaskIdLow = 0x0000;
-//    canfilterconfig.FilterMode = CAN_FILTERMODE_IDMASK;
-//    //canfilterconfig.FilterMode = CAN_FILTERMODE_IDLIST;
-//    canfilterconfig.FilterScale = CAN_FILTERSCALE_32BIT;
-//    //canfilterconfig.FilterScale = CAN_FILTERSCALE_16BIT;
-//    canfilterconfig.SlaveStartFilterBank = 13;  // 13 to 27 are assigned to slave CAN (CAN 2) OR 0 to 12 are assgned to CAN1
-
     canfilterconfig.FilterActivation = CAN_FILTER_ENABLE;
-    canfilterconfig.FilterBank = 12;  // anything between 0 to SlaveStartFilterBank
+    canfilterconfig.FilterBank = 0;  // anything between 0 to SlaveStartFilterBank
     canfilterconfig.FilterFIFOAssignment = CAN_RX_FIFO0;
-    canfilterconfig.FilterIdHigh = 0x07fe << 5;
-    canfilterconfig.FilterIdLow = 0x07ff << 5;
-    canfilterconfig.FilterMaskIdHigh = 0x07fd << 5; // Accept everything
-    canfilterconfig.FilterMaskIdLow = 0x7ff << 5;
-    //canfilterconfig.FilterMode = CAN_FILTERMODE_IDMASK;
-    canfilterconfig.FilterMode = CAN_FILTERMODE_IDLIST;
+    //canfilterconfig.FilterIdHigh = 0x0000;
+    canfilterconfig.FilterIdLow = CAN_RX_ID << 5;
+    //canfilterconfig.FilterMaskIdHigh = 0x0000; // Accept everything
+    canfilterconfig.FilterMaskIdLow = CAN_RX_MASK << 5;
+    canfilterconfig.FilterMode = CAN_FILTERMODE_IDMASK;
     canfilterconfig.FilterScale = CAN_FILTERSCALE_16BIT;
-    //canfilterconfig.FilterScale = CAN_FILTERSCALE_16BIT;
     canfilterconfig.SlaveStartFilterBank = 13;  // 13 to 27 are assigned to slave CAN (CAN 2) OR 0 to 12 are assgned to CAN1
-
 
     HAL_CAN_ConfigFilter(&hcan1, &canfilterconfig);
 
     HAL_CAN_Start(&hcan1);
 
     HAL_CAN_ActivateNotification(
-        &hcan1,
-        CAN_IT_TX_MAILBOX_EMPTY |
-        CAN_IT_RX_FIFO0_MSG_PENDING |
-        CAN_IT_RX_FIFO0_FULL |
-        CAN_IT_RX_FIFO0_OVERRUN |
-        CAN_IT_RX_FIFO1_MSG_PENDING |
-        CAN_IT_RX_FIFO1_FULL |
-        CAN_IT_RX_FIFO1_OVERRUN |
-        //CAN_IT_WAKEUP |
-        CAN_IT_SLEEP_ACK |
-        CAN_IT_ERROR_WARNING |
-        CAN_IT_ERROR_PASSIVE |
-        CAN_IT_BUSOFF |
-        CAN_IT_LAST_ERROR_CODE |
-        CAN_IT_ERROR
-    );
+            &hcan1,
+            CAN_IT_TX_MAILBOX_EMPTY |
+            CAN_IT_RX_FIFO0_MSG_PENDING |
+            CAN_IT_RX_FIFO0_FULL |
+            CAN_IT_RX_FIFO0_OVERRUN |
+            CAN_IT_RX_FIFO1_MSG_PENDING |
+            CAN_IT_RX_FIFO1_FULL |
+            CAN_IT_RX_FIFO1_OVERRUN |
+            //CAN_IT_WAKEUP |
+                    CAN_IT_SLEEP_ACK |
+                    CAN_IT_ERROR_WARNING |
+                    CAN_IT_ERROR_PASSIVE |
+                    CAN_IT_BUSOFF |
+                    CAN_IT_LAST_ERROR_CODE |
+                    CAN_IT_ERROR
+            );
 
     /* USER CODE END 2 */
 
@@ -244,6 +236,8 @@ int main(void)
     while (1) {
 
         now = uwTick;
+
+        uint32_t clock_tx = now / 1000;
 
         if (now >= next_blink) {
             HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
@@ -262,21 +256,18 @@ int main(void)
             TxHeader.RTR = CAN_RTR_REMOTE;
             TxHeader.IDE = CAN_ID_STD;
             TxHeader.RTR = CAN_RTR_REMOTE;
-            TxHeader.StdId = 0x7ff;
+            TxHeader.StdId = CAN_ID_3;
 
-            if (HAL_CAN_AddTxMessage(&hcan1, &TxHeader, (uint8_t *)&now, &TxMailbox0) != HAL_OK)
-            {
+            if (HAL_CAN_AddTxMessage(&hcan1, &TxHeader, NULL, &TxMailbox0) != HAL_OK) {
                 Error_Handler();
             }
 
             TxHeader.DLC = 4;
-            //TxHeader.ExtId = 0xffff;
             TxHeader.IDE = CAN_ID_STD;
             TxHeader.RTR = CAN_RTR_DATA;
-            TxHeader.StdId = 0x7fe;
+            TxHeader.StdId = CAN_ID_0;
 
-            if (HAL_CAN_AddTxMessage(&hcan1, &TxHeader, (uint8_t *)&now, &TxMailbox1) != HAL_OK)
-            {
+            if (HAL_CAN_AddTxMessage(&hcan1, &TxHeader, (uint8_t*) &clock_tx, &TxMailbox1) != HAL_OK) {
                 Error_Handler();
             }
 
@@ -286,19 +277,16 @@ int main(void)
         if (now >= next_tx1) {
 
             TxHeader.DLC = 4;
-            //TxHeader.ExtId = 0xffff;
             TxHeader.IDE = CAN_ID_STD;
             TxHeader.RTR = CAN_RTR_DATA;
-            TxHeader.StdId = 0x7fd;
+            TxHeader.StdId = CAN_ID_1;
 
-            if (HAL_CAN_AddTxMessage(&hcan1, &TxHeader, (uint8_t *)&now, &TxMailbox0) != HAL_OK)
-            {
+            if (HAL_CAN_AddTxMessage(&hcan1, &TxHeader, (uint8_t*) &clock_tx, &TxMailbox0) != HAL_OK) {
                 Error_Handler();
             }
 
             next_tx1 = now + 10000;
         }
-
 
         ++loop_cnt;
 
@@ -373,8 +361,8 @@ static void MX_CAN1_Init(void)
     hcan1.Init.Prescaler = 3;
     hcan1.Init.Mode = CAN_MODE_LOOPBACK;
     hcan1.Init.SyncJumpWidth = CAN_SJW_1TQ;
-    hcan1.Init.TimeSeg1 = CAN_BS1_11TQ;
-    hcan1.Init.TimeSeg2 = CAN_BS2_2TQ;
+    hcan1.Init.TimeSeg1 = CAN_BS1_7TQ;
+    hcan1.Init.TimeSeg2 = CAN_BS2_6TQ;
     hcan1.Init.TimeTriggeredMode = DISABLE;
     hcan1.Init.AutoBusOff = DISABLE;
     hcan1.Init.AutoWakeUp = DISABLE;
