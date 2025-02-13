@@ -34,13 +34,16 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 
+// Example filter
+#define CAN_RX_ID    0b10111111100
+#define CAN_RX_MASK  0b11111111100
+
+// Our example IDs
 #define CAN_ID_0     0b10111111100
 #define CAN_ID_1     0b10111111101
 #define CAN_ID_2     0b10111111110
-#define CAN_ID_3     0b10111111111
-
-#define CAN_RX_ID    0b10111111100
-#define CAN_RX_MASK  0b11111111100
+//#define CAN_ID_3     0b10101111111 // Intended
+#define CAN_ID_3     0b10101111111   // Wrong - should NOT match our filter
 
 /* USER CODE END PD */
 
@@ -189,20 +192,19 @@ int main(void)
 
     printf("\n\n\n--------\nStarting\n");
 
-    printf("Configuring CAN filter\n");
-
     CAN_FilterTypeDef canfilterconfig;
 
     canfilterconfig.FilterActivation = CAN_FILTER_ENABLE;
     canfilterconfig.FilterBank = 0;  // anything between 0 to SlaveStartFilterBank
+    canfilterconfig.SlaveStartFilterBank = 13;  // 13 to 27 are assigned to slave CAN (CAN 2) OR 0 to 12 are assgned to CAN1
     canfilterconfig.FilterFIFOAssignment = CAN_RX_FIFO0;
     //canfilterconfig.FilterIdHigh = 0x0000;
     canfilterconfig.FilterIdLow = CAN_RX_ID << 5;
     //canfilterconfig.FilterMaskIdHigh = 0x0000; // Accept everything
     canfilterconfig.FilterMaskIdLow = CAN_RX_MASK << 5;
+    //canfilterconfig.FilterMaskIdLow = 0x0000;
     canfilterconfig.FilterMode = CAN_FILTERMODE_IDMASK;
     canfilterconfig.FilterScale = CAN_FILTERSCALE_16BIT;
-    canfilterconfig.SlaveStartFilterBank = 13;  // 13 to 27 are assigned to slave CAN (CAN 2) OR 0 to 12 are assgned to CAN1
 
     HAL_CAN_ConfigFilter(&hcan1, &canfilterconfig);
 
@@ -217,13 +219,13 @@ int main(void)
             CAN_IT_RX_FIFO1_MSG_PENDING |
             CAN_IT_RX_FIFO1_FULL |
             CAN_IT_RX_FIFO1_OVERRUN |
-            //CAN_IT_WAKEUP |
-                    CAN_IT_SLEEP_ACK |
-                    CAN_IT_ERROR_WARNING |
-                    CAN_IT_ERROR_PASSIVE |
-                    CAN_IT_BUSOFF |
-                    CAN_IT_LAST_ERROR_CODE |
-                    CAN_IT_ERROR
+            CAN_IT_WAKEUP |
+            CAN_IT_SLEEP_ACK |
+            CAN_IT_ERROR_WARNING |
+            CAN_IT_ERROR_PASSIVE |
+            CAN_IT_BUSOFF |
+            CAN_IT_LAST_ERROR_CODE |
+            CAN_IT_ERROR
             );
 
     /* USER CODE END 2 */
