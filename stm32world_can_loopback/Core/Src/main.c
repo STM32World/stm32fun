@@ -39,11 +39,11 @@
 #define CAN_RX_MASK  0b11111111100
 
 // Our example IDs
-#define CAN_ID_0     0b10111111100
-#define CAN_ID_1     0b10111111101
-#define CAN_ID_2     0b10111111110
-//#define CAN_ID_3     0b10101111111 // Intended
-#define CAN_ID_3     0b10101111111   // Wrong - should NOT match our filter
+#define CAN_ID_0     0b10111111100   // 0x5fc - 1532
+#define CAN_ID_1     0b10111111101   // 0x5fd - 1533
+#define CAN_ID_2     0b10111111110   // 0x5fe - 1534
+//#define CAN_ID_3     0b10101111111 // 0x5ff - 1535 - Intended
+#define CAN_ID_3     0b10101111111   // 0x57f - 1407 - Wrong - should NOT match our filter
 
 /* USER CODE END PD */
 
@@ -194,16 +194,26 @@ int main(void)
 
     CAN_FilterTypeDef canfilterconfig;
 
+//    canfilterconfig.FilterActivation = CAN_FILTER_ENABLE;
+//    canfilterconfig.FilterBank = 0;  // anything between 0 to SlaveStartFilterBank
+//    canfilterconfig.SlaveStartFilterBank = 13;  // 13 to 27 are assigned to slave CAN (CAN 2) OR 0 to 12 are assgned to CAN1
+//    canfilterconfig.FilterFIFOAssignment = CAN_RX_FIFO0;
+//    canfilterconfig.FilterIdLow = CAN_RX_ID << 5;
+//    //canfilterconfig.FilterIdHigh = 0x0000;     // Will match everything if the mask is 0x0000
+//    canfilterconfig.FilterMaskIdLow = CAN_RX_MASK << 5;
+//    //canfilterconfig.FilterMaskIdHigh = 0x0000; // Accept everything
+//    canfilterconfig.FilterMode = CAN_FILTERMODE_IDMASK;
+//    canfilterconfig.FilterScale = CAN_FILTERSCALE_16BIT;
+
     canfilterconfig.FilterActivation = CAN_FILTER_ENABLE;
     canfilterconfig.FilterBank = 0;  // anything between 0 to SlaveStartFilterBank
     canfilterconfig.SlaveStartFilterBank = 13;  // 13 to 27 are assigned to slave CAN (CAN 2) OR 0 to 12 are assgned to CAN1
     canfilterconfig.FilterFIFOAssignment = CAN_RX_FIFO0;
-    //canfilterconfig.FilterIdHigh = 0x0000;
-    canfilterconfig.FilterIdLow = CAN_RX_ID << 5;
-    //canfilterconfig.FilterMaskIdHigh = 0x0000; // Accept everything
-    canfilterconfig.FilterMaskIdLow = CAN_RX_MASK << 5;
-    //canfilterconfig.FilterMaskIdLow = 0x0000;
-    canfilterconfig.FilterMode = CAN_FILTERMODE_IDMASK;
+    canfilterconfig.FilterIdLow = CAN_ID_0 << 5;
+    canfilterconfig.FilterIdHigh = CAN_ID_1 << 5;
+    canfilterconfig.FilterMaskIdLow = CAN_ID_2 << 5;
+    canfilterconfig.FilterMaskIdHigh = (CAN_ID_3 << 5) || 0b00010000;
+    canfilterconfig.FilterMode = CAN_FILTERMODE_IDLIST;
     canfilterconfig.FilterScale = CAN_FILTERSCALE_16BIT;
 
     HAL_CAN_ConfigFilter(&hcan1, &canfilterconfig);
@@ -255,12 +265,11 @@ int main(void)
         if (now >= next_tx0) {
 
             TxHeader.DLC = 4;
-            TxHeader.RTR = CAN_RTR_REMOTE;
             TxHeader.IDE = CAN_ID_STD;
-            TxHeader.RTR = CAN_RTR_REMOTE;
+            TxHeader.RTR = CAN_RTR_DATA;
             TxHeader.StdId = CAN_ID_3;
 
-            if (HAL_CAN_AddTxMessage(&hcan1, &TxHeader, NULL, &TxMailbox0) != HAL_OK) {
+            if (HAL_CAN_AddTxMessage(&hcan1, &TxHeader, (uint8_t*) &clock_tx, &TxMailbox0) != HAL_OK) {
                 Error_Handler();
             }
 
