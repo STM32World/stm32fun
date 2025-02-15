@@ -42,8 +42,10 @@
 #define CAN_ID_0     0b10111111100   // 0x5fc - 1532
 #define CAN_ID_1     0b10111111101   // 0x5fd - 1533
 #define CAN_ID_2     0b10111111110   // 0x5fe - 1534
-//#define CAN_ID_3     0b10101111111 // 0x5ff - 1535 - Intended
+//#define CAN_ID_3     0b10111111111   // 0x5ff - 1535 - Intended
 #define CAN_ID_3     0b10101111111   // 0x57f - 1407 - Wrong - should NOT match our filter
+
+#define CAN_FILTER_ID_REMOTE 0b00010000
 
 /* USER CODE END PD */
 
@@ -61,8 +63,6 @@ UART_HandleTypeDef huart1;
 
 CAN_TxHeaderTypeDef TxHeader;
 CAN_RxHeaderTypeDef RxHeader;
-
-uint32_t TxMailbox0, TxMailbox1;
 
 uint8_t TxData[8];
 uint8_t RxData[8];
@@ -212,7 +212,7 @@ int main(void)
     canfilterconfig.FilterIdLow = CAN_ID_0 << 5;
     canfilterconfig.FilterIdHigh = CAN_ID_1 << 5;
     canfilterconfig.FilterMaskIdLow = CAN_ID_2 << 5;
-    canfilterconfig.FilterMaskIdHigh = (CAN_ID_3 << 5) || 0b00010000;
+    canfilterconfig.FilterMaskIdHigh = (CAN_ID_3 << 5) | CAN_FILTER_ID_REMOTE;
     canfilterconfig.FilterMode = CAN_FILTERMODE_IDLIST;
     canfilterconfig.FilterScale = CAN_FILTERSCALE_16BIT;
 
@@ -264,12 +264,13 @@ int main(void)
 
         if (now >= next_tx0) {
 
-            TxHeader.DLC = 4;
+            TxHeader.DLC = 8;
             TxHeader.IDE = CAN_ID_STD;
-            TxHeader.RTR = CAN_RTR_DATA;
+            TxHeader.RTR = CAN_RTR_REMOTE;
             TxHeader.StdId = CAN_ID_3;
 
-            if (HAL_CAN_AddTxMessage(&hcan1, &TxHeader, (uint8_t*) &clock_tx, &TxMailbox0) != HAL_OK) {
+            uint32_t mb0;
+            if (HAL_CAN_AddTxMessage(&hcan1, &TxHeader, NULL, &mb0) != HAL_OK) {
                 Error_Handler();
             }
 
@@ -278,7 +279,8 @@ int main(void)
             TxHeader.RTR = CAN_RTR_DATA;
             TxHeader.StdId = CAN_ID_0;
 
-            if (HAL_CAN_AddTxMessage(&hcan1, &TxHeader, (uint8_t*) &clock_tx, &TxMailbox1) != HAL_OK) {
+            uint32_t mb1;
+            if (HAL_CAN_AddTxMessage(&hcan1, &TxHeader, (uint8_t*) &clock_tx, &mb1) != HAL_OK) {
                 Error_Handler();
             }
 
@@ -292,7 +294,8 @@ int main(void)
             TxHeader.RTR = CAN_RTR_DATA;
             TxHeader.StdId = CAN_ID_1;
 
-            if (HAL_CAN_AddTxMessage(&hcan1, &TxHeader, (uint8_t*) &clock_tx, &TxMailbox0) != HAL_OK) {
+            uint32_t mb0;
+            if (HAL_CAN_AddTxMessage(&hcan1, &TxHeader, (uint8_t*) &clock_tx, &mb0) != HAL_OK) {
                 Error_Handler();
             }
 
