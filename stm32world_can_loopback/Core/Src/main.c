@@ -212,6 +212,7 @@ int main(void)
     canfilterconfig.FilterIdLow = CAN_ID_0 << 5;
     canfilterconfig.FilterIdHigh = CAN_ID_1 << 5;
     canfilterconfig.FilterMaskIdLow = CAN_ID_2 << 5;
+    //canfilterconfig.FilterMaskIdHigh = CAN_ID_3 << 5;
     canfilterconfig.FilterMaskIdHigh = (CAN_ID_3 << 5) | CAN_FILTER_ID_REMOTE;
     canfilterconfig.FilterMode = CAN_FILTERMODE_IDLIST;
     canfilterconfig.FilterScale = CAN_FILTERSCALE_16BIT;
