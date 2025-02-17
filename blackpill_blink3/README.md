@@ -1,6 +1,6 @@
-# Blink LED - Right way
+# External Interrupt
 
-STM32F411 Blink the RIGHT way.
+How to respond to external interrupts.
 
 Video is here: https://www.youtube.com/watch?v=eLrsCw1UDJU
 
