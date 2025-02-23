@@ -151,7 +151,7 @@ int main(void)
         }
 
         if (now >= next_tick) {
-            printf("Tick %lu (loop = %lu)\n", now / 1000, loop_cnt);
+            printf("Tick %0.2f (loop = %lu)\n", (float)(1.0 * now / 1000), loop_cnt);
             loop_cnt = 0;
             next_tick = now + 1000;
         }
