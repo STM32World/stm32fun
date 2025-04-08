@@ -66,7 +66,7 @@ static void MX_USART1_UART_Init(void);
 /* USER CODE BEGIN 0 */
 
 // Send printf to uart1
-__attribute__((section(".ccmram"))) int _write(int fd, char *ptr, int len) {
+int _write(int fd, char *ptr, int len) {
     HAL_StatusTypeDef hstatus;
 
     if (fd == 1 || fd == 2) {
@@ -247,9 +247,6 @@ int main(void)
         sprintf(sa[i], "String %d", i);
         printf("%s\n", sa[i]);
     }
-
-
-
 
     /* USER CODE END 2 */
 
