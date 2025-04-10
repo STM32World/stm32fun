@@ -37,7 +37,7 @@
 
 /* Exported constants --------------------------------------------------------*/
 /* USER CODE BEGIN EC */
-
+ //extern uint32_t uwTick;
 /* USER CODE END EC */
 
 /* Exported macro ------------------------------------------------------------*/

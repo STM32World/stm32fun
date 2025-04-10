@@ -246,7 +246,7 @@ int main(void)
     uint32_t start = uwTick;
     if (f_open(&SDFile, big_filename, FA_CREATE_ALWAYS | FA_WRITE) == FR_OK) {
         for (uint16_t i = 0; i < 1 * 1024; ++i) {
-            crc_written = HAL_CRC_Accumulate(&hcrc, (uint32_t *)&buf, sizeof(buf) / 4);
+            crc_written = HAL_CRC_Accumulate(&hcrc, (uint32_t*) &buf, sizeof(buf) / 4);
             if (f_write(&SDFile, &buf, sizeof(buf), (void*) &wbytes) != FR_OK) {
                 printf("Unable to write\n");
             }
@@ -308,13 +308,14 @@ int main(void)
 
         if (now >= next_ls) {
 
-            __HAL_CRC_DR_RESET(&hcrc);
+            //__HAL_CRC_DR_RESET(&hcrc);       // Reset with macro
+            HAL_CRC_Calculate(&hcrc, NULL, 0); // Reset by starting with 0 byte
 
             uint32_t start = uwTick;
             uint32_t total = 0;
             if (f_open(&SDFile, big_filename, FA_OPEN_EXISTING | FA_READ) == FR_OK) {
                 while (f_read(&SDFile, &buf, sizeof(buf), (void*) &rbytes) == FR_OK && rbytes == sizeof(buf)) {
-                    crc_read = HAL_CRC_Accumulate(&hcrc, (uint32_t *)&buf, sizeof(buf) / 4);
+                    crc_read = HAL_CRC_Accumulate(&hcrc, (uint32_t*) &buf, sizeof(buf) / 4);
                     total += rbytes;
                 }
                 f_close(&SDFile);
@@ -323,8 +324,8 @@ int main(void)
             }
 
             printf("Read %lu bytes took %lu ms\n", total, uwTick - start);
-            printf("Written CRC = 0x%08x\n", crc_written);
-            printf("Read CRC    = 0x%08x\n", crc_read);
+            printf("Written CRC = 0x%08x\n", (unsigned int) crc_written);
+            printf("Read CRC    = 0x%08x\n", (unsigned int) crc_read);
 
             ls();
             next_ls = now + 10000;

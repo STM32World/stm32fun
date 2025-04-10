@@ -120,7 +120,7 @@ int main(void)
 
         if (now >= next_blink) {
 
-            printf("Toggling GPIO\n");
+            //printf("Toggling GPIO\n");
 
             HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
 
