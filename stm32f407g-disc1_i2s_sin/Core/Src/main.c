@@ -36,7 +36,7 @@
 /* USER CODE BEGIN PD */
 
 #define TAU 6.28318530717958647692
-#define I2S_DMA_BUFFER_SAMPLES 960
+#define I2S_DMA_BUFFER_SAMPLES 96
 #define I2S_DMA_BUFFER_SIZE 2 * 2 * I2S_DMA_BUFFER_SAMPLES // 2 full buffers L+R samples
 #define SAMPLE_FREQ 96000
 #define OUTPUT_MID 32767 // 2^16 / 2 - 1
@@ -68,7 +68,7 @@ float angle[2] = {
 };
 
 float angle_change[2] = {
-        220.0 * (TAU / SAMPLE_FREQ), // left
+        440.0 * (TAU / SAMPLE_FREQ), // left
         440.0 * (TAU / SAMPLE_FREQ)  // right
 };
 
@@ -214,7 +214,7 @@ int main(void)
         printf("Error: cs_init failed\n");
     }
 
-    HAL_I2S_Transmit_DMA(&hi2s3, (uint16_t*) &i2s_dma_buffer, 2 * I2S_DMA_BUFFER_SAMPLES);
+    HAL_I2S_Transmit_DMA(&hi2s3, (uint16_t*) &i2s_dma_buffer, I2S_DMA_BUFFER_SIZE);
 
     /* USER CODE END 2 */
 
