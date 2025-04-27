@@ -64,12 +64,12 @@ int16_t i2s_dma_buffer[I2S_DMA_BUFFER_SIZE];
 
 float angle[2] = {
         0,
-        0
+        M_PI_4
 };
 
 float angle_change[2] = {
-        440.0 * (TAU / SAMPLE_FREQ), // left
-        440.0 * (TAU / SAMPLE_FREQ)  // right
+        2000.0 * (TAU / SAMPLE_FREQ), // left
+        2000.05 * (TAU / SAMPLE_FREQ)  // right
 };
 
 float amplification[2] = {
@@ -265,8 +265,8 @@ void SystemClock_Config(void)
     RCC_OscInitStruct.HSEState = RCC_HSE_ON;
     RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
     RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
-    RCC_OscInitStruct.PLL.PLLM = 4;
-    RCC_OscInitStruct.PLL.PLLN = 168;
+    RCC_OscInitStruct.PLL.PLLM = 8;
+    RCC_OscInitStruct.PLL.PLLN = 336;
     RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
     RCC_OscInitStruct.PLL.PLLQ = 4;
     if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
