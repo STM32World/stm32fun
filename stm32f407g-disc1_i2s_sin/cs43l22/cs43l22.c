@@ -72,7 +72,7 @@ CS43L22_result_t cs_init(CS43L22_HandleTypeDef *cs, I2C_HandleTypeDef *i2c, uint
     cs->id = (v & 0b11111000) >> 3;
     cs->rev = (v & 0b00000111);
 
-    if (cs->id != CS42L22_DEFAULT_ID) {
+    if (cs->id != CS43L22_DEFAULT_ID) {
         CS_DBG("IC must be a tranny, it does not identify as a CS41L22\n");
         return Err;
     }
@@ -80,13 +80,13 @@ CS43L22_result_t cs_init(CS43L22_HandleTypeDef *cs, I2C_HandleTypeDef *i2c, uint
     CS_DBG("CS43L22 id = %d rev = %d\n", cs->id, cs->rev);
 
     // Let's power the thing on
-    v = CS43L22_PWR_ON;
+    v = CS43L22_PWR_CTL_1_ON;
     if (cs_write_register(cs, CS43L22_PWR_CTL_1, &v, 1)) {
         CS_DBG("CS43L22 write error");
     }
 
     // Enable all
-    v = CS43L22_ALL_ON;
+    v = CS43L22_PWR_CTL_2_HPB_ON | CS43L22_PWR_CTL_2_HPA_ON | CS43L22_PWR_CTL_2_SPB_ON | CS43L22_PWR_CTL_2_SPA_ON;
     if (cs_write_register(cs, CS43L22_PWR_CTL_2, &v, 1)) {
         CS_DBG("CS43L22 write error");
     }
