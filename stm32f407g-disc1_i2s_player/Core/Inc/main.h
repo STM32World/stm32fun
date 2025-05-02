@@ -59,13 +59,13 @@ void Error_Handler(void);
 /* Private defines -----------------------------------------------------------*/
 #define BTN_Pin GPIO_PIN_0
 #define BTN_GPIO_Port GPIOA
-#define SPI1_CS_Pin GPIO_PIN_4
-#define SPI1_CS_GPIO_Port GPIOC
+#define SD_CS_Pin GPIO_PIN_12
+#define SD_CS_GPIO_Port GPIOB
 #define CS_RST_Pin GPIO_PIN_4
 #define CS_RST_GPIO_Port GPIOD
 
 /* USER CODE BEGIN Private defines */
-
+#define SD_SPI_HANDLE hspi2
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

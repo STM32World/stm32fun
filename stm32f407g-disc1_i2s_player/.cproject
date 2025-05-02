@@ -55,9 +55,9 @@
 									<listOptionValue builtIn="false" value="../Middlewares/Third_Party/ARM_CMSIS/CMSIS/Core_A/Include/"/>
 									<listOptionValue builtIn="false" value="../Middlewares/Third_Party/ARM_CMSIS/CMSIS/DSP/Include"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/cs43l22}&quot;"/>
+									<listOptionValue builtIn="false" value="../Middlewares/Third_Party/FatFs/src"/>
 									<listOptionValue builtIn="false" value="../FATFS/Target"/>
 									<listOptionValue builtIn="false" value="../FATFS/App"/>
-									<listOptionValue builtIn="false" value="../Middlewares/Third_Party/FatFs/src"/>
 								</option>
 								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.437459679" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c"/>
 							</tool>

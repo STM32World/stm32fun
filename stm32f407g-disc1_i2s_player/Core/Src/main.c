@@ -55,7 +55,7 @@ I2C_HandleTypeDef hi2c1;
 I2S_HandleTypeDef hi2s3;
 DMA_HandleTypeDef hdma_spi3_tx;
 
-SPI_HandleTypeDef hspi1;
+SPI_HandleTypeDef hspi2;
 
 UART_HandleTypeDef huart2;
 
@@ -63,6 +63,9 @@ UART_HandleTypeDef huart2;
 
 const char total_uptime_filename[] = "uptime.dat";
 const char tick_filename[] = "tick.txt";
+const char big_filename[] = "big.dat";
+
+uint32_t total_uptime = 0;
 
 CS43L22_HandleTypeDef cs;
 
@@ -97,7 +100,7 @@ static void MX_DMA_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_I2S3_Init(void);
 static void MX_I2C1_Init(void);
-static void MX_SPI1_Init(void);
+static void MX_SPI2_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -119,16 +122,16 @@ int _write(int fd, char *ptr, int len) {
     return -1;
 }
 
-uint8_t BSP_SD_IsDetected(void)
-{
-    __IO uint8_t status = SD_PRESENT;
-
-//    if (HAL_GPIO_ReadPin(SD_DETECT_GPIO_PORT, SD_DETECT_PIN) != GPIO_PIN_RESET) {
-//        status = SD_NOT_PRESENT;
-//    }
-
-    return status;
-}
+//uint8_t BSP_SD_IsDetected(void)
+//{
+//    __IO uint8_t status = SD_PRESENT;
+//
+////    if (HAL_GPIO_ReadPin(SD_DETECT_GPIO_PORT, SD_DETECT_PIN) != GPIO_PIN_RESET) {
+////        status = SD_NOT_PRESENT;
+////    }
+//
+//    return status;
+//}
 
 void ls() {
 
@@ -263,16 +266,16 @@ int main(void)
   MX_I2S3_Init();
   MX_I2C1_Init();
   MX_FATFS_Init();
-  MX_SPI1_Init();
+  MX_SPI2_Init();
   /* USER CODE BEGIN 2 */
 
     printf("\n\n\n--------\nStarting\n");
 
-    printf("SD Card Information:\n");
-    printf("Block size  : %lu\n", hsd.SdCard.BlockSize);
-    printf("Block nmbr  : %lu\n", hsd.SdCard.BlockNbr);
-    printf("Card size   : %lu\n", (hsd.SdCard.BlockSize * hsd.SdCard.BlockNbr) / 1000);
-    printf("Card version: %lu\n", hsd.SdCard.CardVersion);
+//    printf("SD Card Information:\n");
+//    printf("Block size  : %lu\n", hsd.SdCard.BlockSize);
+//    printf("Block nmbr  : %lu\n", hsd.SdCard.BlockNbr);
+//    printf("Card size   : %lu\n", (hsd.SdCard.BlockSize * hsd.SdCard.BlockNbr) / 1000);
+//    printf("Card version: %lu\n", hsd.SdCard.CardVersion);
 
     if (cs_init(&cs, &hi2c1, CS43L22_DEFAULT_ADDR, CS_RST_GPIO_Port, CS_RST_Pin)) {
         printf("Error: cs_init failed\n");
@@ -281,6 +284,62 @@ int main(void)
     cs_hp_vol(&cs, 255);
 
     HAL_I2S_Transmit_DMA(&hi2s3, (uint16_t*) &i2s_dma_buffer, I2S_DMA_BUFFER_SIZE);
+
+    uint32_t wbytes, rbytes; /* File write counts */
+
+    if (f_mount(&USERFatFS, "", 0) != FR_OK) {
+        printf("Unable to mount disk\n");
+        Error_Handler();
+    }
+
+//    if (f_open(&USERFile, total_uptime_filename, FA_OPEN_EXISTING | FA_READ) == FR_OK) {
+//        if (f_read(&USERFile, &total_uptime, sizeof(total_uptime), (void*) &rbytes) == FR_OK) {
+//            printf("Total uptime = %lu\n", total_uptime);
+//            f_close(&USERFile);
+//        } else {
+//            printf("Unable to read\n");
+//            Error_Handler();
+//        }
+//    } else {
+//        // File did not exist - let's create it
+//        if (f_open(&USERFile, total_uptime_filename, FA_CREATE_ALWAYS | FA_WRITE) == FR_OK) {
+//            if (f_write(&USERFile, &total_uptime, sizeof(total_uptime), (void*) &wbytes) == FR_OK) {
+//                printf("File %s created\n", total_uptime_filename);
+//                f_close(&USERFile);
+//            } else {
+//                printf("Unable to write\n");
+//                Error_Handler();
+//            }
+//        } else {
+//            printf("Unable to create\n");
+//            Error_Handler();
+//        }
+//    }
+
+    // Create tick file if it does NOT exist
+    if (f_open(&USERFile, tick_filename, FA_CREATE_ALWAYS | FA_WRITE) == FR_OK) {
+        f_close(&USERFile);
+    }
+
+    uint8_t buf[1024]; // 1K buffer
+    for (uint16_t i = 0; i < 1024; ++i) {
+        buf[i] = (uint8_t) i;
+    }
+
+    uint32_t start = uwTick;
+    if (f_open(&USERFile, big_filename, FA_CREATE_ALWAYS | FA_WRITE) == FR_OK) {
+        for (uint16_t i = 0; i < 100; ++i) {
+            if (f_write(&USERFile, &buf, sizeof(buf), (void*) &wbytes) != FR_OK) {
+                printf("Unable to write\n");
+            }
+        }
+        f_close(&USERFile);
+    } else {
+        printf("Unable to open %s\n", big_filename);
+    }
+    printf("Write took %lu ms\n", uwTick - start);
+
+    ls();
 
   /* USER CODE END 2 */
 
@@ -424,40 +483,40 @@ static void MX_I2S3_Init(void)
 }
 
 /**
-  * @brief SPI1 Initialization Function
+  * @brief SPI2 Initialization Function
   * @param None
   * @retval None
   */
-static void MX_SPI1_Init(void)
+static void MX_SPI2_Init(void)
 {
 
-  /* USER CODE BEGIN SPI1_Init 0 */
+  /* USER CODE BEGIN SPI2_Init 0 */
 
-  /* USER CODE END SPI1_Init 0 */
+  /* USER CODE END SPI2_Init 0 */
 
-  /* USER CODE BEGIN SPI1_Init 1 */
+  /* USER CODE BEGIN SPI2_Init 1 */
 
-  /* USER CODE END SPI1_Init 1 */
-  /* SPI1 parameter configuration*/
-  hspi1.Instance = SPI1;
-  hspi1.Init.Mode = SPI_MODE_MASTER;
-  hspi1.Init.Direction = SPI_DIRECTION_2LINES;
-  hspi1.Init.DataSize = SPI_DATASIZE_8BIT;
-  hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;
-  hspi1.Init.CLKPhase = SPI_PHASE_1EDGE;
-  hspi1.Init.NSS = SPI_NSS_SOFT;
-  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
-  hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
-  hspi1.Init.TIMode = SPI_TIMODE_DISABLE;
-  hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
-  hspi1.Init.CRCPolynomial = 10;
-  if (HAL_SPI_Init(&hspi1) != HAL_OK)
+  /* USER CODE END SPI2_Init 1 */
+  /* SPI2 parameter configuration*/
+  hspi2.Instance = SPI2;
+  hspi2.Init.Mode = SPI_MODE_MASTER;
+  hspi2.Init.Direction = SPI_DIRECTION_2LINES;
+  hspi2.Init.DataSize = SPI_DATASIZE_8BIT;
+  hspi2.Init.CLKPolarity = SPI_POLARITY_LOW;
+  hspi2.Init.CLKPhase = SPI_PHASE_1EDGE;
+  hspi2.Init.NSS = SPI_NSS_SOFT;
+  hspi2.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_4;
+  hspi2.Init.FirstBit = SPI_FIRSTBIT_MSB;
+  hspi2.Init.TIMode = SPI_TIMODE_DISABLE;
+  hspi2.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
+  hspi2.Init.CRCPolynomial = 10;
+  if (HAL_SPI_Init(&hspi2) != HAL_OK)
   {
     Error_Handler();
   }
-  /* USER CODE BEGIN SPI1_Init 2 */
+  /* USER CODE BEGIN SPI2_Init 2 */
 
-  /* USER CODE END SPI1_Init 2 */
+  /* USER CODE END SPI2_Init 2 */
 
 }
 
@@ -525,12 +584,12 @@ static void MX_GPIO_Init(void)
   /* GPIO Ports Clock Enable */
   __HAL_RCC_GPIOH_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
+  __HAL_RCC_GPIOB_CLK_ENABLE();
   __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOD_CLK_ENABLE();
-  __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(SPI1_CS_GPIO_Port, SPI1_CS_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(SD_CS_GPIO_Port, SD_CS_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(CS_RST_GPIO_Port, CS_RST_Pin, GPIO_PIN_RESET);
@@ -541,12 +600,12 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(BTN_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : SPI1_CS_Pin */
-  GPIO_InitStruct.Pin = SPI1_CS_Pin;
+  /*Configure GPIO pin : SD_CS_Pin */
+  GPIO_InitStruct.Pin = SD_CS_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(SPI1_CS_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(SD_CS_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : CS_RST_Pin */
   GPIO_InitStruct.Pin = CS_RST_Pin;
