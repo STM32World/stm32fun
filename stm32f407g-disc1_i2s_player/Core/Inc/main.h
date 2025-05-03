@@ -57,10 +57,10 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define OTG_FS_PowerSwitchOn_Pin GPIO_PIN_0
+#define OTG_FS_PowerSwitchOn_GPIO_Port GPIOC
 #define BTN_Pin GPIO_PIN_0
 #define BTN_GPIO_Port GPIOA
-#define SD_CS_Pin GPIO_PIN_4
-#define SD_CS_GPIO_Port GPIOC
 #define CS_RST_Pin GPIO_PIN_4
 #define CS_RST_GPIO_Port GPIOD
 
