@@ -326,6 +326,8 @@ int main(void)
         }
     }
 
+    //total_uptime = 0;
+
     res = f_findfirst(&dir, &music_file_info, "", "*.wav");
 
     printf("Found: %s\n", music_file_info.fname);
@@ -367,16 +369,22 @@ int main(void)
 
             printf("Tick %lu (loop=%lu bdo=%lu)\n", now / 1000, loop_cnt, buffers_done);
 
-            ++total_uptime;
+            if (((now / 1000) % 60) == 0) {
 
-            // Update the total uptime file
-            if (f_open(&SDFile, total_uptime_filename, FA_OPEN_EXISTING | FA_WRITE) == FR_OK) {
-                if (f_write(&SDFile, &total_uptime, sizeof(total_uptime), (void*) &wbytes) != FR_OK) {
-                    printf("Unable to write\n");
+                ++total_uptime;
+
+                printf("Updating total uptime to %lu minutes\n", total_uptime);
+
+                // Update the total uptime file
+                if (f_open(&SDFile, total_uptime_filename, FA_OPEN_EXISTING | FA_WRITE) == FR_OK) {
+                    if (f_write(&SDFile, &total_uptime, sizeof(total_uptime), (void*) &wbytes) != FR_OK) {
+                        printf("Unable to write\n");
+                    }
+                    f_close(&SDFile);
+                } else {
+                    printf("Unable to open file\n");
                 }
-                f_close(&SDFile);
-            } else {
-                printf("Unable to open file\n");
+
             }
 
             open_next_file = 0;
@@ -561,7 +569,7 @@ static void MX_SDIO_SD_Init(void)
     hsd.Init.ClockPowerSave = SDIO_CLOCK_POWER_SAVE_DISABLE;
     hsd.Init.BusWide = SDIO_BUS_WIDE_4B;
     hsd.Init.HardwareFlowControl = SDIO_HARDWARE_FLOW_CONTROL_DISABLE;
-    hsd.Init.ClockDiv = 4;
+    hsd.Init.ClockDiv = 6;
     /* USER CODE BEGIN SDIO_Init 2 */
 
     // First init with 1B bus - SD card will not initialize with 4 bits
