@@ -184,8 +184,6 @@ int main(void)
 
     printf("\n\n\n\n--------\nStarting\n");
 
-    //HAL_Delay(500);
-
     printf("SD Card Information:\n");
     printf("Block size  : %lu\n", hsd.SdCard.BlockSize);
     printf("Block nmbr  : %lu\n", hsd.SdCard.BlockNbr);
