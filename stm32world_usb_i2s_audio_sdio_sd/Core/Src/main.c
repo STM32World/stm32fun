@@ -24,6 +24,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
+#include <string.h>
 #include <math.h>
 #include "arm_math.h"
 /* USER CODE END Includes */
@@ -37,7 +38,7 @@
 /* USER CODE BEGIN PD */
 
 #define TAU 6.28318530717958647692
-#define I2S_DMA_BUFFER_SAMPLES 1024
+#define I2S_DMA_BUFFER_SAMPLES 512
 #define I2S_DMA_BUFFER_SIZE 2 * 2 * I2S_DMA_BUFFER_SAMPLES // 2 full buffers L+R samples
 #define SAMPLE_FREQ 96000
 #define OUTPUT_MID 32768
@@ -68,8 +69,8 @@ I2S_AUDIOFREQ_44K
 uint8_t current_freq = 0;
 
 float freq[2] = {
-        8000,
-        8001
+        220,
+        440
 };
 
 float angle[2] = {
@@ -77,10 +78,11 @@ float angle[2] = {
         0
 };
 
-float angle_change[2] = { // Will be calculated from freq
+// Will be calculated from freq
+float angle_change[2] = {
         0,
-                0
-        };
+        0
+};
 
 float amplification[2] = {
         0.8,
@@ -248,6 +250,22 @@ void set_i2s_freq(uint32_t freq) {
 
 }
 
+FRESULT parse_wav_header(FIL *f) {
+
+    char buf[128];  // 128 bytes for header - enough?
+    unsigned int n;
+
+    if (f_read(f, &buf, 128, &n) != FR_OK && n != 128) {
+        printf("Read error\n");
+        return FR_INT_ERR;
+    }
+
+    if (strstr(buf, "RIFF") != &buf) {
+        printf("File is not a RIFF file\n");
+    }
+
+    return FR_OK;
+}
 /* USER CODE END 0 */
 
 /**
@@ -432,10 +450,14 @@ int main(void)
                 printf("Unable to open %s\n", music_file_info.fname);
             }
 
-            // Try to read first four byte
-            if (f_read(&music_file, &buf, 4, &n) != FR_OK && n != 4) {
-                printf("Could not read 4 byte\n");
+            if (parse_wav_header(&music_file) != FR_OK) {
+
             }
+
+            // Try to read first four byte
+//            if (f_read(&music_file, &buf, 4, &n) != FR_OK && n != 4) {
+//                printf("Could not read 4 byte\n");
+//            }
 
             printf("File header: %s\n", buf);
 
