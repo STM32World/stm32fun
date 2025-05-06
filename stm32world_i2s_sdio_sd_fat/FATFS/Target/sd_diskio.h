@@ -17,7 +17,7 @@
   */
 /* USER CODE END Header */
 
-/* Note: code generation based on sd_diskio_template.h */
+/* Note: code generation based on sd_diskio_dma_template.h */
 
 /* Define to prevent recursive inclusion -------------------------------------*/
 #ifndef __SD_DISKIO_H

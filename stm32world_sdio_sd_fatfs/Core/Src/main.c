@@ -43,6 +43,8 @@
 
 /* Private variables ---------------------------------------------------------*/
 SD_HandleTypeDef hsd;
+DMA_HandleTypeDef hdma_sdio_rx;
+DMA_HandleTypeDef hdma_sdio_tx;
 
 UART_HandleTypeDef huart1;
 
@@ -56,6 +58,7 @@ uint32_t total_uptime;
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
+static void MX_DMA_Init(void);
 static void MX_USART1_UART_Init(void);
 static void MX_SDIO_SD_Init(void);
 /* USER CODE BEGIN PFP */
@@ -177,6 +180,7 @@ int main(void)
 
     /* Initialize all configured peripherals */
     MX_GPIO_Init();
+    MX_DMA_Init();
     MX_USART1_UART_Init();
     MX_SDIO_SD_Init();
     MX_FATFS_Init();
@@ -387,7 +391,7 @@ static void MX_SDIO_SD_Init(void)
     hsd.Init.ClockPowerSave = SDIO_CLOCK_POWER_SAVE_DISABLE;
     hsd.Init.BusWide = SDIO_BUS_WIDE_4B;
     hsd.Init.HardwareFlowControl = SDIO_HARDWARE_FLOW_CONTROL_DISABLE;
-    hsd.Init.ClockDiv = 1;
+    hsd.Init.ClockDiv = 3;
     /* USER CODE BEGIN SDIO_Init 2 */
 
     // First init with 1B bus - SD card will not initialize with 4 bits
@@ -435,6 +439,25 @@ static void MX_USART1_UART_Init(void)
     /* USER CODE BEGIN USART1_Init 2 */
 
     /* USER CODE END USART1_Init 2 */
+
+}
+
+/**
+ * Enable DMA controller clock
+ */
+static void MX_DMA_Init(void)
+{
+
+    /* DMA controller clock enable */
+    __HAL_RCC_DMA2_CLK_ENABLE();
+
+    /* DMA interrupt init */
+    /* DMA2_Stream3_IRQn interrupt configuration */
+    HAL_NVIC_SetPriority(DMA2_Stream3_IRQn, 0, 0);
+    HAL_NVIC_EnableIRQ(DMA2_Stream3_IRQn);
+    /* DMA2_Stream6_IRQn interrupt configuration */
+    HAL_NVIC_SetPriority(DMA2_Stream6_IRQn, 0, 0);
+    HAL_NVIC_EnableIRQ(DMA2_Stream6_IRQn);
 
 }
 
