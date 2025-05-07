@@ -24,8 +24,8 @@
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
 #include <string.h>
-#include <math.h>
-#include "arm_math.h"
+//#include <math.h>
+//#include "arm_math.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -43,7 +43,7 @@ typedef struct {
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 
-#define TAU 6.28318530717958647692
+//#define TAU 6.28318530717958647692
 #define I2S_DMA_BUFFER_SAMPLES 512
 #define I2S_DMA_BUFFER_SIZE 2 * 2 * I2S_DMA_BUFFER_SAMPLES // 2 full buffers L+R samples
 #define SAMPLE_FREQ 96000
@@ -68,34 +68,34 @@ UART_HandleTypeDef huart1;
 
 /* USER CODE BEGIN PV */
 
-const uint32_t sample_frequencies[] = {
-I2S_AUDIOFREQ_96K,
-I2S_AUDIOFREQ_48K,
-I2S_AUDIOFREQ_44K
-};
-
-uint8_t current_freq = 0;
-
-float freq[2] = {
-        220,
-        439
-};
-
-float angle[2] = {
-        0,
-        0
-};
-
-// Will be calculated from freq
-float angle_change[2] = {
-        0,
-        0
-};
-
-float amplification[2] = {
-        0.8,
-        0.8
-};
+//const uint32_t sample_frequencies[] = {
+//I2S_AUDIOFREQ_96K,
+//I2S_AUDIOFREQ_48K,
+//I2S_AUDIOFREQ_44K
+//};
+//
+//uint8_t current_freq = 0;
+//
+//float freq[2] = {
+//        220,
+//        439
+//};
+//
+//float angle[2] = {
+//        0,
+//        0
+//};
+//
+//// Will be calculated from freq
+//float angle_change[2] = {
+//        0,
+//        0
+//};
+//
+//float amplification[2] = {
+//        0.8,
+//        0.8
+//};
 
 const char total_uptime_filename[] = "uptime.dat";
 
@@ -233,10 +233,10 @@ uint8_t BSP_SD_IsDetected(void)
     return status;
 }
 
-void set_angle_changes() {
-    angle_change[0] = freq[0] * (TAU / sample_frequencies[current_freq]); // left
-    angle_change[1] = freq[1] * (TAU / sample_frequencies[current_freq]);  // right
-}
+//void set_angle_changes() {
+//    angle_change[0] = freq[0] * (TAU / sample_frequencies[current_freq]); // left
+//    angle_change[1] = freq[1] * (TAU / sample_frequencies[current_freq]);  // right
+//}
 
 void set_i2s_freq(uint32_t freq) {
 
@@ -406,17 +406,12 @@ int main(void)
 
     printf("Found: %s\n", music_file_info.fname);
 
-//
-//    // Create tick file always
-//    if (f_open(&SDFile, tick_filename, FA_CREATE_ALWAYS | FA_WRITE) == FR_OK) {
-//        f_close(&SDFile);
-//    }
 
     ls();
 
     printf("Total uptime reported = %lu\n", total_uptime);
 
-    set_angle_changes();
+    //set_angle_changes();
 
     //HAL_I2S_Transmit_DMA(&hi2s2, (uint16_t*) &i2s_dma_buffer, 2 * I2S_DMA_BUFFER_SAMPLES);
     HAL_I2S_Transmit_DMA(&hi2s2, (uint16_t*) &i2s_dma_buffer, I2S_DMA_BUFFER_SIZE);
@@ -426,7 +421,7 @@ int main(void)
     /* Infinite loop */
     /* USER CODE BEGIN WHILE */
 
-    uint32_t now = 0, next_blink = 500, next_tick = 1000, next_freq = 10000, loop_cnt = 0;
+    uint32_t now = 0, next_blink = 500, next_tick = 1000, loop_cnt = 0;
 
     while (1) {
 
@@ -441,7 +436,7 @@ int main(void)
 
         if (now >= next_tick) {
 
-            printf("Tick %lu (loop=%lu bdo=%lu)\n", now / 1000, loop_cnt, buffers_done);
+            printf("Tick %lu (loop=%lu bd=%lu)\n", now / 1000, loop_cnt, buffers_done);
 
             if (((now / 1000) % 60) == 0) {
 
@@ -468,27 +463,27 @@ int main(void)
 
         }
 
-        if (now >= next_freq) {
-
-            // Increase index
-            ++current_freq;
-
-            // Loop around if too big
-            if (current_freq >= sizeof(sample_frequencies) / sizeof(sample_frequencies[0])) {
-                current_freq = 0;
-            }
-
-            printf("Setting sample freq to: %lu\n", sample_frequencies[current_freq]);
-
-            // Set the freq
-            set_i2s_freq(sample_frequencies[current_freq]);
-
-            next_freq = now + 10000;
-        }
+//        if (now >= next_freq) {
+//
+//            // Increase index
+//            ++current_freq;
+//
+//            // Loop around if too big
+//            if (current_freq >= sizeof(sample_frequencies) / sizeof(sample_frequencies[0])) {
+//                current_freq = 0;
+//            }
+//
+//            printf("Setting sample freq to: %lu\n", sample_frequencies[current_freq]);
+//
+//            // Set the freq
+//            set_i2s_freq(sample_frequencies[current_freq]);
+//
+//            next_freq = now + 10000;
+//        }
 
         if (open_next_file) {
 
-            char buf[32];
+            //char buf[32];
 
             f_close(&music_file);
 
@@ -518,21 +513,23 @@ int main(void)
             printf("Wav bytes per block: %d\n", wav_format.bytes_per_block);
             printf("Wav bits per sample: %d\n", wav_format.bits_per_sample);
 
+            set_i2s_freq(wav_format.frequency);
+
             open_next_file = 0;
 
         }
 
         if (do_buffer) {
 
-            for (int i = 0; i < 2 * I2S_DMA_BUFFER_SAMPLES; i += 2) { // Two samples left/right per step
-                do_buffer[i] = OUTPUT_MID * amplification[0] * arm_cos_f32(angle[0]);      // Left
-                do_buffer[i + 1] = OUTPUT_MID * amplification[1] * arm_cos_f32(angle[1]);  // Right
-                angle[0] += angle_change[0];
-                angle[1] += angle_change[1];
-                if (angle[0] > TAU)
-                    angle[0] -= TAU;
-                if (angle[1] > TAU)
-                    angle[1] -= TAU;
+            uint16_t buf[2 * I2S_DMA_BUFFER_SAMPLES] = {0};
+            unsigned int bytes_read = 0;
+
+            if (f_read(&music_file, &buf, sizeof(buf), &bytes_read) == FR_OK) {
+
+                memcpy(do_buffer, buf, sizeof(buf));
+
+                if (bytes_read < sizeof(buf)) open_next_file = 1;
+
             }
 
             ++buffers_done;

@@ -39,7 +39,7 @@
 #define I2S_DMA_BUFFER_SAMPLES 1024
 #define I2S_DMA_BUFFER_SIZE 2 * 2 * I2S_DMA_BUFFER_SAMPLES // 2 full buffers L+R samples
 #define SAMPLE_FREQ 96000
-#define OUTPUT_MID 32768
+#define OUTPUT_MID 32767
 
 /* USER CODE END PD */
 
@@ -74,14 +74,15 @@ float angle[2] = {
         0
 };
 
-float angle_change[2] = { // Will be calculated from freq
+// Will be calculated from freq
+float angle_change[2] = {
         0,
-                0
-        };
+        0
+};
 
 float amplification[2] = {
-        0.8,
-        0.8
+        1,
+        0.25
 };
 
 int16_t i2s_dma_buffer[I2S_DMA_BUFFER_SIZE];
