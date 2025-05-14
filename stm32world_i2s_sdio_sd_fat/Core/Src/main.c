@@ -204,13 +204,19 @@ void process_character(char ch) {
     switch (ch) {
     case 'e':
         amplifier += 0.05;
-        if (amplifier > 1) amplifier = 1;
+        if (amplifier > 1)
+            amplifier = 1;
         printf("Amp = %0.2f\n", amplifier);
         break;
     case 'd':
         amplifier -= 0.05;
-        if (amplifier < 0) amplifier = 0;
+        if (amplifier < 0)
+            amplifier = 0;
         printf("Amp = %0.2f\n", amplifier);
+        break;
+    case 'f':
+        open_next_file = 1;
+        break;
     }
 
 }
@@ -339,40 +345,40 @@ FRESULT parse_wav_header(FIL *f, fmt_typedef *format) {
 /* USER CODE END 0 */
 
 /**
-  * @brief  The application entry point.
-  * @retval int
-  */
+ * @brief  The application entry point.
+ * @retval int
+ */
 int main(void)
 {
 
-  /* USER CODE BEGIN 1 */
+    /* USER CODE BEGIN 1 */
 
-  /* USER CODE END 1 */
+    /* USER CODE END 1 */
 
-  /* MCU Configuration--------------------------------------------------------*/
+    /* MCU Configuration--------------------------------------------------------*/
 
-  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
-  HAL_Init();
+    /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
+    HAL_Init();
 
-  /* USER CODE BEGIN Init */
+    /* USER CODE BEGIN Init */
 
-  /* USER CODE END Init */
+    /* USER CODE END Init */
 
-  /* Configure the system clock */
-  SystemClock_Config();
+    /* Configure the system clock */
+    SystemClock_Config();
 
-  /* USER CODE BEGIN SysInit */
+    /* USER CODE BEGIN SysInit */
 
-  /* USER CODE END SysInit */
+    /* USER CODE END SysInit */
 
-  /* Initialize all configured peripherals */
-  MX_GPIO_Init();
-  MX_DMA_Init();
-  MX_USART1_UART_Init();
-  MX_I2S2_Init();
-  MX_SDIO_SD_Init();
-  MX_FATFS_Init();
-  /* USER CODE BEGIN 2 */
+    /* Initialize all configured peripherals */
+    MX_GPIO_Init();
+    MX_DMA_Init();
+    MX_USART1_UART_Init();
+    MX_I2S2_Init();
+    MX_SDIO_SD_Init();
+    MX_FATFS_Init();
+    /* USER CODE BEGIN 2 */
 
     printf("\n\n\n---------------------\nStarting music player\n");
 
@@ -430,10 +436,10 @@ int main(void)
 
     HAL_UARTEx_ReceiveToIdle_DMA(&huart1, (uint8_t*) &usart_rx_buffer, 2 * sizeof(usart_rx_buffer));
 
-  /* USER CODE END 2 */
+    /* USER CODE END 2 */
 
-  /* Infinite loop */
-  /* USER CODE BEGIN WHILE */
+    /* Infinite loop */
+    /* USER CODE BEGIN WHILE */
 
     uint32_t now = 0, next_blink = 500, next_tick = 1000, loop_cnt = 0;
 
@@ -512,8 +518,6 @@ int main(void)
                 open_next_file = 0;
             }
 
-
-
         }
 
         if (do_buffer) {
@@ -546,115 +550,115 @@ int main(void)
 
         ++loop_cnt;
 
-    /* USER CODE END WHILE */
+        /* USER CODE END WHILE */
 
-    /* USER CODE BEGIN 3 */
+        /* USER CODE BEGIN 3 */
     }
-  /* USER CODE END 3 */
+    /* USER CODE END 3 */
 }
 
 /**
-  * @brief System Clock Configuration
-  * @retval None
-  */
+ * @brief System Clock Configuration
+ * @retval None
+ */
 void SystemClock_Config(void)
 {
-  RCC_OscInitTypeDef RCC_OscInitStruct = {0};
-  RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+    RCC_OscInitTypeDef RCC_OscInitStruct = { 0 };
+    RCC_ClkInitTypeDef RCC_ClkInitStruct = { 0 };
 
-  /** Configure the main internal regulator output voltage
-  */
-  __HAL_RCC_PWR_CLK_ENABLE();
-  __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
+    /** Configure the main internal regulator output voltage
+     */
+    __HAL_RCC_PWR_CLK_ENABLE();
+    __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
 
-  /** Initializes the RCC Oscillators according to the specified parameters
-  * in the RCC_OscInitTypeDef structure.
-  */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
-  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
-  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
-  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
-  RCC_OscInitStruct.PLL.PLLM = 8;
-  RCC_OscInitStruct.PLL.PLLN = 72;
-  RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
-  RCC_OscInitStruct.PLL.PLLQ = 3;
-  if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
-  {
-    Error_Handler();
-  }
+    /** Initializes the RCC Oscillators according to the specified parameters
+     * in the RCC_OscInitTypeDef structure.
+     */
+    RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+    RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+    RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+    RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
+    RCC_OscInitStruct.PLL.PLLM = 8;
+    RCC_OscInitStruct.PLL.PLLN = 72;
+    RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
+    RCC_OscInitStruct.PLL.PLLQ = 3;
+    if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
+            {
+        Error_Handler();
+    }
 
-  /** Initializes the CPU, AHB and APB buses clocks
-  */
-  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
-                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
-  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
-  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
-  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
-  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
+    /** Initializes the CPU, AHB and APB buses clocks
+     */
+    RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK
+            | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
+    RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+    RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+    RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
+    RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
-  {
-    Error_Handler();
-  }
+    if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
+            {
+        Error_Handler();
+    }
 }
 
 /**
-  * @brief I2S2 Initialization Function
-  * @param None
-  * @retval None
-  */
+ * @brief I2S2 Initialization Function
+ * @param None
+ * @retval None
+ */
 static void MX_I2S2_Init(void)
 {
 
-  /* USER CODE BEGIN I2S2_Init 0 */
+    /* USER CODE BEGIN I2S2_Init 0 */
 
-  /* USER CODE END I2S2_Init 0 */
+    /* USER CODE END I2S2_Init 0 */
 
-  /* USER CODE BEGIN I2S2_Init 1 */
+    /* USER CODE BEGIN I2S2_Init 1 */
 
-  /* USER CODE END I2S2_Init 1 */
-  hi2s2.Instance = SPI2;
-  hi2s2.Init.Mode = I2S_MODE_MASTER_TX;
-  hi2s2.Init.Standard = I2S_STANDARD_PHILIPS;
-  hi2s2.Init.DataFormat = I2S_DATAFORMAT_16B;
-  hi2s2.Init.MCLKOutput = I2S_MCLKOUTPUT_DISABLE;
-  hi2s2.Init.AudioFreq = I2S_AUDIOFREQ_96K;
-  hi2s2.Init.CPOL = I2S_CPOL_LOW;
-  hi2s2.Init.ClockSource = I2S_CLOCK_PLL;
-  hi2s2.Init.FullDuplexMode = I2S_FULLDUPLEXMODE_DISABLE;
-  if (HAL_I2S_Init(&hi2s2) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN I2S2_Init 2 */
+    /* USER CODE END I2S2_Init 1 */
+    hi2s2.Instance = SPI2;
+    hi2s2.Init.Mode = I2S_MODE_MASTER_TX;
+    hi2s2.Init.Standard = I2S_STANDARD_PHILIPS;
+    hi2s2.Init.DataFormat = I2S_DATAFORMAT_16B;
+    hi2s2.Init.MCLKOutput = I2S_MCLKOUTPUT_DISABLE;
+    hi2s2.Init.AudioFreq = I2S_AUDIOFREQ_96K;
+    hi2s2.Init.CPOL = I2S_CPOL_LOW;
+    hi2s2.Init.ClockSource = I2S_CLOCK_PLL;
+    hi2s2.Init.FullDuplexMode = I2S_FULLDUPLEXMODE_DISABLE;
+    if (HAL_I2S_Init(&hi2s2) != HAL_OK)
+            {
+        Error_Handler();
+    }
+    /* USER CODE BEGIN I2S2_Init 2 */
 
-  /* USER CODE END I2S2_Init 2 */
+    /* USER CODE END I2S2_Init 2 */
 
 }
 
 /**
-  * @brief SDIO Initialization Function
-  * @param None
-  * @retval None
-  */
+ * @brief SDIO Initialization Function
+ * @param None
+ * @retval None
+ */
 static void MX_SDIO_SD_Init(void)
 {
 
-  /* USER CODE BEGIN SDIO_Init 0 */
+    /* USER CODE BEGIN SDIO_Init 0 */
 
-  /* USER CODE END SDIO_Init 0 */
+    /* USER CODE END SDIO_Init 0 */
 
-  /* USER CODE BEGIN SDIO_Init 1 */
+    /* USER CODE BEGIN SDIO_Init 1 */
 
-  /* USER CODE END SDIO_Init 1 */
-  hsd.Instance = SDIO;
-  hsd.Init.ClockEdge = SDIO_CLOCK_EDGE_RISING;
-  hsd.Init.ClockBypass = SDIO_CLOCK_BYPASS_DISABLE;
-  hsd.Init.ClockPowerSave = SDIO_CLOCK_POWER_SAVE_DISABLE;
-  hsd.Init.BusWide = SDIO_BUS_WIDE_4B;
-  hsd.Init.HardwareFlowControl = SDIO_HARDWARE_FLOW_CONTROL_DISABLE;
-  hsd.Init.ClockDiv = 3;
-  /* USER CODE BEGIN SDIO_Init 2 */
+    /* USER CODE END SDIO_Init 1 */
+    hsd.Instance = SDIO;
+    hsd.Init.ClockEdge = SDIO_CLOCK_EDGE_RISING;
+    hsd.Init.ClockBypass = SDIO_CLOCK_BYPASS_DISABLE;
+    hsd.Init.ClockPowerSave = SDIO_CLOCK_POWER_SAVE_DISABLE;
+    hsd.Init.BusWide = SDIO_BUS_WIDE_4B;
+    hsd.Init.HardwareFlowControl = SDIO_HARDWARE_FLOW_CONTROL_DISABLE;
+    hsd.Init.ClockDiv = 3;
+    /* USER CODE BEGIN SDIO_Init 2 */
 
     // First init with 1B bus - SD card will not initialize with 4 bits
     hsd.Init.BusWide = SDIO_BUS_WIDE_1B;
@@ -667,115 +671,115 @@ static void MX_SDIO_SD_Init(void)
         Error_Handler();
     }
 
-  /* USER CODE END SDIO_Init 2 */
+    /* USER CODE END SDIO_Init 2 */
 
 }
 
 /**
-  * @brief USART1 Initialization Function
-  * @param None
-  * @retval None
-  */
+ * @brief USART1 Initialization Function
+ * @param None
+ * @retval None
+ */
 static void MX_USART1_UART_Init(void)
 {
 
-  /* USER CODE BEGIN USART1_Init 0 */
+    /* USER CODE BEGIN USART1_Init 0 */
 
-  /* USER CODE END USART1_Init 0 */
+    /* USER CODE END USART1_Init 0 */
 
-  /* USER CODE BEGIN USART1_Init 1 */
+    /* USER CODE BEGIN USART1_Init 1 */
 
-  /* USER CODE END USART1_Init 1 */
-  huart1.Instance = USART1;
-  huart1.Init.BaudRate = 2000000;
-  huart1.Init.WordLength = UART_WORDLENGTH_8B;
-  huart1.Init.StopBits = UART_STOPBITS_1;
-  huart1.Init.Parity = UART_PARITY_NONE;
-  huart1.Init.Mode = UART_MODE_TX_RX;
-  huart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
-  huart1.Init.OverSampling = UART_OVERSAMPLING_16;
-  if (HAL_UART_Init(&huart1) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN USART1_Init 2 */
+    /* USER CODE END USART1_Init 1 */
+    huart1.Instance = USART1;
+    huart1.Init.BaudRate = 2000000;
+    huart1.Init.WordLength = UART_WORDLENGTH_8B;
+    huart1.Init.StopBits = UART_STOPBITS_1;
+    huart1.Init.Parity = UART_PARITY_NONE;
+    huart1.Init.Mode = UART_MODE_TX_RX;
+    huart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+    huart1.Init.OverSampling = UART_OVERSAMPLING_16;
+    if (HAL_UART_Init(&huart1) != HAL_OK)
+            {
+        Error_Handler();
+    }
+    /* USER CODE BEGIN USART1_Init 2 */
 
-  /* USER CODE END USART1_Init 2 */
+    /* USER CODE END USART1_Init 2 */
 
 }
 
 /**
-  * Enable DMA controller clock
-  */
+ * Enable DMA controller clock
+ */
 static void MX_DMA_Init(void)
 {
 
-  /* DMA controller clock enable */
-  __HAL_RCC_DMA1_CLK_ENABLE();
-  __HAL_RCC_DMA2_CLK_ENABLE();
+    /* DMA controller clock enable */
+    __HAL_RCC_DMA1_CLK_ENABLE();
+    __HAL_RCC_DMA2_CLK_ENABLE();
 
-  /* DMA interrupt init */
-  /* DMA1_Stream4_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(DMA1_Stream4_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(DMA1_Stream4_IRQn);
-  /* DMA2_Stream2_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(DMA2_Stream2_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(DMA2_Stream2_IRQn);
-  /* DMA2_Stream3_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(DMA2_Stream3_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(DMA2_Stream3_IRQn);
-  /* DMA2_Stream6_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(DMA2_Stream6_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(DMA2_Stream6_IRQn);
+    /* DMA interrupt init */
+    /* DMA1_Stream4_IRQn interrupt configuration */
+    HAL_NVIC_SetPriority(DMA1_Stream4_IRQn, 0, 0);
+    HAL_NVIC_EnableIRQ(DMA1_Stream4_IRQn);
+    /* DMA2_Stream2_IRQn interrupt configuration */
+    HAL_NVIC_SetPriority(DMA2_Stream2_IRQn, 0, 0);
+    HAL_NVIC_EnableIRQ(DMA2_Stream2_IRQn);
+    /* DMA2_Stream3_IRQn interrupt configuration */
+    HAL_NVIC_SetPriority(DMA2_Stream3_IRQn, 0, 0);
+    HAL_NVIC_EnableIRQ(DMA2_Stream3_IRQn);
+    /* DMA2_Stream6_IRQn interrupt configuration */
+    HAL_NVIC_SetPriority(DMA2_Stream6_IRQn, 0, 0);
+    HAL_NVIC_EnableIRQ(DMA2_Stream6_IRQn);
 
 }
 
 /**
-  * @brief GPIO Initialization Function
-  * @param None
-  * @retval None
-  */
+ * @brief GPIO Initialization Function
+ * @param None
+ * @retval None
+ */
 static void MX_GPIO_Init(void)
 {
-  GPIO_InitTypeDef GPIO_InitStruct = {0};
-  /* USER CODE BEGIN MX_GPIO_Init_1 */
-  /* USER CODE END MX_GPIO_Init_1 */
+    GPIO_InitTypeDef GPIO_InitStruct = { 0 };
+    /* USER CODE BEGIN MX_GPIO_Init_1 */
+    /* USER CODE END MX_GPIO_Init_1 */
 
-  /* GPIO Ports Clock Enable */
-  __HAL_RCC_GPIOC_CLK_ENABLE();
-  __HAL_RCC_GPIOH_CLK_ENABLE();
-  __HAL_RCC_GPIOB_CLK_ENABLE();
-  __HAL_RCC_GPIOA_CLK_ENABLE();
-  __HAL_RCC_GPIOD_CLK_ENABLE();
+    /* GPIO Ports Clock Enable */
+    __HAL_RCC_GPIOC_CLK_ENABLE();
+    __HAL_RCC_GPIOH_CLK_ENABLE();
+    __HAL_RCC_GPIOB_CLK_ENABLE();
+    __HAL_RCC_GPIOA_CLK_ENABLE();
+    __HAL_RCC_GPIOD_CLK_ENABLE();
 
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);
+    /*Configure GPIO pin Output Level */
+    HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);
 
-  /*Configure GPIO pin : LED_Pin */
-  GPIO_InitStruct.Pin = LED_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(LED_GPIO_Port, &GPIO_InitStruct);
+    /*Configure GPIO pin : LED_Pin */
+    GPIO_InitStruct.Pin = LED_Pin;
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+    HAL_GPIO_Init(LED_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : BTN_Pin */
-  GPIO_InitStruct.Pin = BTN_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
-  GPIO_InitStruct.Pull = GPIO_PULLUP;
-  HAL_GPIO_Init(BTN_GPIO_Port, &GPIO_InitStruct);
+    /*Configure GPIO pin : BTN_Pin */
+    GPIO_InitStruct.Pin = BTN_Pin;
+    GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
+    GPIO_InitStruct.Pull = GPIO_PULLUP;
+    HAL_GPIO_Init(BTN_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : SD_DET_Pin */
-  GPIO_InitStruct.Pin = SD_DET_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(SD_DET_GPIO_Port, &GPIO_InitStruct);
+    /*Configure GPIO pin : SD_DET_Pin */
+    GPIO_InitStruct.Pin = SD_DET_Pin;
+    GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    HAL_GPIO_Init(SD_DET_GPIO_Port, &GPIO_InitStruct);
 
-  /* EXTI interrupt init*/
-  HAL_NVIC_SetPriority(EXTI0_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(EXTI0_IRQn);
+    /* EXTI interrupt init*/
+    HAL_NVIC_SetPriority(EXTI0_IRQn, 0, 0);
+    HAL_NVIC_EnableIRQ(EXTI0_IRQn);
 
-  /* USER CODE BEGIN MX_GPIO_Init_2 */
-  /* USER CODE END MX_GPIO_Init_2 */
+    /* USER CODE BEGIN MX_GPIO_Init_2 */
+    /* USER CODE END MX_GPIO_Init_2 */
 }
 
 /* USER CODE BEGIN 4 */
@@ -783,18 +787,18 @@ static void MX_GPIO_Init(void)
 /* USER CODE END 4 */
 
 /**
-  * @brief  This function is executed in case of error occurrence.
-  * @retval None
-  */
+ * @brief  This function is executed in case of error occurrence.
+ * @retval None
+ */
 void Error_Handler(void)
 {
-  /* USER CODE BEGIN Error_Handler_Debug */
+    /* USER CODE BEGIN Error_Handler_Debug */
     /* User can add his own implementation to report the HAL error return state */
     __disable_irq();
     while (1)
     {
     }
-  /* USER CODE END Error_Handler_Debug */
+    /* USER CODE END Error_Handler_Debug */
 }
 
 #ifdef  USE_FULL_ASSERT
