@@ -527,9 +527,9 @@ int main(void)
 
             if (f_read(&music_file, &buf, sizeof(buf), &bytes_read) == FR_OK) {
 
-                for (int i = 0; i < 2 * I2S_DMA_BUFFER_SAMPLES; ++i) {
-                    buf[i] = buf[i] * amplifier;
-                }
+//                for (int i = 0; i < 2 * I2S_DMA_BUFFER_SAMPLES; ++i) {
+//                    buf[i] = buf[i] * amplifier;
+//                }
 
                 memcpy(do_buffer, buf, sizeof(buf));
 
