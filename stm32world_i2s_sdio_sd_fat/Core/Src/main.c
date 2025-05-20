@@ -434,7 +434,7 @@ int main(void)
     //HAL_I2S_Transmit_DMA(&hi2s2, (uint16_t*) &i2s_dma_buffer, 2 * I2S_DMA_BUFFER_SAMPLES);
     HAL_I2S_Transmit_DMA(&hi2s2, (uint16_t*) &i2s_dma_buffer, I2S_DMA_BUFFER_SIZE);
 
-    HAL_UARTEx_ReceiveToIdle_DMA(&huart1, (uint8_t*) &usart_rx_buffer, 2 * sizeof(usart_rx_buffer));
+    HAL_UARTEx_ReceiveToIdle_DMA(&huart1, (uint8_t*) &usart_rx_buffer, sizeof(usart_rx_buffer));
 
     /* USER CODE END 2 */
 
@@ -527,9 +527,9 @@ int main(void)
 
             if (f_read(&music_file, &buf, sizeof(buf), &bytes_read) == FR_OK) {
 
-//                for (int i = 0; i < 2 * I2S_DMA_BUFFER_SAMPLES; ++i) {
-//                    buf[i] = buf[i] * amplifier;
-//                }
+                for (int i = 0; i < 2 * I2S_DMA_BUFFER_SAMPLES; ++i) {
+                    buf[i] = buf[i] * amplifier;
+                }
 
                 memcpy(do_buffer, buf, sizeof(buf));
 
