@@ -24,8 +24,6 @@
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
 #include <string.h>
-//#include <math.h>
-//#include "arm_math.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -136,56 +134,50 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
     }
 }
 
-void ls() {
+void set_i2s_freq(uint32_t freq) {
 
-    char *path;
+    printf("Setting I2S sample frequency to: %lu\n", freq);
 
-    path = ""; // where you want to list
+    // Stop the DMA transfers
+    HAL_I2S_DMAStop(&hi2s2);
 
-    res = f_opendir(&dir, path);
+    // Deinit
+    HAL_I2S_DeInit(&hi2s2);
 
-#ifdef DEBUG
-    if (res != FR_OK)
-        printf("res = %d f_opendir\n", res);
-#endif
+    if (freq > 0) {
 
-    if (res == FR_OK) {
-        while (1) {
+        hi2s2.Init.AudioFreq = freq;
 
-            FILINFO fno;
+        HAL_I2S_Init(&hi2s2);
 
-            res = f_readdir(&dir, &fno);
-
-#ifdef DEBUG
-            if (res != FR_OK)
-                printf("res = %d f_readdir\n", res);
-#endif
-
-            if ((res != FR_OK) || (fno.fname[0] == 0))
-                break;
-
-            printf("%c%c%c%c %10d %s/%s\n",
-                    ((fno.fattrib & AM_DIR) ? 'D' : '-'),
-                    ((fno.fattrib & AM_RDO) ? 'R' : '-'),
-                    ((fno.fattrib & AM_SYS) ? 'S' : '-'),
-                    ((fno.fattrib & AM_HID) ? 'H' : '-'),
-                    (int) fno.fsize, path, fno.fname);
-        }
+        HAL_I2S_Transmit_DMA(&hi2s2, (uint16_t*) &i2s_dma_buffer, I2S_DMA_BUFFER_SIZE);
 
     }
 
-    uint32_t free_clusters;
-    FATFS *fs_ptr;
+}
 
-    res = f_getfree("", &free_clusters, &fs_ptr);
-    if (res == FR_OK) {
-        uint32_t totalBlocks = (fs_ptr->n_fatent - 2) * fs_ptr->csize;
-        uint32_t freeBlocks = free_clusters * fs_ptr->csize;
+void process_buffer(int16_t *target_buffer) {
 
-        printf("Total blocks: %lu (%lu Mb)\n", totalBlocks, totalBlocks / 2000);
-        printf("Free blocks : %lu (%lu Mb)\n", freeBlocks, freeBlocks / 2000);
-    } else {
-        printf("Unable to get free space\n");
+    int16_t buf[2 * I2S_DMA_BUFFER_SAMPLES] = { 0 };
+    unsigned int bytes_read = 0;
+
+    if (f_read(&music_file, &buf, sizeof(buf), &bytes_read) == FR_OK) {
+
+        for (int i = 0; i < 2 * I2S_DMA_BUFFER_SAMPLES; ++i) {
+            buf[i] = buf[i] * amplifier;
+        }
+
+        memcpy(target_buffer, buf, sizeof(buf));
+
+        if (bytes_read < sizeof(buf)) {
+
+            printf("File done!\n");
+
+            set_i2s_freq(0);
+
+            open_next_file = 1;
+        }
+
     }
 
 }
@@ -199,17 +191,16 @@ void HAL_I2S_TxHalfCpltCallback(I2S_HandleTypeDef *hi2s) {
 }
 
 void process_character(char ch) {
-    //printf("Received: %02x\n", ch);
 
     switch (ch) {
     case 'e':
-        amplifier += 0.05;
+        amplifier += 0.01;
         if (amplifier > 1)
             amplifier = 1;
         printf("Amp = %0.2f\n", amplifier);
         break;
     case 'd':
-        amplifier -= 0.05;
+        amplifier -= 0.01;
         if (amplifier < 0)
             amplifier = 0;
         printf("Amp = %0.2f\n", amplifier);
@@ -252,42 +243,16 @@ uint8_t BSP_SD_IsDetected(void)
 {
     __IO uint8_t status = SD_PRESENT;
 
-//    if (HAL_GPIO_ReadPin(SD_DETECT_GPIO_PORT, SD_DETECT_PIN) != GPIO_PIN_RESET) {
-//        status = SD_NOT_PRESENT;
-//    }
+    if (HAL_GPIO_ReadPin(SD_DETECT_GPIO_PORT, SD_DETECT_PIN) != GPIO_PIN_RESET) {
+        status = SD_NOT_PRESENT;
+    }
 
     return status;
 }
 
-void set_i2s_freq(uint32_t freq) {
-
-    printf("Setting I2S sample frequency to: %lu\n", freq);
-
-    // Stop the DMA transfers
-    HAL_I2S_DMAStop(&hi2s2);
-
-    // Deinit
-    HAL_I2S_DeInit(&hi2s2);
-
-    if (freq > 0) {
-
-        hi2s2.Init.AudioFreq = freq;
-
-        HAL_I2S_Init(&hi2s2);
-
-        //set_angle_changes();
-
-        // Restart DMA
-        //HAL_I2S_DMAResume(&hi2s2);
-        HAL_I2S_Transmit_DMA(&hi2s2, (uint16_t*) &i2s_dma_buffer, I2S_DMA_BUFFER_SIZE);
-
-    }
-
-}
-
 FRESULT parse_wav_header(FIL *f, fmt_typedef *format) {
 
-    char buf[1024];  // 512 bytes for header - enough?
+    char buf[512];  // 512 bytes for header - enough?
     unsigned int n;
 
     if (f_read(f, &buf, sizeof(buf), &n) != FR_OK && n < sizeof(buf)) {
@@ -314,7 +279,7 @@ FRESULT parse_wav_header(FIL *f, fmt_typedef *format) {
 
     memcpy(format, &buf[20], sizeof(fmt_typedef));
 
-    //char *data_pos = strstr(buf, "data");
+    //char *data_pos = strstr(buf, "data"); // Consistantly fails
     int data_offset = 0;
     for (size_t i = 0; i <= sizeof(buf) - 4; ++i) {
         if (memcmp(buf + i, "data", 4) == 0) {
@@ -421,17 +386,12 @@ int main(void)
 
     //total_uptime = 0;
 
+    printf("Total uptime reported = %lu\n", total_uptime);
+
     res = f_findfirst(&dir, &music_file_info, "", "*.wav");
 
     printf("Found: %s\n", music_file_info.fname);
 
-    //ls();
-
-    printf("Total uptime reported = %lu\n", total_uptime);
-
-    //set_angle_changes();
-
-    //HAL_I2S_Transmit_DMA(&hi2s2, (uint16_t*) &i2s_dma_buffer, 2 * I2S_DMA_BUFFER_SAMPLES);
     HAL_I2S_Transmit_DMA(&hi2s2, (uint16_t*) &i2s_dma_buffer, I2S_DMA_BUFFER_SIZE);
 
     HAL_UARTEx_ReceiveToIdle_DMA(&huart1, (uint8_t*) &usart_rx_buffer, sizeof(usart_rx_buffer));
@@ -462,7 +422,7 @@ int main(void)
 
                 ++total_uptime;
 
-                //printf("Updating total uptime to %lu minutes\n", total_uptime);
+                printf("Updating total uptime to %lu minutes\n", total_uptime);
 
                 // Update the total uptime file
                 if (f_open(&SDFile, total_uptime_filename, FA_OPEN_EXISTING | FA_WRITE) == FR_OK) {
@@ -504,7 +464,7 @@ int main(void)
 
             if (parse_wav_header(&music_file, &wav_format) != FR_OK) {
                 printf("Unable to parse header\n");
-
+                open_next_file = 1;
             } else {
 
                 printf("Wav format: %d\n", wav_format.format);
@@ -515,6 +475,7 @@ int main(void)
                 printf("Wav bits per sample: %d\n", wav_format.bits_per_sample);
 
                 set_i2s_freq(wav_format.frequency);
+
                 open_next_file = 0;
             }
 
@@ -522,27 +483,7 @@ int main(void)
 
         if (do_buffer) {
 
-            int16_t buf[2 * I2S_DMA_BUFFER_SAMPLES] = { 0 };
-            unsigned int bytes_read = 0;
-
-            if (f_read(&music_file, &buf, sizeof(buf), &bytes_read) == FR_OK) {
-
-                for (int i = 0; i < 2 * I2S_DMA_BUFFER_SAMPLES; ++i) {
-                    buf[i] = buf[i] * amplifier;
-                }
-
-                memcpy(do_buffer, buf, sizeof(buf));
-
-                if (bytes_read < sizeof(buf)) {
-
-                    printf("File done!\n");
-
-                    set_i2s_freq(0);
-
-                    open_next_file = 1;
-                }
-
-            }
+            process_buffer(do_buffer);
 
             ++buffers_done;
             do_buffer = 0;
@@ -657,7 +598,7 @@ static void MX_SDIO_SD_Init(void)
     hsd.Init.ClockPowerSave = SDIO_CLOCK_POWER_SAVE_DISABLE;
     hsd.Init.BusWide = SDIO_BUS_WIDE_4B;
     hsd.Init.HardwareFlowControl = SDIO_HARDWARE_FLOW_CONTROL_DISABLE;
-    hsd.Init.ClockDiv = 3;
+    hsd.Init.ClockDiv = 4;
     /* USER CODE BEGIN SDIO_Init 2 */
 
     // First init with 1B bus - SD card will not initialize with 4 bits
@@ -771,7 +712,7 @@ static void MX_GPIO_Init(void)
     /*Configure GPIO pin : SD_DET_Pin */
     GPIO_InitStruct.Pin = SD_DET_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Pull = GPIO_PULLDOWN;
     HAL_GPIO_Init(SD_DET_GPIO_Port, &GPIO_InitStruct);
 
     /* EXTI interrupt init*/
