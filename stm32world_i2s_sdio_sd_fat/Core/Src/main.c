@@ -42,7 +42,7 @@ typedef struct {
 /* USER CODE BEGIN PD */
 
 //#define TAU 6.28318530717958647692
-#define I2S_DMA_BUFFER_SAMPLES 512
+#define I2S_DMA_BUFFER_SAMPLES 256
 #define I2S_DMA_BUFFER_SIZE 2 * 2 * I2S_DMA_BUFFER_SAMPLES // 2 full buffers L+R samples
 #define SAMPLE_FREQ 96000
 #define OUTPUT_MID 32768
@@ -388,9 +388,9 @@ int main(void)
 
     printf("Total uptime reported = %lu\n", total_uptime);
 
-    res = f_findfirst(&dir, &music_file_info, "", "*.wav");
-
-    printf("Found: %s\n", music_file_info.fname);
+    // These were in the video but commented out as they are redundant - the open next will handle
+    //res = f_findfirst(&dir, &music_file_info, "", "*.wav");
+    //printf("Found: %s\n", music_file_info.fname);
 
     HAL_I2S_Transmit_DMA(&hi2s2, (uint16_t*) &i2s_dma_buffer, I2S_DMA_BUFFER_SIZE);
 
