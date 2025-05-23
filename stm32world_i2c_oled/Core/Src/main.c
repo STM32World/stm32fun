@@ -109,7 +109,7 @@ void drawLines()
         ssd1306_UpdateScreen();
         HAL_Delay(10);
     }
-    HAL_Delay(250);
+    HAL_Delay(500);
 
     ssd1306_Clear();
     for (int16_t i = 0; i < ssd1306_GetWidth(); i += 4)
@@ -146,7 +146,7 @@ void drawLines()
         ssd1306_UpdateScreen();
         HAL_Delay(10);
     }
-    for (int16_t i = 0; i < ssd1306_GetWidth(); i += 4)
+    for (int16_t i = ssd1306_GetWidth(); i >= 0; i -= 4)
             {
         ssd1306_DrawLine(ssd1306_GetWidth() - 1, 0, i, ssd1306_GetHeight() - 1);
         ssd1306_UpdateScreen();
@@ -317,12 +317,12 @@ int main(void)
             uint32_t start = uwTick;
             ssd1306_ShiftLeft();
             ssd1306_UpdateScreen();
-            printf("LShift t = %lu\n", uwTick - start);
+            //printf("LShift t = %lu\n", uwTick - start);
             HAL_Delay(5);
         }
 
         drawLines();
-        HAL_Delay(1000);
+        HAL_Delay(500);
         ssd1306_Clear();
 
         drawRect();

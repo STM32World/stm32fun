@@ -5,7 +5,7 @@
  ******************************************************************************
  * @attention
  *
- * Copyright (c) 2024 Lars Boegild Thomsen <lbthomsen@gmail.com>
+ * Copyright (c) 2025 Lars Boegild Thomsen <lbthomsen@gmail.com>
  * Copyright (c) 2019 Andriy Honcharenko
  * Copyright (c) 2021 Roberto Benjami
  * All rights reserved.

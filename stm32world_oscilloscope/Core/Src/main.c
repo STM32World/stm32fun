@@ -66,11 +66,11 @@ UART_HandleTypeDef huart1;
 /* USER CODE BEGIN PV */
 
 const float demo_values[][2] = {
-        {1, 0.9},
-        {2, 0.9},
-        {2, 0.2},
-        {4, 0.9},
-        {0.5, 0.5}
+        { 1, 0.9 },
+        { 2, 0.9 },
+        { 2, 0.2 },
+        { 4, 0.9 },
+        { 0.5, 0.5 }
 };
 
 uint8_t demo_value = 0;
@@ -137,30 +137,6 @@ static inline void do_dac(uint16_t *buffer) {
 }
 
 void do_adc(uint16_t *buffer) {
-
-//    uint32_t temp_sum = 0, vref_sum = 0, vbat_sum = 0;
-//
-//    //if (cb % 50 == 0) HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-//
-//    for (int i = 0; i < DMA_SAMPLES; ++i) {
-//        temp_sum += buffer[0];
-//        vref_sum += buffer[1];
-//        vbat_sum += buffer[2];
-//        buffer += 3;
-//    }
-//
-//    temp_avg = temp_sum / DMA_SAMPLES;
-//    vref_avg = vref_sum / DMA_SAMPLES;
-//    vbat_avg = vbat_sum / DMA_SAMPLES;
-//
-//    // VDDA can be calculated based on the measured vref and the calibration data
-//    vdda = (float) VREFINT_CAL_VREF * (float) *VREFINT_CAL_ADDR / vref_avg / 1000;
-//
-//    // Knowing vdda and the resolution of adc - the actual voltage can be calculated
-//    vref = (float) vdda / ADC_RESOLUTION * vref_avg;
-//
-//    // Temperature can be calculated based on the
-//    temp = (float) ((float) ((float) (TEMPSENSOR_CAL2_TEMP - TEMPSENSOR_CAL1_TEMP) / (float) (*TEMPSENSOR_CAL2_ADDR - *TEMPSENSOR_CAL1_ADDR)) * (temp_avg - *TEMPSENSOR_CAL1_ADDR) + TEMPSENSOR_CAL1_TEMP);
 
     memcpy(sample_buffer, sample_buffer[DMA_BUFFER_SIZE], 2 * DMA_BUFFER_SIZE * (SAMPLE_BUFFER_COUNT - 1));
     memcpy(sample_buffer[DMA_BUFFER_SIZE * (SAMPLE_BUFFER_COUNT - 1)], buffer, DMA_BUFFER_SIZE * 2);
@@ -307,7 +283,8 @@ int main(void)
             angle_change = demo_values[demo_value][0] * (2 * M_PI / SAMPLE_FREQ);
             amplifier = demo_values[demo_value][1];
             ++demo_value;
-            if (demo_value >= sizeof(demo_values) / sizeof(demo_values[0])) demo_value = 0;
+            if (demo_value >= sizeof(demo_values) / sizeof(demo_values[0]))
+                demo_value = 0;
             next_demo = now + 5000;
         }
 
