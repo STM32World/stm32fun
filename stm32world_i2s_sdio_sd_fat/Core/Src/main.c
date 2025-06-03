@@ -187,7 +187,7 @@ void HAL_I2S_TxCpltCallback(I2S_HandleTypeDef *hi2s) {
 }
 
 void HAL_I2S_TxHalfCpltCallback(I2S_HandleTypeDef *hi2s) {
-    do_buffer = &i2s_dma_buffer[0]; // Second half
+    do_buffer = &i2s_dma_buffer[0]; // First half
 }
 
 void process_character(char ch) {
