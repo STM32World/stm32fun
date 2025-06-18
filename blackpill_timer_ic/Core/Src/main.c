@@ -215,7 +215,7 @@ int main(void)
                 pwm_vals_idx = 0;
             }
 
-            next_change = now + 10000;
+            next_change = now + 1000;
         }
 
         ++loop_cnt;
