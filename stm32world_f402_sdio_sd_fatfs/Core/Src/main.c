@@ -52,7 +52,7 @@ UART_HandleTypeDef huart1;
 const char total_uptime_filename[] = "uptime.dat";
 const char tick_filename[] = "tick.txt";
 const char big_filename[] = "big.dat";
-uint32_t total_uptime;
+uint64_t total_uptime;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -205,7 +205,7 @@ int main(void)
 
     if (f_open(&SDFile, total_uptime_filename, FA_OPEN_EXISTING | FA_READ) == FR_OK) {
         if (f_read(&SDFile, &total_uptime, sizeof(total_uptime), (void*) &rbytes) == FR_OK) {
-            printf("Total uptime = %lu\n", total_uptime);
+            printf("Total uptime = %llu\n", total_uptime);
             f_close(&SDFile);
         } else {
             printf("Unable to read\n");
@@ -272,7 +272,7 @@ int main(void)
 
             char s[128];
 
-            sprintf(s, "Tick %lu (loop = %lu total = %lu)\n", now / 1000, loop_cnt, total_uptime);
+            sprintf(s, "Tick %lu (loop = %lu total = %llu)\n", now / 1000, loop_cnt, total_uptime);
 
             printf("%s", s);
 
