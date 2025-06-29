@@ -96,20 +96,19 @@ static BYTE xchg_spi(
         )
 {
     BYTE rxDat;
-    HAL_SPI_TransmitReceive(&SD_SPI_HANDLE, &dat, &rxDat, 1, 50);
+
+//    HAL_SPI_TransmitReceive(&SD_SPI_HANDLE, &dat, &rxDat, 1, 50);
+
+    SPI1->CR1 |= SPI_CR1_SPE;               //enable SPI1
+    SPI1->DR = dat;                        // Write data to be transmitted to the SPI data register
+    while (!(SD_SPI_HANDLE.Instance->SR & (SPI_SR_TXE)));     // Wait until transmit complete
+    while (!(SD_SPI_HANDLE.Instance->SR & (SPI_SR_RXNE)));    // Wait until receive complete
+    while (SD_SPI_HANDLE.Instance->SR & (SPI_SR_BSY));        // Wait until SPI is not busy anymore
+
+    rxDat = SPI1->DR;
+
     return rxDat;
 
-//    // THIS FUNCTION IS NOTORIOUSLY SLOW
-//        // HAL_SPI_TransmitReceive(&SD_SPI_HANDLE, &dat, &rxDat, 1, 50);
-//
-//    // MAKE SURE SPI IS ENABLED ~ YOU CAN ALSO PUT THIS AT THE END OF YOUR MX_SPI_Init()
-//    if ((SD_SPI_HANDLE.Instance->CR1 & SPI_CR1_SPE) != SPI_CR1_SPE) __HAL_SPI_ENABLE(&SD_SPI_HANDLE);
-//
-//    while (0 == (SD_SPI_HANDLE.Instance->SR & SPI_SR_TXE));
-//    *(uint8_t*) &(SD_SPI_HANDLE.Instance->DR) = dat;
-//    while (0 == (SD_SPI_HANDLE.Instance->SR & SPI_SR_RXNE));
-//    rxDat = *(volatile uint8_t*) &SD_SPI_HANDLE.Instance->DR;
-//    return rxDat;
 }
 
 /* Receive multiple byte */

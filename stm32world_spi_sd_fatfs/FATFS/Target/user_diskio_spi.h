@@ -6,7 +6,7 @@
  ******************************************************************************
  * Portions copyright (C) 2014, ChaN, all rights reserved.
  * Portions copyright (C) 2017, kiwih, all rights reserved.
- * Portions copyright (C) 2024, Lars Boegild Thomsen <lbthomsen@gmail.com>
+ * Portions copyright (C) 2024, Lars Boegild Thomsen <lth@stm32world.com>
  *
  * This software is a free software and there is NO WARRANTY.
  * No restriction on use. You can use, modify and redistribute it for

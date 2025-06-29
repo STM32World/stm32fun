@@ -6,7 +6,7 @@
  ******************************************************************************
  * @attention
  *
- * Copyright (c) 2024 Lars Boegild Thomsen <lbthomsen@gmail.com>
+ * Copyright (c) 2024 Lars Boegild Thomsen <lth@stm32world.com>
  * All rights reserved.
  *
  * This software is licensed under terms that can be found in the LICENSE file
@@ -217,7 +217,7 @@ int main(void)
 
     uint32_t start = uwTick;
     if (f_open(&USERFile, big_filename, FA_CREATE_ALWAYS | FA_WRITE) == FR_OK) {
-        for (uint16_t i = 0; i < 100; ++i) {
+        for (uint16_t i = 0; i < 256; ++i) {
             if (f_write(&USERFile, &buf, sizeof(buf), (void*) &wbytes) != FR_OK) {
                 printf("Unable to write\n");
             }
