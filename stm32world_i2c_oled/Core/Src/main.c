@@ -6,7 +6,7 @@
  ******************************************************************************
  * @attention
  *
- * Copyright (c) 2025 Lars Boegild Thomsen <lbthomsen@gmail.com>
+ * Copyright (c) 2025 Lars Boegild Thomsen <lth@stm32world.com>
  * All rights reserved.
  *
  * This software is licensed under terms that can be found in the LICENSE file
@@ -314,7 +314,7 @@ int main(void)
         HAL_Delay(500);
 
         for (int i = 0; i < 128; ++i) {
-            uint32_t start = uwTick;
+            //uint32_t start = uwTick;
             ssd1306_ShiftLeft();
             ssd1306_UpdateScreen();
             //printf("LShift t = %lu\n", uwTick - start);
@@ -554,8 +554,7 @@ void Error_Handler(void)
     }
     /* USER CODE END Error_Handler_Debug */
 }
-
-#ifdef  USE_FULL_ASSERT
+#ifdef USE_FULL_ASSERT
 /**
   * @brief  Reports the name of the source file and the source line number
   *         where the assert_param error has occurred.

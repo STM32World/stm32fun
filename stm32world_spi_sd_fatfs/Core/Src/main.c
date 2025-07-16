@@ -172,6 +172,7 @@ int main(void)
   /* USER CODE BEGIN 2 */
 
     HAL_Delay(100);
+
     printf("\n\n\n\n--------\nStarting\n");
 
     uint32_t wbytes, rbytes; /* File write counts */
@@ -217,8 +218,8 @@ int main(void)
 
     uint32_t start = uwTick;
     if (f_open(&USERFile, big_filename, FA_CREATE_ALWAYS | FA_WRITE) == FR_OK) {
-        for (int i = 0; i < 100; ++i) { // 100 kB
-            printf("Writing buf %d\n", i);
+        for (int i = 0; i < 512; ++i) { // 100 kB
+            //printf("Writing buf %d\n", i);
             if (f_write(&USERFile, &buf, sizeof(buf), (void*) &wbytes) != FR_OK) {
                 printf("Unable to write\n");
             }
@@ -375,7 +376,7 @@ static void MX_SPI1_Init(void)
   hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;
   hspi1.Init.CLKPhase = SPI_PHASE_1EDGE;
   hspi1.Init.NSS = SPI_NSS_SOFT;
-  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
+  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_4;
   hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
   hspi1.Init.TIMode = SPI_TIMODE_DISABLE;
   hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;

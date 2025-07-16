@@ -100,8 +100,12 @@ static BYTE xchg_spi(
 //    HAL_SPI_TransmitReceive(&SD_SPI_HANDLE, &dat, &rxDat, 1, 50);
 
     SD_SPI_HANDLE.Instance->CR1 |= SPI_CR1_SPE;               // enable SPI1
+
+    //while (SD_SPI_HANDLE.Instance->SR & (SPI_SR_BSY));        // Wait until SPI is not busy anymore
+
     SD_SPI_HANDLE.Instance->DR = dat;                         // Write data to be transmitted to the SPI data register
     while (!(SD_SPI_HANDLE.Instance->SR & (SPI_SR_TXE)));     // Wait until transmit complete
+
     while (!(SD_SPI_HANDLE.Instance->SR & (SPI_SR_RXNE)));    // Wait until receive complete
     while (SD_SPI_HANDLE.Instance->SR & (SPI_SR_BSY));        // Wait until SPI is not busy anymore
 

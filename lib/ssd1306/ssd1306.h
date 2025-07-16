@@ -97,6 +97,7 @@ typedef enum {
   GEOMETRY_128_64 = 0,
   GEOMETRY_128_32 = 1
 } SSD1306_Geometry;
+
 //
 //  Struct to store transformations
 //
