@@ -97,7 +97,7 @@ static BYTE xchg_spi(
 {
     BYTE rxDat;
 
-//    HAL_SPI_TransmitReceive(&SD_SPI_HANDLE, &dat, &rxDat, 1, 50);
+    HAL_SPI_TransmitReceive(&SD_SPI_HANDLE, &dat, &rxDat, Size: 1, Timeout: 50);
 
     SD_SPI_HANDLE.Instance->CR1 |= SPI_CR1_SPE;               // enable SPI1
 
