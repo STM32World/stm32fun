@@ -91,7 +91,19 @@
 __ALIGN_BEGIN static uint8_t CUSTOM_HID_ReportDesc_FS[USBD_CUSTOM_HID_REPORT_DESC_SIZE] __ALIGN_END =
 {
   /* USER CODE BEGIN 0 */
-  0x00,
+  0x06, 0x00, 0xff,             // Usage page (vendor defined page 1)
+  0x09, 0x01,                   // Usage (vendor defined 1)
+  0xa1, 0x01,                   // collection application
+  // Input report
+  0x09, 0x02,                   // Usage (vendor defined 2)
+  0x75, 0x08,                   // Report size (8)
+  0x95, CUSTOM_HID_EPIN_SIZE,   // Report count(1)
+  0x81, 0x02,                   // Input (data, array, abs)
+  // Output report
+  0x09, 0x02,                   // Usage (vendor defined 2)
+  0x75, 0x08,                   // Report size (8)
+  0x95, CUSTOM_HID_EPOUT_SIZE,  // Report count(1)
+  0x91, 0x02,                   // Input (data, array, abs)
   /* USER CODE END 0 */
   0xC0    /*     END_COLLECTION	             */
 };

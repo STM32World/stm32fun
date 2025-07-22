@@ -24,6 +24,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "usb_device.h"
+#include "usbd_customhid.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -45,6 +46,9 @@
 UART_HandleTypeDef huart1;
 
 PCD_HandleTypeDef hpcd_USB_OTG_FS;
+
+extern USBD_HandleTypeDef hUsbDeviceFS;
+uint8_t usbTxBuffer[CUSTOM_HID_EPIN_SIZE] = {0};
 
 /* USER CODE BEGIN PV */
 
