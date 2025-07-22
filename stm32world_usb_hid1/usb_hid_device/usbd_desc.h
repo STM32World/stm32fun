@@ -1,21 +1,21 @@
 /* USER CODE BEGIN Header */
 /**
-  ******************************************************************************
-  * @file           : usbd_desc.c
-  * @version        : v1.0_Cube
-  * @brief          : Header for usbd_conf.c file.
-  ******************************************************************************
-  * @attention
-  *
-  * Copyright (c) 2025 STMicroelectronics.
-  * All rights reserved.
-  *
-  * This software is licensed under terms that can be found in the LICENSE file
-  * in the root directory of this software component.
-  * If no LICENSE file comes with this software, it is provided AS-IS.
-  *
-  ******************************************************************************
-  */
+ ******************************************************************************
+ * @file           : usbd_desc.c
+ * @version        : v1.0_Cube
+ * @brief          : Header for usbd_conf.c file.
+ ******************************************************************************
+ * @attention
+ *
+ * Copyright (c) 2025 STMicroelectronics.
+ * All rights reserved.
+ *
+ * This software is licensed under terms that can be found in the LICENSE file
+ * in the root directory of this software component.
+ * If no LICENSE file comes with this software, it is provided AS-IS.
+ *
+ ******************************************************************************
+ */
 /* USER CODE END Header */
 /* Define to prevent recursive inclusion -------------------------------------*/
 #ifndef __USBD_DESC__C__
@@ -33,13 +33,13 @@
 /* USER CODE END INCLUDE */
 
 /** @addtogroup STM32_USB_OTG_DEVICE_LIBRARY
-  * @{
-  */
+ * @{
+ */
 
 /** @defgroup USBD_DESC USBD_DESC
-  * @brief Usb device descriptors module.
-  * @{
-  */
+ * @brief Usb device descriptors module.
+ * @{
+ */
 
 /*
  * User to provide a unique ID to define the USB device serial number
@@ -56,52 +56,52 @@
 /* USER CODE END EXPORTED_CONSTANTS */
 
 /**
-  * @}
-  */
+ * @}
+ */
 
 /** @defgroup USBD_DESC_Exported_Defines USBD_DESC_Exported_Defines
-  * @brief Defines.
-  * @{
-  */
+ * @brief Defines.
+ * @{
+ */
 
 /* USER CODE BEGIN EXPORTED_DEFINES */
 
 /* USER CODE END EXPORTED_DEFINES */
 
 /**
-  * @}
-  */
+ * @}
+ */
 
 /** @defgroup USBD_DESC_Exported_TypesDefinitions USBD_DESC_Exported_TypesDefinitions
-  * @brief Types.
-  * @{
-  */
+ * @brief Types.
+ * @{
+ */
 
 /* USER CODE BEGIN EXPORTED_TYPES */
 
 /* USER CODE END EXPORTED_TYPES */
 
 /**
-  * @}
-  */
+ * @}
+ */
 
 /** @defgroup USBD_DESC_Exported_Macros USBD_DESC_Exported_Macros
-  * @brief Aliases.
-  * @{
-  */
+ * @brief Aliases.
+ * @{
+ */
 
 /* USER CODE BEGIN EXPORTED_MACRO */
 
 /* USER CODE END EXPORTED_MACRO */
 
 /**
-  * @}
-  */
+ * @}
+ */
 
 /** @defgroup USBD_DESC_Exported_Variables USBD_DESC_Exported_Variables
-  * @brief Public variables.
-  * @{
-  */
+ * @brief Public variables.
+ * @{
+ */
 
 /** Descriptor for the Usb device. */
 extern USBD_DescriptorsTypeDef FS_Desc;
@@ -111,29 +111,29 @@ extern USBD_DescriptorsTypeDef FS_Desc;
 /* USER CODE END EXPORTED_VARIABLES */
 
 /**
-  * @}
-  */
+ * @}
+ */
 
 /** @defgroup USBD_DESC_Exported_FunctionsPrototype USBD_DESC_Exported_FunctionsPrototype
-  * @brief Public functions declaration.
-  * @{
-  */
+ * @brief Public functions declaration.
+ * @{
+ */
 
 /* USER CODE BEGIN EXPORTED_FUNCTIONS */
 
 /* USER CODE END EXPORTED_FUNCTIONS */
 
 /**
-  * @}
-  */
+ * @}
+ */
 
 /**
-  * @}
-  */
+ * @}
+ */
 
 /**
-  * @}
-  */
+ * @}
+ */
 
 #ifdef __cplusplus
 }
