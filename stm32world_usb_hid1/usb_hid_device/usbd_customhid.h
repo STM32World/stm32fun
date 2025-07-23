@@ -111,7 +111,7 @@ typedef struct _USBD_CUSTOM_HID_Itf
 #ifdef USBD_CUSTOMHID_REPORT_BUFFER_EVENT_ENABLED
   int8_t (* OutEvent)(uint8_t *report_buffer);
 #else
-  int8_t (* OutEvent)(uint8_t event_idx, uint8_t state);
+  int8_t (* OutEvent)(uint8_t *buffer);
 #endif /* USBD_CUSTOMHID_REPORT_BUFFER_EVENT_ENABLED */
 #ifdef USBD_CUSTOMHID_CTRL_REQ_COMPLETE_CALLBACK_ENABLED
   int8_t (* CtrlReqComplete)(uint8_t request, uint16_t wLength);
