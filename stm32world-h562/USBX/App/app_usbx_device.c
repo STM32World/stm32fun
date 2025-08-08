@@ -55,11 +55,8 @@ static ULONG hid_custom_interface_number;
 static ULONG hid_custom_configuration_number;
 static ULONG cdc_acm_interface_number;
 static ULONG cdc_acm_configuration_number;
-static ULONG dfu_interface_number;
-static ULONG dfu_configuration_number;
 static UX_SLAVE_CLASS_HID_PARAMETER custom_hid_parameter;
 static UX_SLAVE_CLASS_CDC_ACM_PARAMETER cdc_acm_parameter;
-static UX_SLAVE_CLASS_DFU_PARAMETER dfu_parameter;
 
 /* USER CODE BEGIN PV */
 
@@ -196,41 +193,6 @@ UINT MX_USBX_Device_Init(VOID)
     /* USER CODE BEGIN USBX_DEVICE_CDC_ACM_REGISTER_ERROR */
     return UX_ERROR;
     /* USER CODE END USBX_DEVICE_CDC_ACM_REGISTER_ERROR */
-  }
-
-  /* Initialize the dfu class parameters for the device */
-  dfu_parameter.ux_slave_class_dfu_parameter_instance_activate   = USBD_DFU_Activate;
-  dfu_parameter.ux_slave_class_dfu_parameter_instance_deactivate = USBD_DFU_Deactivate;
-  dfu_parameter.ux_slave_class_dfu_parameter_get_status          = USBD_DFU_GetStatus;
-  dfu_parameter.ux_slave_class_dfu_parameter_read                = USBD_DFU_Read;
-  dfu_parameter.ux_slave_class_dfu_parameter_write               = USBD_DFU_Write;
-  dfu_parameter.ux_slave_class_dfu_parameter_notify              = USBD_DFU_Notify;
-#ifdef UX_DEVICE_CLASS_DFU_CUSTOM_REQUEST_ENABLE
-  dfu_parameter.ux_device_class_dfu_parameter_custom_request     = USBD_DFU_CustomRequest;
-#endif /* UX_DEVICE_CLASS_DFU_CUSTOM_REQUEST_ENABLE */
-  dfu_parameter.ux_slave_class_dfu_parameter_framework           = device_framework_full_speed;
-  dfu_parameter.ux_slave_class_dfu_parameter_framework_length    = device_framework_fs_length;
-
-  /* USER CODE BEGIN DFU_PARAMETER */
-
-  /* USER CODE END DFU_PARAMETER */
-
-  /* Get dfu configuration number */
-  dfu_configuration_number = USBD_Get_Configuration_Number(CLASS_TYPE_DFU, 0);
-
-  /* Find dfu interface number */
-  dfu_interface_number = USBD_Get_Interface_Number(CLASS_TYPE_DFU, 0);
-
-  /* Initialize the device dfu class */
-  if (ux_device_stack_class_register(_ux_system_slave_class_dfu_name,
-                                     ux_device_class_dfu_entry,
-                                     dfu_configuration_number,
-                                     dfu_interface_number,
-                                     &dfu_parameter) != UX_SUCCESS)
-  {
-    /* USER CODE BEGIN USBX_DEVICE_DFU_REGISTER_ERROR */
-    return UX_ERROR;
-    /* USER CODE END USBX_DEVICE_DFU_REGISTER_ERROR */
   }
 
   /* USER CODE BEGIN MX_USBX_Device_Init1 */

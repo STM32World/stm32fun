@@ -45,7 +45,6 @@
 USBD_DevClassHandleTypeDef  USBD_Device_FS, USBD_Device_HS;
 
 uint8_t UserClassInstance[USBD_MAX_CLASS_INTERFACES] = {
-  CLASS_TYPE_DFU,
   CLASS_TYPE_HID,
   CLASS_TYPE_CDC_ACM,
 };
@@ -152,11 +151,6 @@ static void USBD_FrameWork_CDCDesc(USBD_DevClassHandleTypeDef *pdev,
                                    uint32_t pConf, uint32_t *Sze);
 #endif /* USBD_CDC_ACM_CLASS_ACTIVATED == 1U */
 
-#if USBD_DFU_CLASS_ACTIVATED == 1U
-static void USBD_FrameWork_DFUDesc(USBD_DevClassHandleTypeDef *pdev,
-                                   uint32_t pConf, uint32_t *Sze);
-#endif /* USBD_DFU_CLASS_ACTIVATED == 1U */
-
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -246,17 +240,6 @@ uint8_t *USBD_Get_String_Framework(ULONG *Length)
 
   /* Set the Serial number in USBD_string_framework */
   USBD_Desc_GetString((uint8_t *)USBD_SERIAL_NUMBER, USBD_string_framework + count, &len);
-
-#if USBD_DFU_CLASS_ACTIVATED
-  /* Set DFU_STRING_DESC_INDEX and DFU_STRING_DESC in string_framework */
-  count += len + 1;
-  USBD_string_framework[count++] = USBD_LANGID_STRING & 0xFF;
-  USBD_string_framework[count++] = USBD_LANGID_STRING >> 8;
-  USBD_string_framework[count++] = USBD_DFU_STRING_DESC_INDEX;
-
-  /* Set the USBD_DFU_STRING_DESC in USBD_string_framework */
-  USBD_Desc_GetString((uint8_t *)USBD_DFU_STRING_DESC, USBD_string_framework + count, &len);
-#endif /* USBD_DFU_CLASS_ACTIVATED */
 
   /* USER CODE BEGIN String_Framework1 */
 
@@ -729,24 +712,6 @@ uint8_t  USBD_FrameWork_AddToConfDesc(USBD_DevClassHandleTypeDef *pdev, uint8_t 
       break;
 
 #endif /* USBD_CDC_ACM_CLASS_ACTIVATED */
-#if USBD_DFU_CLASS_ACTIVATED == 1
-
-    case CLASS_TYPE_DFU:
-
-      /* Find the first available interface slot and Assign number of interfaces */
-      interface = USBD_FrameWork_FindFreeIFNbr(pdev);
-      pdev->tclasslist[pdev->classId].NumIf  = 1U;
-      pdev->tclasslist[pdev->classId].Ifs[0] = interface;
-
-      /* Assign endpoint numbers */
-      pdev->tclasslist[pdev->classId].NumEps = 0U; /* only EP0 is used */
-
-      /* Configure and Append the Descriptor */
-      USBD_FrameWork_DFUDesc(pdev, (uint32_t)pCmpstConfDesc, &pdev->CurrConfDescSz);
-
-      break;
-
-#endif /* USBD_DFU_CLASS_ACTIVATED */
     /* USER CODE BEGIN FrameWork_AddToConfDesc_1 */
 
     /* USER CODE END FrameWork_AddToConfDesc_1 */
@@ -1012,42 +977,6 @@ static void USBD_FrameWork_CDCDesc(USBD_DevClassHandleTypeDef *pdev,
   ((USBD_ConfigDescTypedef *)pConf)->wDescriptorLength = *Sze;
 }
 #endif /* USBD_CDC_ACM_CLASS_ACTIVATED == 1 */
-#if USBD_DFU_CLASS_ACTIVATED
-/**
-  * @brief  USBD_FrameWork_DFUDesc
-  *         Configure and Append the DFU Descriptor
-  * @param  pdev: device instance
-  * @param  pConf: Configuration descriptor pointer
-  * @param  Sze: pointer to the current configuration descriptor size
-  * @retval None
-  */
-static void USBD_FrameWork_DFUDesc(USBD_DevClassHandleTypeDef *pdev,
-                                   uint32_t pConf, uint32_t *Sze)
-{
-  static USBD_IfDescTypedef        *pIfDesc;
-  static USBD_DFUFuncDescTypedef   *pDFUFuncDesc;
-
-  /* Append DFU Interface descriptor to Configuration descriptor */
-  __USBD_FRAMEWORK_SET_IF(pdev->tclasslist[pdev->classId].Ifs[0], 0U,
-                          0U, 0xFEU, 0x01U, 0x02U, 0x06U);
-
-  /* Append DFU Functional descriptor to Configuration descriptor */
-  pDFUFuncDesc = ((USBD_DFUFuncDescTypedef*)(pConf + *Sze));
-  pDFUFuncDesc->bLength = (uint8_t)sizeof(USBD_DFUFuncDescTypedef);
-  pDFUFuncDesc->bDescriptorType = DFU_DESCRIPTOR_TYPE;
-  pDFUFuncDesc->bmAttributes = USBD_DFU_BM_ATTRIBUTES;
-  pDFUFuncDesc->wDetachTimeout = USBD_DFU_DetachTimeout;
-  pDFUFuncDesc->wTransferSze = USBD_DFU_XFER_SIZE;
-  pDFUFuncDesc->bcdDFUVersion = 0x011AU;
-  *Sze += (uint32_t)sizeof(USBD_DFUFuncDescTypedef);
-
-  /* Update Config Descriptor and IAD descriptor */
-  ((USBD_ConfigDescTypedef*)pConf)->bNumInterfaces += 1U;
-  ((USBD_ConfigDescTypedef*)pConf)->wDescriptorLength = *Sze;
-
-  UNUSED(USBD_FrameWork_AssignEp);
-}
-#endif /* USBD_DFU_CLASS_ACTIVATED */
 
 /* USER CODE BEGIN 1 */
 

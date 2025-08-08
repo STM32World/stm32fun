@@ -43,7 +43,7 @@
 UART_HandleTypeDef huart1;
 
 /* USER CODE BEGIN PV */
-uint32_t loop_cnt = 0;
+//uint32_t loop_cnt = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -112,7 +112,9 @@ int main(void)
     /* Infinite loop */
     /* USER CODE BEGIN WHILE */
 
-    for (;;) {
+    uint32_t loop_cnt = 0;
+
+    while (1) {
 
         ++loop_cnt;
 
@@ -120,6 +122,7 @@ int main(void)
 
         /* USER CODE BEGIN 3 */
     }
+
     /* USER CODE END 3 */
 }
 

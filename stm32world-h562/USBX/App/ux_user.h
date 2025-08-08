@@ -411,18 +411,18 @@
        bwPollTimeout supported.
 */
 
-#define UX_DEVICE_CLASS_DFU_STATUS_MODE                     1
+/* #define UX_DEVICE_CLASS_DFU_STATUS_MODE                  1 */
 
 /* Defined, this value represents the default DFU status bwPollTimeout.
    The value is 3 bytes long (max 0xFFFFFFu).
    By default the bwPollTimeout is 1 (means 1ms).
  */
 
-#define UX_DEVICE_CLASS_DFU_STATUS_POLLTIMEOUT              0
+/* #define UX_DEVICE_CLASS_DFU_STATUS_POLLTIMEOUT           1 */
 
 /* Defined, this macro will enable custom request process callback.  */
 
-#define UX_DEVICE_CLASS_DFU_CUSTOM_REQUEST_ENABLE
+/* #define UX_DEVICE_CLASS_DFU_CUSTOM_REQUEST_ENABLE  */
 
 /* Defined, this macro disables CDC ACM non-blocking transmission support. */
 

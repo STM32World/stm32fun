@@ -30,7 +30,6 @@ extern "C" {
 #include "ux_device_class_hid.h"
 #include "ux_device_customhid.h"
 #include "ux_device_cdc_acm.h"
-#include "ux_device_dfu_media.h"
 #include "ux_device_descriptors.h"
 #include "ux_dcd_stm32.h"
 /* Private includes ----------------------------------------------------------*/
