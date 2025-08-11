@@ -32,6 +32,5 @@
 #define UX_DEVICE_DFU
 #define UX_DEVICE_AUDIO
 #define UX_DEVICE_PIMA
-#define THREADX_ENABLED
 
 #endif /* __RTE_COMPONENTS_H__ */
