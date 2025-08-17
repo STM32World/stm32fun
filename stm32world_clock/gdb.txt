@@ -1,0 +1,2501 @@
+=cmd-param-changed,param="logging enabled",value="on"
+23^done
+(gdb) 
+&"set mem inaccessible-by-default off\n"
+=cmd-param-changed,param="mem inaccessible-by-default",value="off"
+24^done
+(gdb) 
+&"monitor connect_rst enable\n"
+@"Assert nRST during connect: enabled\n"
+25^done
+(gdb) 
+&"monitor auto_scan\n"
+@"Target voltage: 3.24V\n"
+@"JTAG scan found no devices, trying SWD!\n"
+@"Available Targets:\n"
+@"No. Att Driver\n"
+@" 1      STM32F40x M4\n"
+26^done
+(gdb) 
+&"attach 1\n"
+~"Attaching to program: /home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf, Remote target\n"
+=thread-group-started,id="i1",pid="1"
+=thread-created,id="1",group-id="i1"
+*running,thread-id="1"
+27^done
+~"0x0800118c in SysTick_Config (ticks=134222221) at ../Drivers/CMSIS/Include/core_cm4.h:2024\n"
+~"2024\t  if ((ticks - 1UL) > SysTick_LOAD_RELOAD_Msk)\n"
+*stopped,frame={addr="0x0800118c",func="SysTick_Config",args=[{name="ticks",value="134222221"}],file="../Drivers/CMSIS/Include/core_cm4.h",fullname="/home/lth/src/stm32fun/stm32world_variables/Drivers/CMSIS/Include/core_cm4.h",line="2024",arch="armv7e-m"},thread-id="1",stopped-threads="all"
+&"load /home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf \n"
+~"Loading section .isr_vector, size 0x188 lma 0x8000000\n"
+28+download,{section=".isr_vector",section-size="392",total-size="988158"}
+28+download,{section=".isr_vector",section-sent="392",section-size="392",total-sent="392",total-size="988158"}
+~"Loading section .text, size 0x38d8 lma 0x8000190\n"
+28+download,{section=".text",section-size="14552",total-size="988158"}
+~"Loading section .rodata, size 0x250 lma 0x8003a68\n"
+28+download,{section=".rodata",section-size="592",total-size="988158"}
+~"Loading section .ARM, size 0x8 lma 0x8003cb8\n"
+28+download,{section=".ARM",section-size="8",total-size="988158"}
+~"Loading section .init_array, size 0x4 lma 0x8003cc0\n"
+28+download,{section=".init_array",section-size="4",total-size="988158"}
+~"Loading section .fini_array, size 0x4 lma 0x8003cc4\n"
+28+download,{section=".fini_array",section-size="4",total-size="988158"}
+~"Loading section .data, size 0x68 lma 0x8003cc8\n"
+28+download,{section=".data",section-size="104",total-size="988158"}
+~"Loading section .ccmram, size 0x58 lma 0x8003d30\n"
+28+download,{section=".ccmram",section-size="88",total-size="988158"}
+~"Start address 0x08000f24, load size 15744\n"
+~"Transfer rate: 33 KB/sec, 715 bytes/write.\n"
+28^done
+(gdb) 
+&"\n"
+^done
+(gdb) 
+29^done,BreakpointTable={nr_rows="0",nr_cols="6",hdr=[{width="7",alignment="-1",col_name="number",colhdr="Num"},{width="14",alignment="-1",col_name="type",colhdr="Type"},{width="4",alignment="-1",col_name="disp",colhdr="Disp"},{width="3",alignment="-1",col_name="enabled",colhdr="Enb"},{width="10",alignment="-1",col_name="addr",colhdr="Address"},{width="40",alignment="2",col_name="what",colhdr="What"}],body=[]}
+(gdb) 
+30^done,depth="1"
+(gdb) 
+31^done,groups=[{id="i1",type="process",pid="1",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+32^done,threads=[{id="1",target-id="Thread 1",frame={level="0",addr="0x08000f24",func="Reset_Handler",args=[],file="../Core/Startup/startup_stm32f405rgtx.s",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Startup/startup_stm32f405rgtx.s",line="61",arch="armv7e-m"},state="stopped"}]
+(gdb) 
+33^done
+(gdb) 
+34^done,stack=[frame={level="0",addr="0x08000f24",func="Reset_Handler",file="../Core/Startup/startup_stm32f405rgtx.s",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Startup/startup_stm32f405rgtx.s",line="61",arch="armv7e-m"}]
+(gdb) 
+35^done,threads=[{id="1",target-id="Thread 1",frame={level="0",addr="0x08000f24",func="Reset_Handler",args=[],file="../Core/Startup/startup_stm32f405rgtx.s",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Startup/startup_stm32f405rgtx.s",line="61",arch="armv7e-m"},state="stopped"}]
+(gdb) 
+36^error,msg="Can not fetch data now."
+(gdb) 
+37^done,groups=[{id="i1",type="process",pid="1",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+38^done,stack-args=[frame={level="0",args=[]}]
+(gdb) 
+39^done,locals=[]
+(gdb) 
+~"Kill the program being debugged? (y or n) [answered Y; input not from terminal]\n"
+=thread-exited,id="1",group-id="i1"
+=thread-group-exited,id="i1"
+~"[Inferior 1 (Remote target) killed]\n"
+40^done
+(gdb) 
+41^error,msg="Invalid thread id: 1"
+(gdb) 
+42^error,msg="Invalid thread id: 1"
+(gdb) 
+43^done,groups=[{id="i1",type="process",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+44^done,groups=[{id="i1",type="process",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+45^exit
+=cmd-param-changed,param="logging enabled",value="on"
+24^done
+(gdb) 
+&"set mem inaccessible-by-default off\n"
+=cmd-param-changed,param="mem inaccessible-by-default",value="off"
+25^done
+(gdb) 
+&"monitor connect_rst enable\n"
+@"Assert nRST during connect: enabled\n"
+26^done
+(gdb) 
+&"monitor auto_scan\n"
+@"Target voltage: 3.27V\n"
+@"JTAG scan found no devices, trying SWD!\n"
+@"Available Targets:\n"
+@"No. Att Driver\n"
+@" 1      STM32F40x M4\n"
+27^done
+(gdb) 
+&"attach 1\n"
+~"Attaching to program: /home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf, Remote target\n"
+=thread-group-started,id="i1",pid="1"
+=thread-created,id="1",group-id="i1"
+*running,thread-id="1"
+28^done
+~"Reset_Handler () at ../Core/Startup/startup_stm32f405rgtx.s:61\n"
+~"61\t  ldr   sp, =_estack     /* set stack pointer */\n"
+*stopped,frame={addr="0x08000f24",func="Reset_Handler",args=[],file="../Core/Startup/startup_stm32f405rgtx.s",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Startup/startup_stm32f405rgtx.s",line="61",arch="armv7e-m"},thread-id="1",stopped-threads="all"
+&"load /home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf \n"
+~"Loading section .isr_vector, size 0x188 lma 0x8000000\n"
+29+download,{section=".isr_vector",section-size="392",total-size="988158"}
+29+download,{section=".isr_vector",section-sent="392",section-size="392",total-sent="392",total-size="988158"}
+~"Loading section .text, size 0x38d8 lma 0x8000190\n"
+29+download,{section=".text",section-size="14552",total-size="988158"}
+~"Loading section .rodata, size 0x250 lma 0x8003a68\n"
+29+download,{section=".rodata",section-size="592",total-size="988158"}
+~"Loading section .ARM, size 0x8 lma 0x8003cb8\n"
+29+download,{section=".ARM",section-size="8",total-size="988158"}
+~"Loading section .init_array, size 0x4 lma 0x8003cc0\n"
+29+download,{section=".init_array",section-size="4",total-size="988158"}
+~"Loading section .fini_array, size 0x4 lma 0x8003cc4\n"
+29+download,{section=".fini_array",section-size="4",total-size="988158"}
+~"Loading section .data, size 0x68 lma 0x8003cc8\n"
+29+download,{section=".data",section-size="104",total-size="988158"}
+~"Loading section .ccmram, size 0x58 lma 0x8003d30\n"
+29+download,{section=".ccmram",section-size="88",total-size="988158"}
+~"Start address 0x08000f24, load size 15744\n"
+~"Transfer rate: 34 KB/sec, 715 bytes/write.\n"
+29^done
+(gdb) 
+&"\n"
+^done
+(gdb) 
+30^done,groups=[{id="i1",type="process",pid="1",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+~"Note: automatically using hardware breakpoints for read-only addresses.\n"
+31^done,bkpt={number="1",type="breakpoint",disp="del",enabled="y",addr="0x08000696",func="main",file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="123",thread-groups=["i1"],times="0",original-location="main"}
+(gdb) 
+&"\n"
+^done
+(gdb) 
+32^done,threads=[{id="1",target-id="Thread 1",frame={level="0",addr="0x08000f24",func="Reset_Handler",args=[],file="../Core/Startup/startup_stm32f405rgtx.s",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Startup/startup_stm32f405rgtx.s",line="61",arch="armv7e-m"},state="stopped"}]
+(gdb) 
+33^done,BreakpointTable={nr_rows="1",nr_cols="6",hdr=[{width="7",alignment="-1",col_name="number",colhdr="Num"},{width="14",alignment="-1",col_name="type",colhdr="Type"},{width="4",alignment="-1",col_name="disp",colhdr="Disp"},{width="3",alignment="-1",col_name="enabled",colhdr="Enb"},{width="10",alignment="-1",col_name="addr",colhdr="Address"},{width="40",alignment="2",col_name="what",colhdr="What"}],body=[bkpt={number="1",type="breakpoint",disp="del",enabled="y",addr="0x08000696",func="main",file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="123",thread-groups=["i1"],times="0",original-location="main"}]}
+(gdb) 
+34^done,depth="1"
+(gdb) 
+35^done,groups=[{id="i1",type="process",pid="1",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+36^done
+(gdb) 
+37^done,stack=[frame={level="0",addr="0x08000f24",func="Reset_Handler",file="../Core/Startup/startup_stm32f405rgtx.s",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Startup/startup_stm32f405rgtx.s",line="61",arch="armv7e-m"}]
+(gdb) 
+38^done,threads=[{id="1",target-id="Thread 1",frame={level="0",addr="0x08000f24",func="Reset_Handler",args=[],file="../Core/Startup/startup_stm32f405rgtx.s",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Startup/startup_stm32f405rgtx.s",line="61",arch="armv7e-m"},state="stopped"}]
+(gdb) 
+39^error,msg="Can not fetch data now."
+(gdb) 
+40^done,groups=[{id="i1",type="process",pid="1",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+41^done,stack-args=[frame={level="0",args=[]}]
+(gdb) 
+42^done,locals=[]
+(gdb) 
+43^done
+(gdb) 
+44^running
+*running,thread-id="all"
+(gdb) 
+=breakpoint-modified,bkpt={number="1",type="breakpoint",disp="del",enabled="y",addr="0x08000696",func="main",file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="123",thread-groups=["i1"],times="1",original-location="main"}
+~"\n"
+~"Temporary breakpoint 1, main () at ../Core/Src/main.c:123\n"
+~"123\t    HAL_Init();\n"
+*stopped,reason="breakpoint-hit",disp="del",bkptno="1",frame={addr="0x08000696",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="123",arch="armv7e-m"},thread-id="1",stopped-threads="all"
+=breakpoint-deleted,id="1"
+45^done,locals=[{name="i",value="134221539"},{name="ip",value="0x8003cc0"},{name="s",value="{a = 536871352, b = 536875464, c = 10}"},{name="a",value="\"4\\000\\000\\000\""},{name="ap",value="0x20000220 \"\\b\\004\""},{name="sbuf",value="\"\377\377\377\377\\000\\000\\000\\000\\001\\000\\000\\000\\001\\000\\000\\000\\030-DT\355\\006\\000\\b\253\\f\\000\\b\\217\\f\\000\\b\", '\\000' <repeats 12 times>, \"\\034\\021\\000 \\\\D\\000\\000\\020\\000\\000\\000\\004`\\002@\\000\\000\\000\\000\\000\\000\\000\\000A\\r\\000\\b-\\034\\000\\b5\\034\\000\\b-\\034\\000\\b\253\\026\\000\\bN\\222(\\000\\000\\000\\000\\000\\200e8\\000<R\\\"\\000&f8\\000tg8\\000hi8\\000\341\\020\\000\\b\310\\021\\000 \371\377\377\377\""},{name="cstr1",value="\"\\200\\000\\000\\000\377\377\377\377\""},{name="cstr2",value="\"LX\\000 \240\377\\001 \350\""},{name="sbuf2",value="0x8003cc4 \"\\221\\001\""},{name="cstr3",value="\"\\001\\000\\000\\000\261`\\000\\b4\""},{name="loc",value="0x0"},{name="sa",value="{0x8006011 \"\\034\363\321\370\275\", 0x2 \"\\002 %\\017\", 0x8006850 \")\\n\", 0x2000584c \"8Y\", 0x20000150 <__sf+116> \"\"}"}]
+(gdb) 
+46^done,depth="1"
+(gdb) 
+47^done,name="var1",numchild="0",value="134221539",type="int",thread-id="1",has_more="0"
+(gdb) 
+48^done,name="var2",numchild="1",value="0x8003cc0",type="int *",thread-id="1",has_more="0"
+(gdb) 
+49^done,name="var3",numchild="3",value="{...}",type="s_struct",thread-id="1",has_more="0"
+(gdb) 
+50^done,name="var4",numchild="5",value="[5]",type="uint8_t [5]",thread-id="1",has_more="0"
+(gdb) 
+51^done,name="var5",numchild="1",value="0x20000220 \"\\b\\004\"",type="uint8_t *",thread-id="1",has_more="0"
+(gdb) 
+52^done,name="var6",numchild="128",value="[128]",type="char [128]",thread-id="1",has_more="0"
+(gdb) 
+53^done,name="var7",numchild="8",value="[8]",type="char [8]",thread-id="1",has_more="0"
+(gdb) 
+54^done,name="var8",numchild="9",value="[9]",type="char [9]",thread-id="1",has_more="0"
+(gdb) 
+55^done,name="var9",numchild="1",value="0x8003cc4 \"\\221\\001\"",type="char *",thread-id="1",has_more="0"
+(gdb) 
+56^done,name="var10",numchild="9",value="[9]",type="char [9]",thread-id="1",has_more="0"
+(gdb) 
+57^done,name="var11",numchild="1",value="0x0",type="char *",thread-id="1",has_more="0"
+(gdb) 
+58^done,name="var12",numchild="5",value="[5]",type="char *[5]",thread-id="1",has_more="0"
+(gdb) 
+59^done
+(gdb) 
+60^done,threads=[{id="1",target-id="Thread 1",frame={level="0",addr="0x08000696",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="123",arch="armv7e-m"},state="stopped"}]
+(gdb) 
+61^done,groups=[{id="i1",type="process",pid="1",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+62^done,name="var13",numchild="1",value="0x2001ffc0",type="uint8_t (*)[5]",thread-id="1",has_more="0"
+(gdb) 
+63^done,name="var14",numchild="1",value="0x2001ff40",type="char (*)[128]",thread-id="1",has_more="0"
+(gdb) 
+64^done,name="var15",numchild="1",value="0x2001ff38",type="char (*)[8]",thread-id="1",has_more="0"
+(gdb) 
+65^done,name="var16",numchild="1",value="0x2001ff2c",type="char (*)[9]",thread-id="1",has_more="0"
+(gdb) 
+66^done,name="var17",numchild="1",value="0x2001ff20",type="char (*)[9]",thread-id="1",has_more="0"
+(gdb) 
+67^done,name="var18",numchild="1",value="0x2001ff0c",type="char *(*)[5]",thread-id="1",has_more="0"
+(gdb) 
+68^running
+*running,thread-id="all"
+(gdb) 
+*stopped,reason="end-stepping-range",frame={addr="0x0800069a",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="130",arch="armv7e-m"},thread-id="1",stopped-threads="all"
+69^done,locals=[{name="i",value="134221539"},{name="ip",value="0x8003cc0"},{name="s",value="{a = 536871352, b = 536875464, c = 10}"},{name="a",value="\"4\\000\\000\\000\""},{name="ap",value="0x20000220 \"\\b\\004\""},{name="sbuf",value="\"\377\377\377\377\\000\\000\\000\\000\\001\\000\\000\\000\\001\\000\\000\\000\\030-DT\355\\006\\000\\b\253\\f\\000\\b\\217\\f\\000\\b\", '\\000' <repeats 12 times>, \"\\034\\021\\000 \\\\D\\000\\000\\020\\000\\000\\000\\004`\\002@\\000\\000\\000\\000\\000\\000\\000\\000A\\r\\000\\b-\\034\\000\\b5\\034\\000\\b-\\034\\000\\b\253\\026\\000\\bN\\222(\\000\\000\\000\\000\\000\\200e8\\000<R\\\"\\000&f8\\000tg8\\000hi8\\000\341\\020\\000\\b\310\\021\\000 \371\377\377\377\""},{name="cstr1",value="\"\\200\\000\\000\\000\377\377\377\377\""},{name="cstr2",value="\"LX\\000 \240\377\\001 \350\""},{name="sbuf2",value="0x8003cc4 \"\\221\\001\""},{name="cstr3",value="\"\\001\\000\\000\\000\261`\\000\\b4\""},{name="loc",value="0x0"},{name="sa",value="{0x8006011 \"\\034\363\321\370\275\", 0x2 \"\\002 %\\017\", 0x8006850 \")\\n\", 0x2000584c \"8Y\", 0x20000150 <__sf+116> \"\"}"}]
+(gdb) 
+70^done,depth="1"
+(gdb) 
+71^done
+(gdb) 
+72^done,threads=[{id="1",target-id="Thread 1",frame={level="0",addr="0x0800069a",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="130",arch="armv7e-m"},state="stopped"}]
+(gdb) 
+73^done,groups=[{id="i1",type="process",pid="1",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+74^done,changelist=[]
+(gdb) 
+75^done,changelist=[]
+(gdb) 
+76^done,changelist=[]
+(gdb) 
+77^done,changelist=[]
+(gdb) 
+78^done,changelist=[]
+(gdb) 
+79^done,changelist=[]
+(gdb) 
+80^done,changelist=[]
+(gdb) 
+81^done,changelist=[]
+(gdb) 
+82^done,changelist=[]
+(gdb) 
+83^done,changelist=[]
+(gdb) 
+84^done,changelist=[]
+(gdb) 
+85^done,changelist=[]
+(gdb) 
+86^done,changelist=[]
+(gdb) 
+87^done,changelist=[]
+(gdb) 
+88^done,changelist=[]
+(gdb) 
+89^done,changelist=[]
+(gdb) 
+90^done,changelist=[]
+(gdb) 
+91^done,changelist=[]
+(gdb) 
+92^running
+*running,thread-id="all"
+(gdb) 
+*stopped,reason="end-stepping-range",frame={addr="0x0800069e",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="137",arch="armv7e-m"},thread-id="1",stopped-threads="all"
+93^done,locals=[{name="i",value="134221539"},{name="ip",value="0x8003cc0"},{name="s",value="{a = 536871352, b = 536875464, c = 10}"},{name="a",value="\"4\\000\\000\\000\""},{name="ap",value="0x20000220 \"\\b\\004\""},{name="sbuf",value="\"\377\377\377\377\\000\\000\\000\\000\\001\\000\\000\\000\\001\\000\\000\\000\\030-DT\355\\006\\000\\b\253\\f\\000\\b\\217\\f\\000\\b\", '\\000' <repeats 12 times>, \"\\034\\021\\000 \\\\D\\000\\000\\020\\000\\000\\000\\004`\\002@\\000\\000\\000\\000\\000\\000\\000\\000A\\r\\000\\b-\\034\\000\\b5\\034\\000\\b-\\034\\000\\b\253\\026\\000\\bN\\222(\\000\\000\\000\\000\\000\\200e8\\000<R\\\"\\000&f8\\000tg8\\000hi8\\000\341\\020\\000\\b\310\\021\\000 \371\377\377\377\""},{name="cstr1",value="\"\\200\\000\\000\\000\377\377\377\377\""},{name="cstr2",value="\"LX\\000 \240\377\\001 \350\""},{name="sbuf2",value="0x8003cc4 \"\\221\\001\""},{name="cstr3",value="\"\\001\\000\\000\\000\261`\\000\\b4\""},{name="loc",value="0x0"},{name="sa",value="{0x8006011 \"\\034\363\321\370\275\", 0x2 \"\\002 %\\017\", 0x8006850 \")\\n\", 0x2000584c \"8Y\", 0x20000150 <__sf+116> \"\"}"}]
+(gdb) 
+94^done,depth="1"
+(gdb) 
+95^done
+(gdb) 
+96^done,threads=[{id="1",target-id="Thread 1",frame={level="0",addr="0x0800069e",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="137",arch="armv7e-m"},state="stopped"}]
+(gdb) 
+97^done,groups=[{id="i1",type="process",pid="1",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+98^done,changelist=[]
+(gdb) 
+99^done,changelist=[]
+(gdb) 
+100^done,changelist=[]
+(gdb) 
+101^done,changelist=[]
+(gdb) 
+102^done,changelist=[]
+(gdb) 
+103^done,changelist=[]
+(gdb) 
+104^done,changelist=[]
+(gdb) 
+105^done,changelist=[]
+(gdb) 
+106^done,changelist=[]
+(gdb) 
+107^done,changelist=[]
+(gdb) 
+108^done,changelist=[]
+(gdb) 
+109^done,changelist=[]
+(gdb) 
+110^done,changelist=[]
+(gdb) 
+111^done,changelist=[]
+(gdb) 
+112^done,changelist=[]
+(gdb) 
+113^done,changelist=[]
+(gdb) 
+114^done,changelist=[]
+(gdb) 
+115^done,changelist=[]
+(gdb) 
+116^running
+*running,thread-id="all"
+(gdb) 
+*stopped,reason="end-stepping-range",frame={addr="0x080006a2",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="138",arch="armv7e-m"},thread-id="1",stopped-threads="all"
+117^done,locals=[{name="i",value="134221539"},{name="ip",value="0x8003cc0"},{name="s",value="{a = 536871352, b = 536875464, c = 10}"},{name="a",value="\"4\\000\\000\\000\""},{name="ap",value="0x20000220 \"\\b\\004\""},{name="sbuf",value="\"\377\377\377\377\\000\\000\\000\\000\\001\\000\\000\\000\\001\\000\\000\\000\\030-DT\355\\006\\000\\b\253\\f\\000\\b\\217\\f\\000\\b\", '\\000' <repeats 12 times>, \"\\034\\021\\000 \\\\D\\000\\000\\020\\000\\000\\000\\004`\\002@\\000\\000\\000\\000\\000\\000\\000\\000A\\r\\000\\b-\\034\\000\\b5\\034\\000\\b-\\034\\000\\b\253\\026\\000\\bN\\222(\\000\\000\\000\\000\\000\\200e8\\000<R\\\"\\000&f8\\000tg8\\000hi8\\000\341\\020\\000\\b\310\\021\\000 \371\377\377\377\""},{name="cstr1",value="\"\\200\\000\\000\\000\377\377\377\377\""},{name="cstr2",value="\"LX\\000 \240\377\\001 \350\""},{name="sbuf2",value="0x8003cc4 \"\\221\\001\""},{name="cstr3",value="\"\\001\\000\\000\\000\261`\\000\\b4\""},{name="loc",value="0x0"},{name="sa",value="{0x8006011 \"\\034\363\321\370\275\", 0x2 \"\\002 %\\017\", 0x8006850 \")\\n\", 0x2000584c \"8Y\", 0x20000150 <__sf+116> \"\"}"}]
+(gdb) 
+118^done,depth="1"
+(gdb) 
+119^done
+(gdb) 
+120^done,threads=[{id="1",target-id="Thread 1",frame={level="0",addr="0x080006a2",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="138",arch="armv7e-m"},state="stopped"}]
+(gdb) 
+121^done,groups=[{id="i1",type="process",pid="1",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+122^done,changelist=[]
+(gdb) 
+123^done,changelist=[]
+(gdb) 
+124^done,changelist=[]
+(gdb) 
+125^done,changelist=[]
+(gdb) 
+126^done,changelist=[]
+(gdb) 
+127^done,changelist=[]
+(gdb) 
+128^done,changelist=[]
+(gdb) 
+129^done,changelist=[]
+(gdb) 
+130^done,changelist=[]
+(gdb) 
+131^done,changelist=[]
+(gdb) 
+132^done,changelist=[]
+(gdb) 
+133^done,changelist=[]
+(gdb) 
+134^done,changelist=[]
+(gdb) 
+135^done,changelist=[]
+(gdb) 
+136^done,changelist=[]
+(gdb) 
+137^done,changelist=[]
+(gdb) 
+138^done,changelist=[]
+(gdb) 
+139^done,changelist=[]
+(gdb) 
+140^running
+*running,thread-id="all"
+(gdb) 
+*stopped,reason="end-stepping-range",frame={addr="0x080006a6",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="141",arch="armv7e-m"},thread-id="1",stopped-threads="all"
+141^done,locals=[{name="i",value="134221539"},{name="ip",value="0x8003cc0"},{name="s",value="{a = 536871352, b = 536875464, c = 10}"},{name="a",value="\"4\\000\\000\\000\""},{name="ap",value="0x20000220 \"\\b\\004\""},{name="sbuf",value="\"\377\377\377\377\\000\\000\\000\\000\\001\\000\\000\\000\\001\\000\\000\\000\\030-DT\355\\006\\000\\b\253\\f\\000\\b\\217\\f\\000\\b\", '\\000' <repeats 12 times>, \"\\034\\021\\000 \\\\D\\000\\000\\020\\000\\000\\000\\004`\\002@\\000\\000\\000\\000\\000\\000\\000\\000A\\r\\000\\b-\\034\\000\\b5\\034\\000\\b-\\034\\000\\b\253\\026\\000\\bN\\222(\\000\\000\\000\\000\\000\\200e8\\000<R\\\"\\000&f8\\000tg8\\000hi8\\000\341\\020\\000\\b\310\\021\\000 \371\377\377\377\""},{name="cstr1",value="\"\\200\\000\\000\\000\377\377\377\377\""},{name="cstr2",value="\"LX\\000 \240\377\\001 \350\""},{name="sbuf2",value="0x8003cc4 \"\\221\\001\""},{name="cstr3",value="\"\\001\\000\\000\\000\261`\\000\\b4\""},{name="loc",value="0x0"},{name="sa",value="{0x8006011 \"\\034\363\321\370\275\", 0x2 \"\\002 %\\017\", 0x8006850 \")\\n\", 0x2000584c \"8Y\", 0x20000150 <__sf+116> \"\"}"}]
+(gdb) 
+142^done,depth="1"
+(gdb) 
+143^done
+(gdb) 
+144^done,threads=[{id="1",target-id="Thread 1",frame={level="0",addr="0x080006a6",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="141",arch="armv7e-m"},state="stopped"}]
+(gdb) 
+145^done,groups=[{id="i1",type="process",pid="1",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+146^done,changelist=[]
+(gdb) 
+147^done,changelist=[]
+(gdb) 
+148^done,changelist=[]
+(gdb) 
+149^done,changelist=[]
+(gdb) 
+150^done,changelist=[]
+(gdb) 
+151^done,changelist=[]
+(gdb) 
+152^done,changelist=[]
+(gdb) 
+153^done,changelist=[]
+(gdb) 
+154^done,changelist=[]
+(gdb) 
+155^done,changelist=[]
+(gdb) 
+156^done,changelist=[]
+(gdb) 
+157^done,changelist=[]
+(gdb) 
+158^done,changelist=[]
+(gdb) 
+159^done,changelist=[]
+(gdb) 
+160^done,changelist=[]
+(gdb) 
+161^done,changelist=[]
+(gdb) 
+162^done,changelist=[]
+(gdb) 
+163^done,changelist=[]
+(gdb) 
+164^running
+*running,thread-id="all"
+(gdb) 
+~"\nProgram"
+~" received signal SIGSEGV, Segmentation fault.\n"
+~"_write (fd=1, ptr=0x1 \"\", len=536871464) at ../Core/Src/main.c:69\n"
+~"69\t__attribute__((section(\".ccmram\"))) int _write(int fd, char *ptr, int len) {\n"
+*stopped,reason="signal-received",signal-name="SIGSEGV",signal-meaning="Segmentation fault",frame={addr="0x10000000",func="_write",args=[{name="fd",value="1"},{name="ptr",value="0x1 \"\""},{name="len",value="536871464"}],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="69",arch="armv7e-m"},thread-id="1",stopped-threads="all"
+165^done,locals=[{name="hstatus",value="8"}]
+(gdb) 
+166^done,depth="7"
+(gdb) 
+167^done,depth="7"
+(gdb) 
+168^done,name="var19",numchild="0",value="1",type="int",thread-id="1",has_more="0"
+(gdb) 
+169^done,name="var20",numchild="1",value="0x1 \"\"",type="char *",thread-id="1",has_more="0"
+(gdb) 
+170^done,name="var21",numchild="0",value="536871464",type="int",thread-id="1",has_more="0"
+(gdb) 
+171^done,name="var22",numchild="0",value="8",type="HAL_StatusTypeDef",thread-id="1",has_more="0"
+(gdb) 
+172^done
+(gdb) 
+173^done,threads=[{id="1",target-id="Thread 1",frame={level="0",addr="0x10000000",func="_write",args=[{name="fd",value="1"},{name="ptr",value="0x1 \"\""},{name="len",value="536871464"}],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="69",arch="armv7e-m"},state="stopped"}]
+(gdb) 
+174^done,groups=[{id="i1",type="process",pid="1",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+175^done,stack=[frame={level="0",addr="0x10000000",func="_write",file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="69",arch="armv7e-m"},frame={level="1",addr="0x08002dd0",func="_write_r",arch="armv7e-m"},frame={level="2",addr="0x08003812",func="__sflush_r",arch="armv7e-m"},frame={level="3",addr="0x0800386e",func="_fflush_r",arch="armv7e-m"},frame={level="4",addr="0x08002bf8",func="__swbuf_r",arch="armv7e-m"},frame={level="5",addr="0x08002a90",func="_puts_r",arch="armv7e-m"},frame={level="6",addr="0x080006ac",func="main",file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="141",arch="armv7e-m"}]
+(gdb) 
+176^running
+*running,thread-id="all"
+(gdb) 
+177^error,msg="Cannot execute this command while the target is running.\nUse the \"interrupt\" command to stop the target\nand then try again."
+(gdb) 
+178^done
+(gdb) 
+~"Kill the program being debugged? (y or n) [answered Y; input not from terminal]\n"
+&"Cannot execute this command while the target is running.\n"
+&"Use the \"interrupt\" command to stop the target\n"
+&"and then try again.\n"
+179^error,msg="Cannot execute this command while the target is running.\nUse the \"interrupt\" command to stop the target\nand then try again."
+(gdb) 
+180^exit
+&"Cannot execute this command while the target is running.\n"
+&"Use the \"interrupt\" command to stop the target\n"
+&"and then try again.\n"
+=cmd-param-changed,param="logging enabled",value="on"
+24^done
+(gdb) 
+&"set mem inaccessible-by-default off\n"
+=cmd-param-changed,param="mem inaccessible-by-default",value="off"
+25^done
+(gdb) 
+&"monitor connect_rst enable\n"
+@"Assert nRST during connect: enabled\n"
+26^done
+(gdb) 
+&"monitor auto_scan\n"
+@"Target voltage: 3.27V\n"
+@"JTAG scan found no devices, trying SWD!\n"
+@"Available Targets:\n"
+@"No. Att Driver\n"
+@" 1      STM32F40x M4\n"
+27^done
+(gdb) 
+&"attach 1\n"
+~"Attaching to program: /home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf, Remote target\n"
+=thread-group-started,id="i1",pid="1"
+=thread-created,id="1",group-id="i1"
+*running,thread-id="1"
+28^done
+~"Reset_Handler () at ../Core/Startup/startup_stm32f405rgtx.s:61\n"
+~"61\t  ldr   sp, =_estack     /* set stack pointer */\n"
+*stopped,frame={addr="0x08000f24",func="Reset_Handler",args=[],file="../Core/Startup/startup_stm32f405rgtx.s",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Startup/startup_stm32f405rgtx.s",line="61",arch="armv7e-m"},thread-id="1",stopped-threads="all"
+29^done,groups=[{id="i1",type="process",pid="1",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+&"load /home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf \n"
+~"Loading section .isr_vector, size 0x188 lma 0x8000000\n"
+30+download,{section=".isr_vector",section-size="392",total-size="988158"}
+30+download,{section=".isr_vector",section-sent="392",section-size="392",total-sent="392",total-size="988158"}
+~"Loading section .text, size 0x38d8 lma 0x8000190\n"
+30+download,{section=".text",section-size="14552",total-size="988158"}
+~"Loading section .rodata, size 0x250 lma 0x8003a68\n"
+30+download,{section=".rodata",section-size="592",total-size="988158"}
+~"Loading section .ARM, size 0x8 lma 0x8003cb8\n"
+30+download,{section=".ARM",section-size="8",total-size="988158"}
+~"Loading section .init_array, size 0x4 lma 0x8003cc0\n"
+30+download,{section=".init_array",section-size="4",total-size="988158"}
+~"Loading section .fini_array, size 0x4 lma 0x8003cc4\n"
+30+download,{section=".fini_array",section-size="4",total-size="988158"}
+~"Loading section .data, size 0x68 lma 0x8003cc8\n"
+30+download,{section=".data",section-size="104",total-size="988158"}
+~"Loading section .ccmram, size 0x58 lma 0x8003d30\n"
+30+download,{section=".ccmram",section-size="88",total-size="988158"}
+~"Start address 0x08000f24, load size 15744\n"
+~"Transfer rate: 33 KB/sec, 715 bytes/write.\n"
+30^done
+(gdb) 
+&"\n"
+^done
+(gdb) 
+31^done,threads=[{id="1",target-id="Thread 1",frame={level="0",addr="0x08000f24",func="Reset_Handler",args=[],file="../Core/Startup/startup_stm32f405rgtx.s",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Startup/startup_stm32f405rgtx.s",line="61",arch="armv7e-m"},state="stopped"}]
+(gdb) 
+~"Note: automatically using hardware breakpoints for read-only addresses.\n"
+32^done,bkpt={number="1",type="breakpoint",disp="del",enabled="y",addr="0x08000696",func="main",file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="123",thread-groups=["i1"],times="0",original-location="main"}
+(gdb) 
+33^done,depth="1"
+(gdb) 
+34^done,bkpt={number="2",type="breakpoint",disp="del",enabled="y",addr="0x08000696",func="main",file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="123",thread-groups=["i1"],times="0",original-location="main"}
+(gdb) 
+&"\n"
+^done
+(gdb) 
+35^done,BreakpointTable={nr_rows="2",nr_cols="6",hdr=[{width="7",alignment="-1",col_name="number",colhdr="Num"},{width="14",alignment="-1",col_name="type",colhdr="Type"},{width="4",alignment="-1",col_name="disp",colhdr="Disp"},{width="3",alignment="-1",col_name="enabled",colhdr="Enb"},{width="10",alignment="-1",col_name="addr",colhdr="Address"},{width="40",alignment="2",col_name="what",colhdr="What"}],body=[bkpt={number="1",type="breakpoint",disp="del",enabled="y",addr="0x08000696",func="main",file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="123",thread-groups=["i1"],times="0",original-location="main"},bkpt={number="2",type="breakpoint",disp="del",enabled="y",addr="0x08000696",func="main",file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="123",thread-groups=["i1"],times="0",original-location="main"}]}
+(gdb) 
+36^done,depth="1"
+(gdb) 
+37^done,groups=[{id="i1",type="process",pid="1",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+38^done
+(gdb) 
+39^done,stack=[frame={level="0",addr="0x08000f24",func="Reset_Handler",file="../Core/Startup/startup_stm32f405rgtx.s",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Startup/startup_stm32f405rgtx.s",line="61",arch="armv7e-m"}]
+(gdb) 
+40^error,msg="Can not fetch data now."
+(gdb) 
+41^done,threads=[{id="1",target-id="Thread 1",frame={level="0",addr="0x08000f24",func="Reset_Handler",args=[],file="../Core/Startup/startup_stm32f405rgtx.s",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Startup/startup_stm32f405rgtx.s",line="61",arch="armv7e-m"},state="stopped"}]
+(gdb) 
+42^done,groups=[{id="i1",type="process",pid="1",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+43^done,stack-args=[frame={level="0",args=[]}]
+(gdb) 
+44^done,locals=[]
+(gdb) 
+45^done,threads=[{id="1",target-id="Thread 1",frame={level="0",addr="0x08000f24",func="Reset_Handler",args=[],file="../Core/Startup/startup_stm32f405rgtx.s",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Startup/startup_stm32f405rgtx.s",line="61",arch="armv7e-m"},state="stopped"}]
+(gdb) 
+46^done
+(gdb) 
+47^running
+*running,thread-id="all"
+(gdb) 
+=breakpoint-modified,bkpt={number="1",type="breakpoint",disp="del",enabled="y",addr="0x08000696",func="main",file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="123",thread-groups=["i1"],times="1",original-location="main"}
+=breakpoint-modified,bkpt={number="2",type="breakpoint",disp="del",enabled="y",addr="0x08000696",func="main",file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="123",thread-groups=["i1"],times="1",original-location="main"}
+~"\n"
+~"Temporary breakpoint 1, main () at ../Core/Src/main.c:123\n"
+~"123\t    HAL_Init();\n"
+*stopped,reason="breakpoint-hit",disp="del",bkptno="1",frame={addr="0x08000696",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="123",arch="armv7e-m"},thread-id="1",stopped-threads="all"
+=breakpoint-deleted,id="1"
+=breakpoint-deleted,id="2"
+~"No breakpoint number 2.\n"
+48^done
+(gdb) 
+49^done,locals=[{name="i",value="134221539"},{name="ip",value="0x8003cc0"},{name="s",value="{a = 536871352, b = 536875464, c = 10}"},{name="a",value="\"4\\000\\000\\000\""},{name="ap",value="0x20000220 \"\\b\\004\""},{name="sbuf",value="\"\377\377\377\377\\000\\000\\000\\000\\001\\000\\000\\000\\001\\000\\000\\000\\030-DT\355\\006\\000\\b\253\\f\\000\\b\\217\\f\\000\\b\", '\\000' <repeats 12 times>, \"\\034\\021\\000 \\\\D\\000\\000\\020\\000\\000\\000\\004`\\002@\\000\\000\\000\\000\\000\\000\\000\\000A\\r\\000\\b-\\034\\000\\b5\\034\\000\\b-\\034\\000\\b\253\\026\\000\\bN\\222(\\000\\000\\000\\000\\000\\200e8\\000<R\\\"\\000&f8\\000tg8\\000hi8\\000\341\\020\\000\\b\310\\021\\000 \371\377\377\377\""},{name="cstr1",value="\"\\200\\000\\000\\000\377\377\377\377\""},{name="cstr2",value="\"LX\\000 \240\377\\001 \350\""},{name="sbuf2",value="0x8003cc4 \"\\221\\001\""},{name="cstr3",value="\"\\001\\000\\000\\000\261`\\000\\b4\""},{name="loc",value="0x0"},{name="sa",value="{0x8006011 \"\\034\363\321\370\275\", 0x2 \"\\002 %\\017\", 0x8006850 \")\\n\", 0x2000584c \"8Y\", 0x20000150 <__sf+116> \"\"}"}]
+(gdb) 
+50^done,depth="1"
+(gdb) 
+51^done,name="var1",numchild="0",value="134221539",type="int",thread-id="1",has_more="0"
+(gdb) 
+52^done,name="var2",numchild="1",value="0x8003cc0",type="int *",thread-id="1",has_more="0"
+(gdb) 
+53^done,name="var3",numchild="3",value="{...}",type="s_struct",thread-id="1",has_more="0"
+(gdb) 
+54^done,name="var4",numchild="5",value="[5]",type="uint8_t [5]",thread-id="1",has_more="0"
+(gdb) 
+55^done,name="var5",numchild="1",value="0x20000220 \"\\b\\004\"",type="uint8_t *",thread-id="1",has_more="0"
+(gdb) 
+56^done,name="var6",numchild="128",value="[128]",type="char [128]",thread-id="1",has_more="0"
+(gdb) 
+57^done,name="var7",numchild="8",value="[8]",type="char [8]",thread-id="1",has_more="0"
+(gdb) 
+58^done,name="var8",numchild="9",value="[9]",type="char [9]",thread-id="1",has_more="0"
+(gdb) 
+59^done,name="var9",numchild="1",value="0x8003cc4 \"\\221\\001\"",type="char *",thread-id="1",has_more="0"
+(gdb) 
+60^done,name="var10",numchild="9",value="[9]",type="char [9]",thread-id="1",has_more="0"
+(gdb) 
+61^done,name="var11",numchild="1",value="0x0",type="char *",thread-id="1",has_more="0"
+(gdb) 
+62^done,name="var12",numchild="5",value="[5]",type="char *[5]",thread-id="1",has_more="0"
+(gdb) 
+63^done,name="var13",numchild="1",value="0x2001ffc0",type="uint8_t (*)[5]",thread-id="1",has_more="0"
+(gdb) 
+64^done,name="var14",numchild="1",value="0x2001ff40",type="char (*)[128]",thread-id="1",has_more="0"
+(gdb) 
+65^done,name="var15",numchild="1",value="0x2001ff38",type="char (*)[8]",thread-id="1",has_more="0"
+(gdb) 
+66^done,name="var16",numchild="1",value="0x2001ff2c",type="char (*)[9]",thread-id="1",has_more="0"
+(gdb) 
+67^done,name="var17",numchild="1",value="0x2001ff20",type="char (*)[9]",thread-id="1",has_more="0"
+(gdb) 
+68^done,name="var18",numchild="1",value="0x2001ff0c",type="char *(*)[5]",thread-id="1",has_more="0"
+(gdb) 
+69^done
+(gdb) 
+70^done,groups=[{id="i1",type="process",pid="1",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+71^done,threads=[{id="1",target-id="Thread 1",frame={level="0",addr="0x08000696",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="123",arch="armv7e-m"},state="stopped"}]
+(gdb) 
+72^running
+*running,thread-id="all"
+(gdb) 
+*stopped,reason="end-stepping-range",frame={addr="0x0800069a",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="130",arch="armv7e-m"},thread-id="1",stopped-threads="all"
+73^done,locals=[{name="i",value="134221539"},{name="ip",value="0x8003cc0"},{name="s",value="{a = 536871352, b = 536875464, c = 10}"},{name="a",value="\"4\\000\\000\\000\""},{name="ap",value="0x20000220 \"\\b\\004\""},{name="sbuf",value="\"\377\377\377\377\\000\\000\\000\\000\\001\\000\\000\\000\\001\\000\\000\\000\\030-DT\355\\006\\000\\b\253\\f\\000\\b\\217\\f\\000\\b\", '\\000' <repeats 12 times>, \"\\034\\021\\000 \\\\D\\000\\000\\020\\000\\000\\000\\004`\\002@\\000\\000\\000\\000\\000\\000\\000\\000A\\r\\000\\b-\\034\\000\\b5\\034\\000\\b-\\034\\000\\b\253\\026\\000\\bN\\222(\\000\\000\\000\\000\\000\\200e8\\000<R\\\"\\000&f8\\000tg8\\000hi8\\000\341\\020\\000\\b\310\\021\\000 \371\377\377\377\""},{name="cstr1",value="\"\\200\\000\\000\\000\377\377\377\377\""},{name="cstr2",value="\"LX\\000 \240\377\\001 \350\""},{name="sbuf2",value="0x8003cc4 \"\\221\\001\""},{name="cstr3",value="\"\\001\\000\\000\\000\261`\\000\\b4\""},{name="loc",value="0x0"},{name="sa",value="{0x8006011 \"\\034\363\321\370\275\", 0x2 \"\\002 %\\017\", 0x8006850 \")\\n\", 0x2000584c \"8Y\", 0x20000150 <__sf+116> \"\"}"}]
+(gdb) 
+74^done,depth="1"
+(gdb) 
+75^done,changelist=[]
+(gdb) 
+76^done,changelist=[]
+(gdb) 
+77^done,changelist=[]
+(gdb) 
+78^done,changelist=[]
+(gdb) 
+79^done,changelist=[]
+(gdb) 
+80^done,changelist=[]
+(gdb) 
+81^done,changelist=[]
+(gdb) 
+82^done,changelist=[]
+(gdb) 
+83^done,changelist=[]
+(gdb) 
+84^done,changelist=[]
+(gdb) 
+85^done,changelist=[]
+(gdb) 
+86^done,changelist=[]
+(gdb) 
+87^done
+(gdb) 
+88^done,changelist=[]
+(gdb) 
+89^done,changelist=[]
+(gdb) 
+90^done,changelist=[]
+(gdb) 
+91^done,changelist=[]
+(gdb) 
+92^done,changelist=[]
+(gdb) 
+93^done,changelist=[]
+(gdb) 
+94^done,groups=[{id="i1",type="process",pid="1",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+95^done,threads=[{id="1",target-id="Thread 1",frame={level="0",addr="0x0800069a",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="130",arch="armv7e-m"},state="stopped"}]
+(gdb) 
+96^running
+*running,thread-id="all"
+(gdb) 
+*stopped,reason="end-stepping-range",frame={addr="0x0800069e",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="137",arch="armv7e-m"},thread-id="1",stopped-threads="all"
+97^done,locals=[{name="i",value="134221539"},{name="ip",value="0x8003cc0"},{name="s",value="{a = 536871352, b = 536875464, c = 10}"},{name="a",value="\"4\\000\\000\\000\""},{name="ap",value="0x20000220 \"\\b\\004\""},{name="sbuf",value="\"\377\377\377\377\\000\\000\\000\\000\\001\\000\\000\\000\\001\\000\\000\\000\\030-DT\355\\006\\000\\b\253\\f\\000\\b\\217\\f\\000\\b\", '\\000' <repeats 12 times>, \"\\034\\021\\000 \\\\D\\000\\000\\020\\000\\000\\000\\004`\\002@\\000\\000\\000\\000\\000\\000\\000\\000A\\r\\000\\b-\\034\\000\\b5\\034\\000\\b-\\034\\000\\b\253\\026\\000\\bN\\222(\\000\\000\\000\\000\\000\\200e8\\000<R\\\"\\000&f8\\000tg8\\000hi8\\000\341\\020\\000\\b\310\\021\\000 \371\377\377\377\""},{name="cstr1",value="\"\\200\\000\\000\\000\377\377\377\377\""},{name="cstr2",value="\"LX\\000 \240\377\\001 \350\""},{name="sbuf2",value="0x8003cc4 \"\\221\\001\""},{name="cstr3",value="\"\\001\\000\\000\\000\261`\\000\\b4\""},{name="loc",value="0x0"},{name="sa",value="{0x8006011 \"\\034\363\321\370\275\", 0x2 \"\\002 %\\017\", 0x8006850 \")\\n\", 0x2000584c \"8Y\", 0x20000150 <__sf+116> \"\"}"}]
+(gdb) 
+98^done,depth="1"
+(gdb) 
+99^done
+(gdb) 
+100^done,groups=[{id="i1",type="process",pid="1",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+101^done,threads=[{id="1",target-id="Thread 1",frame={level="0",addr="0x0800069e",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="137",arch="armv7e-m"},state="stopped"}]
+(gdb) 
+102^done,changelist=[]
+(gdb) 
+103^done,changelist=[]
+(gdb) 
+104^done,changelist=[]
+(gdb) 
+105^done,changelist=[]
+(gdb) 
+106^done,changelist=[]
+(gdb) 
+107^done,changelist=[]
+(gdb) 
+108^done,changelist=[]
+(gdb) 
+109^done,changelist=[]
+(gdb) 
+110^done,changelist=[]
+(gdb) 
+111^done,changelist=[]
+(gdb) 
+112^done,changelist=[]
+(gdb) 
+113^done,changelist=[]
+(gdb) 
+114^done,changelist=[]
+(gdb) 
+115^done,changelist=[]
+(gdb) 
+116^done,changelist=[]
+(gdb) 
+117^done,changelist=[]
+(gdb) 
+118^done,changelist=[]
+(gdb) 
+119^done,changelist=[]
+(gdb) 
+120^running
+*running,thread-id="all"
+(gdb) 
+*stopped,reason="end-stepping-range",frame={addr="0x080006a2",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="138",arch="armv7e-m"},thread-id="1",stopped-threads="all"
+121^done,locals=[{name="i",value="134221539"},{name="ip",value="0x8003cc0"},{name="s",value="{a = 536871352, b = 536875464, c = 10}"},{name="a",value="\"4\\000\\000\\000\""},{name="ap",value="0x20000220 \"\\b\\004\""},{name="sbuf",value="\"\377\377\377\377\\000\\000\\000\\000\\001\\000\\000\\000\\001\\000\\000\\000\\030-DT\355\\006\\000\\b\253\\f\\000\\b\\217\\f\\000\\b\", '\\000' <repeats 12 times>, \"\\034\\021\\000 \\\\D\\000\\000\\020\\000\\000\\000\\004`\\002@\\000\\000\\000\\000\\000\\000\\000\\000A\\r\\000\\b-\\034\\000\\b5\\034\\000\\b-\\034\\000\\b\253\\026\\000\\bN\\222(\\000\\000\\000\\000\\000\\200e8\\000<R\\\"\\000&f8\\000tg8\\000hi8\\000\341\\020\\000\\b\310\\021\\000 \371\377\377\377\""},{name="cstr1",value="\"\\200\\000\\000\\000\377\377\377\377\""},{name="cstr2",value="\"LX\\000 \240\377\\001 \350\""},{name="sbuf2",value="0x8003cc4 \"\\221\\001\""},{name="cstr3",value="\"\\001\\000\\000\\000\261`\\000\\b4\""},{name="loc",value="0x0"},{name="sa",value="{0x8006011 \"\\034\363\321\370\275\", 0x2 \"\\002 %\\017\", 0x8006850 \")\\n\", 0x2000584c \"8Y\", 0x20000150 <__sf+116> \"\"}"}]
+(gdb) 
+122^done,depth="1"
+(gdb) 
+123^done,changelist=[]
+(gdb) 
+124^done,changelist=[]
+(gdb) 
+125^done,changelist=[]
+(gdb) 
+126^done,changelist=[]
+(gdb) 
+127^done,changelist=[]
+(gdb) 
+128^done,changelist=[]
+(gdb) 
+129^done,changelist=[]
+(gdb) 
+130^done,changelist=[]
+(gdb) 
+131^done,changelist=[]
+(gdb) 
+132^done,changelist=[]
+(gdb) 
+133^done,changelist=[]
+(gdb) 
+134^done,changelist=[]
+(gdb) 
+135^done,changelist=[]
+(gdb) 
+136^done,changelist=[]
+(gdb) 
+137^done,changelist=[]
+(gdb) 
+138^done,changelist=[]
+(gdb) 
+139^done,changelist=[]
+(gdb) 
+140^done,changelist=[]
+(gdb) 
+141^done
+(gdb) 
+142^done,groups=[{id="i1",type="process",pid="1",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+143^done,threads=[{id="1",target-id="Thread 1",frame={level="0",addr="0x080006a2",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="138",arch="armv7e-m"},state="stopped"}]
+(gdb) 
+144^running
+*running,thread-id="all"
+(gdb) 
+*stopped,reason="end-stepping-range",frame={addr="0x080006a6",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="141",arch="armv7e-m"},thread-id="1",stopped-threads="all"
+145^done,locals=[{name="i",value="134221539"},{name="ip",value="0x8003cc0"},{name="s",value="{a = 536871352, b = 536875464, c = 10}"},{name="a",value="\"4\\000\\000\\000\""},{name="ap",value="0x20000220 \"\\b\\004\""},{name="sbuf",value="\"\377\377\377\377\\000\\000\\000\\000\\001\\000\\000\\000\\001\\000\\000\\000\\030-DT\355\\006\\000\\b\253\\f\\000\\b\\217\\f\\000\\b\", '\\000' <repeats 12 times>, \"\\034\\021\\000 \\\\D\\000\\000\\020\\000\\000\\000\\004`\\002@\\000\\000\\000\\000\\000\\000\\000\\000A\\r\\000\\b-\\034\\000\\b5\\034\\000\\b-\\034\\000\\b\253\\026\\000\\bN\\222(\\000\\000\\000\\000\\000\\200e8\\000<R\\\"\\000&f8\\000tg8\\000hi8\\000\341\\020\\000\\b\310\\021\\000 \371\377\377\377\""},{name="cstr1",value="\"\\200\\000\\000\\000\377\377\377\377\""},{name="cstr2",value="\"LX\\000 \240\377\\001 \350\""},{name="sbuf2",value="0x8003cc4 \"\\221\\001\""},{name="cstr3",value="\"\\001\\000\\000\\000\261`\\000\\b4\""},{name="loc",value="0x0"},{name="sa",value="{0x8006011 \"\\034\363\321\370\275\", 0x2 \"\\002 %\\017\", 0x8006850 \")\\n\", 0x2000584c \"8Y\", 0x20000150 <__sf+116> \"\"}"}]
+(gdb) 
+146^done,depth="1"
+(gdb) 
+147^done
+(gdb) 
+148^done,groups=[{id="i1",type="process",pid="1",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+149^done,threads=[{id="1",target-id="Thread 1",frame={level="0",addr="0x080006a6",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="141",arch="armv7e-m"},state="stopped"}]
+(gdb) 
+150^done,changelist=[]
+(gdb) 
+151^done,changelist=[]
+(gdb) 
+152^done,changelist=[]
+(gdb) 
+153^done,changelist=[]
+(gdb) 
+154^done,changelist=[]
+(gdb) 
+155^done,changelist=[]
+(gdb) 
+156^done,changelist=[]
+(gdb) 
+157^done,changelist=[]
+(gdb) 
+158^done,changelist=[]
+(gdb) 
+159^done,changelist=[]
+(gdb) 
+160^done,changelist=[]
+(gdb) 
+161^done,changelist=[]
+(gdb) 
+162^done,changelist=[]
+(gdb) 
+163^done,changelist=[]
+(gdb) 
+164^done,changelist=[]
+(gdb) 
+165^done,changelist=[]
+(gdb) 
+166^done,changelist=[]
+(gdb) 
+167^done,changelist=[]
+(gdb) 
+168^running
+*running,thread-id="all"
+(gdb) 
+~"\nProgram"
+~" received signal SIGSEGV, Segmentation fault.\n"
+~"_write (fd=1, ptr=0x1 \"\", len=536871464) at ../Core/Src/main.c:69\n"
+~"69\t__attribute__((section(\".ccmram\"))) int _write(int fd, char *ptr, int len) {\n"
+*stopped,reason="signal-received",signal-name="SIGSEGV",signal-meaning="Segmentation fault",frame={addr="0x10000000",func="_write",args=[{name="fd",value="1"},{name="ptr",value="0x1 \"\""},{name="len",value="536871464"}],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="69",arch="armv7e-m"},thread-id="1",stopped-threads="all"
+169^done,locals=[{name="hstatus",value="8"}]
+(gdb) 
+170^done,depth="7"
+(gdb) 
+171^done,name="var19",numchild="0",value="1",type="int",thread-id="1",has_more="0"
+(gdb) 
+172^done,name="var20",numchild="1",value="0x1 \"\"",type="char *",thread-id="1",has_more="0"
+(gdb) 
+173^done,name="var21",numchild="0",value="536871464",type="int",thread-id="1",has_more="0"
+(gdb) 
+174^done,name="var22",numchild="0",value="8",type="HAL_StatusTypeDef",thread-id="1",has_more="0"
+(gdb) 
+175^done
+(gdb) 
+176^done,groups=[{id="i1",type="process",pid="1",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+177^done,threads=[{id="1",target-id="Thread 1",frame={level="0",addr="0x10000000",func="_write",args=[{name="fd",value="1"},{name="ptr",value="0x1 \"\""},{name="len",value="536871464"}],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="69",arch="armv7e-m"},state="stopped"}]
+(gdb) 
+178^done,stack=[frame={level="0",addr="0x10000000",func="_write",file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="69",arch="armv7e-m"},frame={level="1",addr="0x08002dd0",func="_write_r",arch="armv7e-m"},frame={level="2",addr="0x08003812",func="__sflush_r",arch="armv7e-m"},frame={level="3",addr="0x0800386e",func="_fflush_r",arch="armv7e-m"},frame={level="4",addr="0x08002bf8",func="__swbuf_r",arch="armv7e-m"},frame={level="5",addr="0x08002a90",func="_puts_r",arch="armv7e-m"},frame={level="6",addr="0x080006ac",func="main",file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="141",arch="armv7e-m"}]
+(gdb) 
+179^running
+*running,thread-id="all"
+(gdb) 
+180^error,msg="Cannot execute this command while the target is running.\nUse the \"interrupt\" command to stop the target\nand then try again."
+(gdb) 
+181^done
+(gdb) 
+~"Kill the program being debugged? (y or n) [answered Y; input not from terminal]\n"
+&"Cannot execute this command while the target is running.\n"
+&"Use the \"interrupt\" command to stop the target\n"
+&"and then try again.\n"
+182^error,msg="Cannot execute this command while the target is running.\nUse the \"interrupt\" command to stop the target\nand then try again."
+(gdb) 
+183^exit
+&"Cannot execute this command while the target is running.\n"
+&"Use the \"interrupt\" command to stop the target\n"
+&"and then try again.\n"
+=cmd-param-changed,param="logging enabled",value="on"
+23^done
+(gdb) 
+&"set mem inaccessible-by-default off\n"
+=cmd-param-changed,param="mem inaccessible-by-default",value="off"
+24^done
+(gdb) 
+&"monitor connect_rst enable\n"
+@"Assert nRST during connect: enabled\n"
+25^done
+(gdb) 
+&"monitor auto_scan\n"
+@"Target voltage: 3.19V\n"
+@"JTAG scan found no devices, trying SWD!\n"
+@"Available Targets:\n"
+@"No. Att Driver\n"
+@" 1      STM32F40x M4\n"
+26^done
+(gdb) 
+&"attach 1\n"
+~"Attaching to program: /home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf, Remote target\n"
+=thread-group-started,id="i1",pid="1"
+=thread-created,id="1",group-id="i1"
+*running,thread-id="1"
+27^done
+~"Reset_Handler () at ../Core/Startup/startup_stm32f405rgtx.s:61\n"
+~"61\t  ldr   sp, =_estack     /* set stack pointer */\n"
+*stopped,frame={addr="0x08000f24",func="Reset_Handler",args=[],file="../Core/Startup/startup_stm32f405rgtx.s",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Startup/startup_stm32f405rgtx.s",line="61",arch="armv7e-m"},thread-id="1",stopped-threads="all"
+&"load /home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf \n"
+~"Loading section .isr_vector, size 0x188 lma 0x8000000\n"
+28+download,{section=".isr_vector",section-size="392",total-size="988158"}
+28+download,{section=".isr_vector",section-sent="392",section-size="392",total-sent="392",total-size="988158"}
+~"Loading section .text, size 0x38d8 lma 0x8000190\n"
+28+download,{section=".text",section-size="14552",total-size="988158"}
+~"Loading section .rodata, size 0x250 lma 0x8003a68\n"
+28+download,{section=".rodata",section-size="592",total-size="988158"}
+~"Loading section .ARM, size 0x8 lma 0x8003cb8\n"
+28+download,{section=".ARM",section-size="8",total-size="988158"}
+~"Loading section .init_array, size 0x4 lma 0x8003cc0\n"
+28+download,{section=".init_array",section-size="4",total-size="988158"}
+~"Loading section .fini_array, size 0x4 lma 0x8003cc4\n"
+28+download,{section=".fini_array",section-size="4",total-size="988158"}
+~"Loading section .data, size 0x68 lma 0x8003cc8\n"
+28+download,{section=".data",section-size="104",total-size="988158"}
+~"Loading section .ccmram, size 0x58 lma 0x8003d30\n"
+28+download,{section=".ccmram",section-size="88",total-size="988158"}
+~"Start address 0x08000f24, load size 15744\n"
+~"Transfer rate: 32 KB/sec, 715 bytes/write.\n"
+28^done
+(gdb) 
+&"\n"
+^done
+(gdb) 
+29^done,groups=[{id="i1",type="process",pid="1",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+~"Note: automatically using hardware breakpoints for read-only addresses.\n"
+30^done,bkpt={number="1",type="breakpoint",disp="del",enabled="y",addr="0x08000696",func="main",file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="123",thread-groups=["i1"],times="0",original-location="main"}
+(gdb) 
+31^done,bkpt={number="2",type="breakpoint",disp="del",enabled="y",addr="0x08000696",func="main",file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="123",thread-groups=["i1"],times="0",original-location="main"}
+(gdb) 
+&"\n"
+^done
+(gdb) 
+32^done,BreakpointTable={nr_rows="2",nr_cols="6",hdr=[{width="7",alignment="-1",col_name="number",colhdr="Num"},{width="14",alignment="-1",col_name="type",colhdr="Type"},{width="4",alignment="-1",col_name="disp",colhdr="Disp"},{width="3",alignment="-1",col_name="enabled",colhdr="Enb"},{width="10",alignment="-1",col_name="addr",colhdr="Address"},{width="40",alignment="2",col_name="what",colhdr="What"}],body=[bkpt={number="1",type="breakpoint",disp="del",enabled="y",addr="0x08000696",func="main",file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="123",thread-groups=["i1"],times="0",original-location="main"},bkpt={number="2",type="breakpoint",disp="del",enabled="y",addr="0x08000696",func="main",file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="123",thread-groups=["i1"],times="0",original-location="main"}]}
+(gdb) 
+33^done,depth="1"
+(gdb) 
+34^done,groups=[{id="i1",type="process",pid="1",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+35^done,threads=[{id="1",target-id="Thread 1",frame={level="0",addr="0x08000f24",func="Reset_Handler",args=[],file="../Core/Startup/startup_stm32f405rgtx.s",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Startup/startup_stm32f405rgtx.s",line="61",arch="armv7e-m"},state="stopped"}]
+(gdb) 
+36^done
+(gdb) 
+37^done,stack=[frame={level="0",addr="0x08000f24",func="Reset_Handler",file="../Core/Startup/startup_stm32f405rgtx.s",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Startup/startup_stm32f405rgtx.s",line="61",arch="armv7e-m"}]
+(gdb) 
+38^error,msg="Can not fetch data now."
+(gdb) 
+39^done,threads=[{id="1",target-id="Thread 1",frame={level="0",addr="0x08000f24",func="Reset_Handler",args=[],file="../Core/Startup/startup_stm32f405rgtx.s",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Startup/startup_stm32f405rgtx.s",line="61",arch="armv7e-m"},state="stopped"}]
+(gdb) 
+40^done,groups=[{id="i1",type="process",pid="1",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+41^done,stack-args=[frame={level="0",args=[]}]
+(gdb) 
+42^done,locals=[]
+(gdb) 
+43^running
+*running,thread-id="all"
+(gdb) 
+=breakpoint-modified,bkpt={number="1",type="breakpoint",disp="del",enabled="y",addr="0x08000696",func="main",file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="123",thread-groups=["i1"],times="1",original-location="main"}
+=breakpoint-modified,bkpt={number="2",type="breakpoint",disp="del",enabled="y",addr="0x08000696",func="main",file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="123",thread-groups=["i1"],times="1",original-location="main"}
+~"\n"
+~"Temporary breakpoint 1, main () at ../Core/Src/main.c:123\n"
+~"123\t    HAL_Init();\n"
+*stopped,reason="breakpoint-hit",disp="del",bkptno="1",frame={addr="0x08000696",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="123",arch="armv7e-m"},thread-id="1",stopped-threads="all"
+=breakpoint-deleted,id="1"
+=breakpoint-deleted,id="2"
+~"No breakpoint number 2.\n"
+44^done
+(gdb) 
+45^done,depth="1"
+(gdb) 
+46^done,groups=[{id="i1",type="process",pid="1",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+47^done,locals=[{name="i",value="818612190"},{name="ip",value="0x8003cc0"},{name="s",value="{a = -1811971949, b = -1066768422, c = 1964170393}"},{name="a",value="\"\310\\nF\\002\\224\""},{name="ap",value="0x20000220 \"\\b\\004\""},{name="sbuf",value="\"\\210\\212BLr\340\304\345E\353\\006\3608\\177\347P\\200\\216r\344}\245\\017\\206a\\003dTC\375\\216\255\3106>\303{\\211\\022\316\3536\316\242\350'y\256Q6-y\273u\\177uJC\327G\344\\214\257\351:H\\003B\\035\325A\272\344\\\\V\304nx\\204\\f\331\343\276\\r_f\\224\276\342YNy\\215\374\347o*:\314\\032\\233M\\216\325T\352c\\n\315\\207H~\\204bIM.\\203/\343\264bU\251\277\274/\366\""},{name="cstr1",value="\"\\025#\\2148\355\\vP\\t\""},{name="cstr2",value="\"z/\\237\\\\Y\264M\352#\""},{name="sbuf2",value="0x8003cc4 \"\\221\\001\""},{name="cstr3",value="\"(wZ\\021?cR\\033\350\""},{name="loc",value="0x0"},{name="sa",value="{0xdfa97417 \"\", 0xa68048bd \"\", 0x5dff22d9 \"\", 0x2348bbcb \"\", 0x7b6b5da5 \"\"}"}]
+(gdb) 
+48^done
+(gdb) 
+49^done,threads=[{id="1",target-id="Thread 1",frame={level="0",addr="0x08000696",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="123",arch="armv7e-m"},state="stopped"}]
+(gdb) 
+50^done,name="var1",numchild="0",value="818612190",type="int",thread-id="1",has_more="0"
+(gdb) 
+51^done,name="var2",numchild="1",value="0x8003cc0",type="int *",thread-id="1",has_more="0"
+(gdb) 
+52^done,name="var3",numchild="3",value="{...}",type="s_struct",thread-id="1",has_more="0"
+(gdb) 
+53^done,name="var4",numchild="5",value="[5]",type="uint8_t [5]",thread-id="1",has_more="0"
+(gdb) 
+54^done,name="var5",numchild="1",value="0x20000220 \"\\b\\004\"",type="uint8_t *",thread-id="1",has_more="0"
+(gdb) 
+55^done,name="var6",numchild="128",value="[128]",type="char [128]",thread-id="1",has_more="0"
+(gdb) 
+56^done,name="var7",numchild="8",value="[8]",type="char [8]",thread-id="1",has_more="0"
+(gdb) 
+57^done,name="var8",numchild="9",value="[9]",type="char [9]",thread-id="1",has_more="0"
+(gdb) 
+58^done,name="var9",numchild="1",value="0x8003cc4 \"\\221\\001\"",type="char *",thread-id="1",has_more="0"
+(gdb) 
+59^done,name="var10",numchild="9",value="[9]",type="char [9]",thread-id="1",has_more="0"
+(gdb) 
+60^done,name="var11",numchild="1",value="0x0",type="char *",thread-id="1",has_more="0"
+(gdb) 
+61^done,name="var12",numchild="5",value="[5]",type="char *[5]",thread-id="1",has_more="0"
+(gdb) 
+62^done,name="var13",numchild="1",value="0x2001ffc0",type="uint8_t (*)[5]",thread-id="1",has_more="0"
+(gdb) 
+63^done,name="var14",numchild="1",value="0x2001ff40",type="char (*)[128]",thread-id="1",has_more="0"
+(gdb) 
+64^done,name="var15",numchild="1",value="0x2001ff38",type="char (*)[8]",thread-id="1",has_more="0"
+(gdb) 
+65^done,name="var16",numchild="1",value="0x2001ff2c",type="char (*)[9]",thread-id="1",has_more="0"
+(gdb) 
+66^done,name="var17",numchild="1",value="0x2001ff20",type="char (*)[9]",thread-id="1",has_more="0"
+(gdb) 
+67^done,name="var18",numchild="1",value="0x2001ff0c",type="char *(*)[5]",thread-id="1",has_more="0"
+(gdb) 
+68^running
+*running,thread-id="all"
+(gdb) 
+*stopped,reason="end-stepping-range",frame={addr="0x0800069a",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="130",arch="armv7e-m"},thread-id="1",stopped-threads="all"
+69^done,locals=[{name="i",value="818612190"},{name="ip",value="0x8003cc0"},{name="s",value="{a = -1811971949, b = -1066768422, c = 1964170393}"},{name="a",value="\"\310\\nF\\002\\224\""},{name="ap",value="0x20000220 \"\\b\\004\""},{name="sbuf",value="\"\\210\\212BLr\340\304\345E\353\\006\3608\\177\347P\\200\\216r\344}\245\\017\\206a\\003dTC\375\\216\255\3106>\303{\\211\\022\316\3536\316\242\350'y\256Q6-y\273u\\177uJC\327G\344\\214\257\351:H\\003B\\035\325A\272\344\\\\V\304nx\\204\\f\331\343\276\\r_f\\224\276\342YNy\\215\374\347o*:\314\\032\\233M\\216\325T\352c\\n\315\\207H~\\204bIM.\\203/\343\264bU\251\277\274/\366\""},{name="cstr1",value="\"\\025#\\2148\355\\vP\\t\""},{name="cstr2",value="\"z/\\237\\\\Y\264M\352#\""},{name="sbuf2",value="0x8003cc4 \"\\221\\001\""},{name="cstr3",value="\"(wZ\\021?cR\\033\350\""},{name="loc",value="0x0"},{name="sa",value="{0xdfa97417 \"\", 0xa68048bd \"\", 0x5dff22d9 \"\", 0x2348bbcb \"\", 0x7b6b5da5 \"\"}"}]
+(gdb) 
+70^done,depth="1"
+(gdb) 
+71^done
+(gdb) 
+72^done,groups=[{id="i1",type="process",pid="1",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+73^done,threads=[{id="1",target-id="Thread 1",frame={level="0",addr="0x0800069a",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="130",arch="armv7e-m"},state="stopped"}]
+(gdb) 
+74^done,changelist=[]
+(gdb) 
+75^done,changelist=[]
+(gdb) 
+76^done,changelist=[]
+(gdb) 
+77^done,changelist=[]
+(gdb) 
+78^done,changelist=[]
+(gdb) 
+79^done,changelist=[]
+(gdb) 
+80^done,changelist=[]
+(gdb) 
+81^done,changelist=[]
+(gdb) 
+82^done,changelist=[]
+(gdb) 
+83^done,changelist=[]
+(gdb) 
+84^done,changelist=[]
+(gdb) 
+85^done,changelist=[]
+(gdb) 
+86^done,changelist=[]
+(gdb) 
+87^done,changelist=[]
+(gdb) 
+88^done,changelist=[]
+(gdb) 
+89^done,changelist=[]
+(gdb) 
+90^done,changelist=[]
+(gdb) 
+91^done,changelist=[]
+(gdb) 
+92^running
+*running,thread-id="all"
+(gdb) 
+*stopped,reason="end-stepping-range",frame={addr="0x0800069e",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="137",arch="armv7e-m"},thread-id="1",stopped-threads="all"
+93^done,locals=[{name="i",value="818612190"},{name="ip",value="0x8003cc0"},{name="s",value="{a = -1811971949, b = -1066768422, c = 1964170393}"},{name="a",value="\"\310\\nF\\002\\224\""},{name="ap",value="0x20000220 \"\\b\\004\""},{name="sbuf",value="\"\\210\\212BLr\340\304\345E\353\\006\3608\\177\347P\\200\\216r\344}\245\\017\\206a\\003dTC\375\\216\255\3106>\303{\\211\\022\316\3536\316\242\350'y\256Q6-y\273u\\177uJC\327G\344\\214\257\351:H\\003B\\035\325A\272\344\\\\V\304nx\\204\\f\331\343\276\\r_f\\224\276\342YNy\\215\374\347o*:\314\\032\\233M\\216\325T\352c\\n\315\\207H~\\204bIM.\\203/\343\264bU\251\277\274/\366\""},{name="cstr1",value="\"\\025#\\2148\355\\vP\\t\""},{name="cstr2",value="\"z/\\237\\\\Y\264M\352#\""},{name="sbuf2",value="0x8003cc4 \"\\221\\001\""},{name="cstr3",value="\"(wZ\\021?cR\\033\350\""},{name="loc",value="0x0"},{name="sa",value="{0xdfa97417 \"\", 0xa68048bd \"\", 0x5dff22d9 \"\", 0x2348bbcb \"\", 0x7b6b5da5 \"\"}"}]
+(gdb) 
+94^done,depth="1"
+(gdb) 
+95^done
+(gdb) 
+96^done,changelist=[]
+(gdb) 
+97^done,changelist=[]
+(gdb) 
+98^done,changelist=[]
+(gdb) 
+99^done,changelist=[]
+(gdb) 
+100^done,changelist=[]
+(gdb) 
+101^done,changelist=[]
+(gdb) 
+102^done,changelist=[]
+(gdb) 
+103^done,changelist=[]
+(gdb) 
+104^done,changelist=[]
+(gdb) 
+105^done,changelist=[]
+(gdb) 
+106^done,changelist=[]
+(gdb) 
+107^done,changelist=[]
+(gdb) 
+108^done,changelist=[]
+(gdb) 
+109^done,changelist=[]
+(gdb) 
+110^done,changelist=[]
+(gdb) 
+111^done,changelist=[]
+(gdb) 
+112^done,changelist=[]
+(gdb) 
+113^done,changelist=[]
+(gdb) 
+114^done,groups=[{id="i1",type="process",pid="1",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+115^done,threads=[{id="1",target-id="Thread 1",frame={level="0",addr="0x0800069e",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="137",arch="armv7e-m"},state="stopped"}]
+(gdb) 
+116^running
+*running,thread-id="all"
+(gdb) 
+*stopped,reason="end-stepping-range",frame={addr="0x080006a2",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="138",arch="armv7e-m"},thread-id="1",stopped-threads="all"
+117^done,locals=[{name="i",value="818612190"},{name="ip",value="0x8003cc0"},{name="s",value="{a = -1811971949, b = -1066768422, c = 1964170393}"},{name="a",value="\"\310\\nF\\002\\224\""},{name="ap",value="0x20000220 \"\\b\\004\""},{name="sbuf",value="\"\\210\\212BLr\340\304\345E\353\\006\3608\\177\347P\\200\\216r\344}\245\\017\\206a\\003dTC\375\\216\255\3106>\303{\\211\\022\316\3536\316\242\350'y\256Q6-y\273u\\177uJC\327G\344\\214\257\351:H\\003B\\035\325A\272\344\\\\V\304nx\\204\\f\331\343\276\\r_f\\224\276\342YNy\\215\374\347o*:\314\\032\\233M\\216\325T\352c\\n\315\\207H~\\204bIM.\\203/\343\264bU\251\277\274/\366\""},{name="cstr1",value="\"\\025#\\2148\355\\vP\\t\""},{name="cstr2",value="\"z/\\237\\\\Y\264M\352#\""},{name="sbuf2",value="0x8003cc4 \"\\221\\001\""},{name="cstr3",value="\"(wZ\\021?cR\\033\350\""},{name="loc",value="0x0"},{name="sa",value="{0xdfa97417 \"\", 0xa68048bd \"\", 0x5dff22d9 \"\", 0x2348bbcb \"\", 0x7b6b5da5 \"\"}"}]
+(gdb) 
+118^done,depth="1"
+(gdb) 
+119^done,changelist=[]
+(gdb) 
+120^done,changelist=[]
+(gdb) 
+121^done,changelist=[]
+(gdb) 
+122^done,changelist=[]
+(gdb) 
+123^done,changelist=[]
+(gdb) 
+124^done,changelist=[]
+(gdb) 
+125^done,changelist=[]
+(gdb) 
+126^done,changelist=[]
+(gdb) 
+127^done,changelist=[]
+(gdb) 
+128^done,changelist=[]
+(gdb) 
+129^done,changelist=[]
+(gdb) 
+130^done,changelist=[]
+(gdb) 
+131^done,changelist=[]
+(gdb) 
+132^done,changelist=[]
+(gdb) 
+133^done,changelist=[]
+(gdb) 
+134^done,changelist=[]
+(gdb) 
+135^done
+(gdb) 
+136^done,changelist=[]
+(gdb) 
+137^done,changelist=[]
+(gdb) 
+138^done,groups=[{id="i1",type="process",pid="1",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+139^done,threads=[{id="1",target-id="Thread 1",frame={level="0",addr="0x080006a2",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="138",arch="armv7e-m"},state="stopped"}]
+(gdb) 
+140^running
+*running,thread-id="all"
+(gdb) 
+*stopped,reason="end-stepping-range",frame={addr="0x080006a6",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="141",arch="armv7e-m"},thread-id="1",stopped-threads="all"
+141^done,locals=[{name="i",value="818612190"},{name="ip",value="0x8003cc0"},{name="s",value="{a = -1811971949, b = -1066768422, c = 1964170393}"},{name="a",value="\"\310\\nF\\002\\224\""},{name="ap",value="0x20000220 \"\\b\\004\""},{name="sbuf",value="\"\\210\\212BLr\340\304\345E\353\\006\3608\\177\347P\\200\\216r\344}\245\\017\\206a\\003dTC\375\\216\255\3106>\303{\\211\\022\316\3536\316\242\350'y\256Q6-y\273u\\177uJC\327G\344\\214\257\351:H\\003B\\035\325A\272\344\\\\V\304nx\\204\\f\331\343\276\\r_f\\224\276\342YNy\\215\374\347o*:\314\\032\\233M\\216\325T\352c\\n\315\\207H~\\204bIM.\\203/\343\264bU\251\277\274/\366\""},{name="cstr1",value="\"\\025#\\2148\355\\vP\\t\""},{name="cstr2",value="\"z/\\237\\\\Y\264M\352#\""},{name="sbuf2",value="0x8003cc4 \"\\221\\001\""},{name="cstr3",value="\"(wZ\\021?cR\\033\350\""},{name="loc",value="0x0"},{name="sa",value="{0xdfa97417 \"\", 0xa68048bd \"\", 0x5dff22d9 \"\", 0x2348bbcb \"\", 0x7b6b5da5 \"\"}"}]
+(gdb) 
+142^done,depth="1"
+(gdb) 
+143^done,depth="1"
+(gdb) 
+144^done,changelist=[]
+(gdb) 
+145^done,changelist=[]
+(gdb) 
+146^done,changelist=[]
+(gdb) 
+147^done,changelist=[]
+(gdb) 
+148^done,changelist=[]
+(gdb) 
+149^done,changelist=[]
+(gdb) 
+150^done,changelist=[]
+(gdb) 
+151^done,changelist=[]
+(gdb) 
+152^done,changelist=[]
+(gdb) 
+153^done,changelist=[]
+(gdb) 
+154^done,changelist=[]
+(gdb) 
+155^done,changelist=[]
+(gdb) 
+156^done,changelist=[]
+(gdb) 
+157^done,changelist=[]
+(gdb) 
+158^done,changelist=[]
+(gdb) 
+159^done,changelist=[]
+(gdb) 
+160^done,changelist=[]
+(gdb) 
+161^done,changelist=[]
+(gdb) 
+162^done
+(gdb) 
+163^done,groups=[{id="i1",type="process",pid="1",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+164^done,threads=[{id="1",target-id="Thread 1",frame={level="0",addr="0x080006a6",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="141",arch="armv7e-m"},state="stopped"}]
+(gdb) 
+165^running
+*running,thread-id="all"
+(gdb) 
+~"\nProgram"
+~" received signal SIGSEGV, Segmentation fault.\n"
+~"_write (fd=1, ptr=0x1 \"\", len=536871464) at ../Core/Src/main.c:69\n"
+~"69\t__attribute__((section(\".ccmram\"))) int _write(int fd, char *ptr, int len) {\n"
+*stopped,reason="signal-received",signal-name="SIGSEGV",signal-meaning="Segmentation fault",frame={addr="0x10000000",func="_write",args=[{name="fd",value="1"},{name="ptr",value="0x1 \"\""},{name="len",value="536871464"}],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="69",arch="armv7e-m"},thread-id="1",stopped-threads="all"
+166^done,locals=[{name="hstatus",value="8"}]
+(gdb) 
+167^done,depth="7"
+(gdb) 
+168^done
+(gdb) 
+169^done,groups=[{id="i1",type="process",pid="1",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+170^done,threads=[{id="1",target-id="Thread 1",frame={level="0",addr="0x10000000",func="_write",args=[{name="fd",value="1"},{name="ptr",value="0x1 \"\""},{name="len",value="536871464"}],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="69",arch="armv7e-m"},state="stopped"}]
+(gdb) 
+171^done,name="var19",numchild="0",value="1",type="int",thread-id="1",has_more="0"
+(gdb) 
+172^done,name="var20",numchild="1",value="0x1 \"\"",type="char *",thread-id="1",has_more="0"
+(gdb) 
+173^done,name="var21",numchild="0",value="536871464",type="int",thread-id="1",has_more="0"
+(gdb) 
+174^done,name="var22",numchild="0",value="8",type="HAL_StatusTypeDef",thread-id="1",has_more="0"
+(gdb) 
+175^done,stack=[frame={level="0",addr="0x10000000",func="_write",file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="69",arch="armv7e-m"},frame={level="1",addr="0x08002dd0",func="_write_r",arch="armv7e-m"},frame={level="2",addr="0x08003812",func="__sflush_r",arch="armv7e-m"},frame={level="3",addr="0x0800386e",func="_fflush_r",arch="armv7e-m"},frame={level="4",addr="0x08002bf8",func="__swbuf_r",arch="armv7e-m"},frame={level="5",addr="0x08002a90",func="_puts_r",arch="armv7e-m"},frame={level="6",addr="0x080006ac",func="main",file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="141",arch="armv7e-m"}]
+(gdb) 
+176^running
+*running,thread-id="all"
+(gdb) 
+177^error,msg="Cannot execute this command while the target is running.\nUse the \"interrupt\" command to stop the target\nand then try again."
+(gdb) 
+178^done
+(gdb) 
+~"Kill the program being debugged? (y or n) [answered Y; input not from terminal]\n"
+&"Cannot execute this command while the target is running.\n"
+&"Use the \"interrupt\" command to stop the target\n"
+&"and then try again.\n"
+179^error,msg="Cannot execute this command while the target is running.\nUse the \"interrupt\" command to stop the target\nand then try again."
+(gdb) 
+180^exit
+&"Cannot execute this command while the target is running.\n"
+&"Use the \"interrupt\" command to stop the target\n"
+&"and then try again.\n"
+=cmd-param-changed,param="logging enabled",value="on"
+24^done
+(gdb) 
+&"set mem inaccessible-by-default off\n"
+=cmd-param-changed,param="mem inaccessible-by-default",value="off"
+25^done
+(gdb) 
+&"monitor connect_rst enable\n"
+@"Assert nRST during connect: enabled\n"
+26^done
+(gdb) 
+&"monitor auto_scan\n"
+@"Target voltage: 3.20V\n"
+@"JTAG scan found no devices, trying SWD!\n"
+@"Available Targets:\n"
+@"No. Att Driver\n"
+@" 1      STM32F40x M4\n"
+27^done
+(gdb) 
+&"attach 1\n"
+~"Attaching to program: /home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf, Remote target\n"
+=thread-group-started,id="i1",pid="1"
+=thread-created,id="1",group-id="i1"
+*running,thread-id="1"
+28^done
+~"0x08000f24 in _sbrk (incr=134221605) at ../Core/Src/sysmem.c:75\n"
+~"75\t  prev_heap_end = __sbrk_heap_end;\n"
+*stopped,frame={addr="0x08000f24",func="_sbrk",args=[{name="incr",value="134221605"}],file="../Core/Src/sysmem.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/sysmem.c",line="75",arch="armv7e-m"},thread-id="1",stopped-threads="all"
+29^done,groups=[{id="i1",type="process",pid="1",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+&"load /home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf \n"
+~"Loading section .isr_vector, size 0x188 lma 0x8000000\n"
+30+download,{section=".isr_vector",section-size="392",total-size="988137"}
+30+download,{section=".isr_vector",section-sent="392",section-size="392",total-sent="392",total-size="988137"}
+~"Loading section .text, size 0x391c lma 0x8000190\n"
+30+download,{section=".text",section-size="14620",total-size="988137"}
+~"Loading section .rodata, size 0x250 lma 0x8003aac\n"
+30+download,{section=".rodata",section-size="592",total-size="988137"}
+~"Loading section .ARM, size 0x8 lma 0x8003cfc\n"
+30+download,{section=".ARM",section-size="8",total-size="988137"}
+~"Loading section .init_array, size 0x4 lma 0x8003d04\n"
+30+download,{section=".init_array",section-size="4",total-size="988137"}
+~"Loading section .fini_array, size 0x4 lma 0x8003d08\n"
+30+download,{section=".fini_array",section-size="4",total-size="988137"}
+~"Loading section .data, size 0x68 lma 0x8003d0c\n"
+30+download,{section=".data",section-size="104",total-size="988137"}
+~"Start address 0x08000f70, load size 15724\n"
+~"Transfer rate: 34 KB/sec, 714 bytes/write.\n"
+30^done
+(gdb) 
+&"\n"
+^done
+(gdb) 
+31^done,threads=[{id="1",target-id="Thread 1",frame={level="0",addr="0x08000f70",func="Reset_Handler",args=[],file="../Core/Startup/startup_stm32f405rgtx.s",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Startup/startup_stm32f405rgtx.s",line="61",arch="armv7e-m"},state="stopped"}]
+(gdb) 
+~"Note: automatically using hardware breakpoints for read-only addresses.\n"
+32^done,bkpt={number="1",type="breakpoint",disp="del",enabled="y",addr="0x080006e2",func="main",file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="123",thread-groups=["i1"],times="0",original-location="main"}
+(gdb) 
+33^done,depth="1"
+(gdb) 
+34^done,bkpt={number="2",type="breakpoint",disp="del",enabled="y",addr="0x080006e2",func="main",file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="123",thread-groups=["i1"],times="0",original-location="main"}
+(gdb) 
+&"\n"
+^done
+(gdb) 
+35^done,BreakpointTable={nr_rows="2",nr_cols="6",hdr=[{width="7",alignment="-1",col_name="number",colhdr="Num"},{width="14",alignment="-1",col_name="type",colhdr="Type"},{width="4",alignment="-1",col_name="disp",colhdr="Disp"},{width="3",alignment="-1",col_name="enabled",colhdr="Enb"},{width="10",alignment="-1",col_name="addr",colhdr="Address"},{width="40",alignment="2",col_name="what",colhdr="What"}],body=[bkpt={number="1",type="breakpoint",disp="del",enabled="y",addr="0x080006e2",func="main",file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="123",thread-groups=["i1"],times="0",original-location="main"},bkpt={number="2",type="breakpoint",disp="del",enabled="y",addr="0x080006e2",func="main",file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="123",thread-groups=["i1"],times="0",original-location="main"}]}
+(gdb) 
+36^done,depth="1"
+(gdb) 
+37^done,groups=[{id="i1",type="process",pid="1",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+38^done
+(gdb) 
+39^done,stack=[frame={level="0",addr="0x08000f70",func="Reset_Handler",file="../Core/Startup/startup_stm32f405rgtx.s",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Startup/startup_stm32f405rgtx.s",line="61",arch="armv7e-m"}]
+(gdb) 
+40^done,threads=[{id="1",target-id="Thread 1",frame={level="0",addr="0x08000f70",func="Reset_Handler",args=[],file="../Core/Startup/startup_stm32f405rgtx.s",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Startup/startup_stm32f405rgtx.s",line="61",arch="armv7e-m"},state="stopped"}]
+(gdb) 
+41^error,msg="Can not fetch data now."
+(gdb) 
+42^done,groups=[{id="i1",type="process",pid="1",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+43^done,threads=[{id="1",target-id="Thread 1",frame={level="0",addr="0x08000f70",func="Reset_Handler",args=[],file="../Core/Startup/startup_stm32f405rgtx.s",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Startup/startup_stm32f405rgtx.s",line="61",arch="armv7e-m"},state="stopped"}]
+(gdb) 
+44^done,stack-args=[frame={level="0",args=[]}]
+(gdb) 
+45^done,locals=[]
+(gdb) 
+46^done
+(gdb) 
+47^running
+*running,thread-id="all"
+(gdb) 
+=breakpoint-modified,bkpt={number="1",type="breakpoint",disp="del",enabled="y",addr="0x080006e2",func="main",file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="123",thread-groups=["i1"],times="1",original-location="main"}
+=breakpoint-modified,bkpt={number="2",type="breakpoint",disp="del",enabled="y",addr="0x080006e2",func="main",file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="123",thread-groups=["i1"],times="1",original-location="main"}
+~"\n"
+~"Temporary breakpoint 1, main () at ../Core/Src/main.c:123\n"
+~"123\t    HAL_Init();\n"
+*stopped,reason="breakpoint-hit",disp="del",bkptno="1",frame={addr="0x080006e2",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="123",arch="armv7e-m"},thread-id="1",stopped-threads="all"
+=breakpoint-deleted,id="1"
+=breakpoint-deleted,id="2"
+~"No breakpoint number 2.\n"
+48^done
+(gdb) 
+49^done,groups=[{id="i1",type="process",pid="1",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+50^done,locals=[{name="i",value="818612190"},{name="ip",value="0x8003d04"},{name="s",value="{a = -1811971949, b = -1066768422, c = 1964170393}"},{name="a",value="\"\310\\nF\\002\\224\""},{name="ap",value="0x20000220 \"\\b\\004\""},{name="sbuf",value="\"\\210\\212BLr\340\304\345E\353\\006\3608\\177\347P\\200\\216r\344}\245\\017\\206a\\003dTC\375\\216\255\3106>\303{\\211\\022\316\3536\316\242\350'y\256Q6-y\273u\\177uJC\327G\344\\214\257\351:H\\003B\\035\325A\272\344\\\\V\304nx\\204\\f\331\343\276\\r_f\\224\276\342YNy\\215\374\347o*:\314\\032\\233M\\216\325T\352c\\n\315\\207H~\\204bIM.\\203/\343\264bU\251\277\274/\366\""},{name="cstr1",value="\"\\025#\\2148\355\\vP\\t\""},{name="cstr2",value="\"z/\\237\\\\Y\264M\352#\""},{name="sbuf2",value="0x8003d08 \"\\221\\001\""},{name="cstr3",value="\"(wZ\\021?cR\\033\350\""},{name="loc",value="0x0"},{name="sa",value="{0xdfa97417 \"\", 0xa68048bd \"\", 0x5dff22d9 \"\", 0x2348bbcb \"\", 0x7b6b5da5 \"\"}"}]
+(gdb) 
+51^done,depth="1"
+(gdb) 
+52^done,threads=[{id="1",target-id="Thread 1",frame={level="0",addr="0x080006e2",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="123",arch="armv7e-m"},state="stopped"}]
+(gdb) 
+53^done,name="var1",numchild="0",value="818612190",type="int",thread-id="1",has_more="0"
+(gdb) 
+54^done,name="var2",numchild="1",value="0x8003d04",type="int *",thread-id="1",has_more="0"
+(gdb) 
+55^done,name="var3",numchild="3",value="{...}",type="s_struct",thread-id="1",has_more="0"
+(gdb) 
+56^done,name="var4",numchild="5",value="[5]",type="uint8_t [5]",thread-id="1",has_more="0"
+(gdb) 
+57^done,name="var5",numchild="1",value="0x20000220 \"\\b\\004\"",type="uint8_t *",thread-id="1",has_more="0"
+(gdb) 
+58^done,name="var6",numchild="128",value="[128]",type="char [128]",thread-id="1",has_more="0"
+(gdb) 
+59^done,name="var7",numchild="8",value="[8]",type="char [8]",thread-id="1",has_more="0"
+(gdb) 
+60^done,name="var8",numchild="9",value="[9]",type="char [9]",thread-id="1",has_more="0"
+(gdb) 
+61^done,name="var9",numchild="1",value="0x8003d08 \"\\221\\001\"",type="char *",thread-id="1",has_more="0"
+(gdb) 
+62^done,name="var10",numchild="9",value="[9]",type="char [9]",thread-id="1",has_more="0"
+(gdb) 
+63^done,name="var11",numchild="1",value="0x0",type="char *",thread-id="1",has_more="0"
+(gdb) 
+64^done,name="var12",numchild="5",value="[5]",type="char *[5]",thread-id="1",has_more="0"
+(gdb) 
+65^done
+(gdb) 
+66^done,name="var13",numchild="1",value="0x2001ffc0",type="uint8_t (*)[5]",thread-id="1",has_more="0"
+(gdb) 
+67^done,name="var14",numchild="1",value="0x2001ff40",type="char (*)[128]",thread-id="1",has_more="0"
+(gdb) 
+68^done,name="var15",numchild="1",value="0x2001ff38",type="char (*)[8]",thread-id="1",has_more="0"
+(gdb) 
+69^done,name="var16",numchild="1",value="0x2001ff2c",type="char (*)[9]",thread-id="1",has_more="0"
+(gdb) 
+70^done,name="var17",numchild="1",value="0x2001ff20",type="char (*)[9]",thread-id="1",has_more="0"
+(gdb) 
+71^done,name="var18",numchild="1",value="0x2001ff0c",type="char *(*)[5]",thread-id="1",has_more="0"
+(gdb) 
+72^running
+*running,thread-id="all"
+(gdb) 
+*stopped,reason="end-stepping-range",frame={addr="0x080006e6",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="130",arch="armv7e-m"},thread-id="1",stopped-threads="all"
+73^done,locals=[{name="i",value="818612190"},{name="ip",value="0x8003d04"},{name="s",value="{a = -1811971949, b = -1066768422, c = 1964170393}"},{name="a",value="\"\310\\nF\\002\\224\""},{name="ap",value="0x20000220 \"\\b\\004\""},{name="sbuf",value="\"\\210\\212BLr\340\304\345E\353\\006\3608\\177\347P\\200\\216r\344}\245\\017\\206a\\003dTC\375\\216\255\3106>\303{\\211\\022\316\3536\316\242\350'y\256Q6-y\273u\\177uJC\327G\344\\214\257\351:H\\003B\\035\325A\272\344\\\\V\304nx\\204\\f\331\343\276\\r_f\\224\276\342YNy\\215\374\347o*:\314\\032\\233M\\216\325T\352c\\n\315\\207H~\\204bIM.\\203/\343\264bU\251\277\274/\366\""},{name="cstr1",value="\"\\025#\\2148\355\\vP\\t\""},{name="cstr2",value="\"z/\\237\\\\Y\264M\352#\""},{name="sbuf2",value="0x8003d08 \"\\221\\001\""},{name="cstr3",value="\"(wZ\\021?cR\\033\350\""},{name="loc",value="0x0"},{name="sa",value="{0xdfa97417 \"\", 0xa68048bd \"\", 0x5dff22d9 \"\", 0x2348bbcb \"\", 0x7b6b5da5 \"\"}"}]
+(gdb) 
+74^done,depth="1"
+(gdb) 
+75^done
+(gdb) 
+76^done,threads=[{id="1",target-id="Thread 1",frame={level="0",addr="0x080006e6",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="130",arch="armv7e-m"},state="stopped"}]
+(gdb) 
+77^done,groups=[{id="i1",type="process",pid="1",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+78^done,changelist=[]
+(gdb) 
+79^done,changelist=[]
+(gdb) 
+80^done,changelist=[]
+(gdb) 
+81^done,changelist=[]
+(gdb) 
+82^done,changelist=[]
+(gdb) 
+83^done,changelist=[]
+(gdb) 
+84^done,changelist=[]
+(gdb) 
+85^done,changelist=[]
+(gdb) 
+86^done,changelist=[]
+(gdb) 
+87^done,changelist=[]
+(gdb) 
+88^done,changelist=[]
+(gdb) 
+89^done,changelist=[]
+(gdb) 
+90^done,changelist=[]
+(gdb) 
+91^done,changelist=[]
+(gdb) 
+92^done,changelist=[]
+(gdb) 
+93^done,changelist=[]
+(gdb) 
+94^done,changelist=[]
+(gdb) 
+95^done,changelist=[]
+(gdb) 
+96^running
+*running,thread-id="all"
+(gdb) 
+*stopped,reason="end-stepping-range",frame={addr="0x080006ea",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="137",arch="armv7e-m"},thread-id="1",stopped-threads="all"
+97^done,locals=[{name="i",value="818612190"},{name="ip",value="0x8003d04"},{name="s",value="{a = -1811971949, b = -1066768422, c = 1964170393}"},{name="a",value="\"\310\\nF\\002\\224\""},{name="ap",value="0x20000220 \"\\b\\004\""},{name="sbuf",value="\"\\210\\212BLr\340\304\345E\353\\006\3608\\177\347P\\200\\216r\344}\245\\017\\206a\\003dTC\375\\216\255\3106>\303{\\211\\022\316\3536\316\242\350'y\256Q6-y\273u\\177uJC\327G\344\\214\257\351:H\\003B\\035\325A\272\344\\\\V\304nx\\204\\f\331\343\276\\r_f\\224\276\342YNy\\215\374\347o*:\314\\032\\233M\\216\325T\352c\\n\315\\207H~\\204bIM.\\203/\343\264bU\251\277\274/\366\""},{name="cstr1",value="\"\\025#\\2148\355\\vP\\t\""},{name="cstr2",value="\"z/\\237\\\\Y\264M\352#\""},{name="sbuf2",value="0x8003d08 \"\\221\\001\""},{name="cstr3",value="\"(wZ\\021?cR\\033\350\""},{name="loc",value="0x0"},{name="sa",value="{0xdfa97417 \"\", 0xa68048bd \"\", 0x5dff22d9 \"\", 0x2348bbcb \"\", 0x7b6b5da5 \"\"}"}]
+(gdb) 
+98^done,depth="1"
+(gdb) 
+99^done
+(gdb) 
+100^done,changelist=[]
+(gdb) 
+101^done,changelist=[]
+(gdb) 
+102^done,changelist=[]
+(gdb) 
+103^done,changelist=[]
+(gdb) 
+104^done,changelist=[]
+(gdb) 
+105^done,changelist=[]
+(gdb) 
+106^done,changelist=[]
+(gdb) 
+107^done,changelist=[]
+(gdb) 
+108^done,changelist=[]
+(gdb) 
+109^done,changelist=[]
+(gdb) 
+110^done,changelist=[]
+(gdb) 
+111^done,changelist=[]
+(gdb) 
+112^done,threads=[{id="1",target-id="Thread 1",frame={level="0",addr="0x080006ea",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="137",arch="armv7e-m"},state="stopped"}]
+(gdb) 
+113^done,groups=[{id="i1",type="process",pid="1",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+114^done,changelist=[]
+(gdb) 
+115^done,changelist=[]
+(gdb) 
+116^done,changelist=[]
+(gdb) 
+117^done,changelist=[]
+(gdb) 
+118^done,changelist=[]
+(gdb) 
+119^done,changelist=[]
+(gdb) 
+120^running
+*running,thread-id="all"
+(gdb) 
+*stopped,reason="end-stepping-range",frame={addr="0x080006ee",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="138",arch="armv7e-m"},thread-id="1",stopped-threads="all"
+121^done,locals=[{name="i",value="818612190"},{name="ip",value="0x8003d04"},{name="s",value="{a = -1811971949, b = -1066768422, c = 1964170393}"},{name="a",value="\"\310\\nF\\002\\224\""},{name="ap",value="0x20000220 \"\\b\\004\""},{name="sbuf",value="\"\\210\\212BLr\340\304\345E\353\\006\3608\\177\347P\\200\\216r\344}\245\\017\\206a\\003dTC\375\\216\255\3106>\303{\\211\\022\316\3536\316\242\350'y\256Q6-y\273u\\177uJC\327G\344\\214\257\351:H\\003B\\035\325A\272\344\\\\V\304nx\\204\\f\331\343\276\\r_f\\224\276\342YNy\\215\374\347o*:\314\\032\\233M\\216\325T\352c\\n\315\\207H~\\204bIM.\\203/\343\264bU\251\277\274/\366\""},{name="cstr1",value="\"\\025#\\2148\355\\vP\\t\""},{name="cstr2",value="\"z/\\237\\\\Y\264M\352#\""},{name="sbuf2",value="0x8003d08 \"\\221\\001\""},{name="cstr3",value="\"(wZ\\021?cR\\033\350\""},{name="loc",value="0x0"},{name="sa",value="{0xdfa97417 \"\", 0xa68048bd \"\", 0x5dff22d9 \"\", 0x2348bbcb \"\", 0x7b6b5da5 \"\"}"}]
+(gdb) 
+122^done,depth="1"
+(gdb) 
+123^done,depth="1"
+(gdb) 
+124^done,changelist=[]
+(gdb) 
+125^done,changelist=[]
+(gdb) 
+126^done,changelist=[]
+(gdb) 
+127^done,changelist=[]
+(gdb) 
+128^done,changelist=[]
+(gdb) 
+129^done,changelist=[]
+(gdb) 
+130^done,changelist=[]
+(gdb) 
+131^done,changelist=[]
+(gdb) 
+132^done,changelist=[]
+(gdb) 
+133^done,changelist=[]
+(gdb) 
+134^done,changelist=[]
+(gdb) 
+135^done,changelist=[]
+(gdb) 
+136^done,changelist=[]
+(gdb) 
+137^done,changelist=[]
+(gdb) 
+138^done,changelist=[]
+(gdb) 
+139^done,changelist=[]
+(gdb) 
+140^done,changelist=[]
+(gdb) 
+141^done,changelist=[]
+(gdb) 
+142^done
+(gdb) 
+143^done,threads=[{id="1",target-id="Thread 1",frame={level="0",addr="0x080006ee",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="138",arch="armv7e-m"},state="stopped"}]
+(gdb) 
+144^done,groups=[{id="i1",type="process",pid="1",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+145^running
+*running,thread-id="all"
+(gdb) 
+*stopped,reason="end-stepping-range",frame={addr="0x080006f2",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="141",arch="armv7e-m"},thread-id="1",stopped-threads="all"
+146^done,locals=[{name="i",value="818612190"},{name="ip",value="0x8003d04"},{name="s",value="{a = -1811971949, b = -1066768422, c = 1964170393}"},{name="a",value="\"\310\\nF\\002\\224\""},{name="ap",value="0x20000220 \"\\b\\004\""},{name="sbuf",value="\"\\210\\212BLr\340\304\345E\353\\006\3608\\177\347P\\200\\216r\344}\245\\017\\206a\\003dTC\375\\216\255\3106>\303{\\211\\022\316\3536\316\242\350'y\256Q6-y\273u\\177uJC\327G\344\\214\257\351:H\\003B\\035\325A\272\344\\\\V\304nx\\204\\f\331\343\276\\r_f\\224\276\342YNy\\215\374\347o*:\314\\032\\233M\\216\325T\352c\\n\315\\207H~\\204bIM.\\203/\343\264bU\251\277\274/\366\""},{name="cstr1",value="\"\\025#\\2148\355\\vP\\t\""},{name="cstr2",value="\"z/\\237\\\\Y\264M\352#\""},{name="sbuf2",value="0x8003d08 \"\\221\\001\""},{name="cstr3",value="\"(wZ\\021?cR\\033\350\""},{name="loc",value="0x0"},{name="sa",value="{0xdfa97417 \"\", 0xa68048bd \"\", 0x5dff22d9 \"\", 0x2348bbcb \"\", 0x7b6b5da5 \"\"}"}]
+(gdb) 
+147^done,depth="1"
+(gdb) 
+148^done
+(gdb) 
+149^done,threads=[{id="1",target-id="Thread 1",frame={level="0",addr="0x080006f2",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="141",arch="armv7e-m"},state="stopped"}]
+(gdb) 
+150^done,groups=[{id="i1",type="process",pid="1",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+151^done,changelist=[]
+(gdb) 
+152^done,changelist=[]
+(gdb) 
+153^done,changelist=[]
+(gdb) 
+154^done,changelist=[]
+(gdb) 
+155^done,changelist=[]
+(gdb) 
+156^done,changelist=[]
+(gdb) 
+157^done,changelist=[]
+(gdb) 
+158^done,changelist=[]
+(gdb) 
+159^done,changelist=[]
+(gdb) 
+160^done,changelist=[]
+(gdb) 
+161^done,changelist=[]
+(gdb) 
+162^done,changelist=[]
+(gdb) 
+163^done,changelist=[]
+(gdb) 
+164^done,changelist=[]
+(gdb) 
+165^done,changelist=[]
+(gdb) 
+166^done,changelist=[]
+(gdb) 
+167^done,changelist=[]
+(gdb) 
+168^done,changelist=[]
+(gdb) 
+169^running
+*running,thread-id="all"
+(gdb) 
+*stopped,reason="end-stepping-range",frame={addr="0x080006f8",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="143",arch="armv7e-m"},thread-id="1",stopped-threads="all"
+170^done,locals=[{name="i",value="818612190"},{name="ip",value="0x8003d04"},{name="s",value="{a = -1811971949, b = -1066768422, c = 1964170393}"},{name="a",value="\"\310\\nF\\002\\224\""},{name="ap",value="0x20000220 \"\\b\\004\""},{name="sbuf",value="\"\\210\\212BLr\340\304\345E\353\\006\3608\\177\347P\\200\\216r\344}\245\\017\\206a\\003dTC\375\\216\255\3106>\303{\\211\\022\316\3536\316\242\350'y\256Q6-y\273u\\177uJC\327G\344\\214\257\351:H\\003B\\035\325A\272\344\\\\V\304nx\\204\\f\331\343\276\\r_f\\224\276\342YNy\\215\374\347o*:\314\\032\\233M\\216\325T\352c\\n\315\\207H~\\204bIM.\\203/\343\264bU\251\277\274/\366\""},{name="cstr1",value="\"\\025#\\2148\355\\vP\\t\""},{name="cstr2",value="\"z/\\237\\\\Y\264M\352#\""},{name="sbuf2",value="0x8003d08 \"\\221\\001\""},{name="cstr3",value="\"(wZ\\021?cR\\033\350\""},{name="loc",value="0x0"},{name="sa",value="{0xdfa97417 \"\", 0xa68048bd \"\", 0x5dff22d9 \"\", 0x2348bbcb \"\", 0x7b6b5da5 \"\"}"}]
+(gdb) 
+171^done,depth="1"
+(gdb) 
+172^done
+(gdb) 
+173^done,threads=[{id="1",target-id="Thread 1",frame={level="0",addr="0x080006f8",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="143",arch="armv7e-m"},state="stopped"}]
+(gdb) 
+174^done,groups=[{id="i1",type="process",pid="1",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+175^done,changelist=[]
+(gdb) 
+176^done,changelist=[]
+(gdb) 
+177^done,changelist=[]
+(gdb) 
+178^done,changelist=[]
+(gdb) 
+179^done,changelist=[]
+(gdb) 
+180^done,changelist=[]
+(gdb) 
+181^done,changelist=[]
+(gdb) 
+182^done,changelist=[]
+(gdb) 
+183^done,changelist=[]
+(gdb) 
+184^done,changelist=[]
+(gdb) 
+185^done,changelist=[]
+(gdb) 
+186^done,changelist=[]
+(gdb) 
+187^done,changelist=[]
+(gdb) 
+188^done,changelist=[]
+(gdb) 
+189^done,changelist=[]
+(gdb) 
+190^done,changelist=[]
+(gdb) 
+191^done,changelist=[]
+(gdb) 
+192^done,changelist=[]
+(gdb) 
+193^running
+*running,thread-id="all"
+(gdb) 
+*stopped,reason="end-stepping-range",frame={addr="0x080006fe",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="144",arch="armv7e-m"},thread-id="1",stopped-threads="all"
+194^done,locals=[{name="i",value="10"},{name="ip",value="0x8003d04"},{name="s",value="{a = -1811971949, b = -1066768422, c = 1964170393}"},{name="a",value="\"\310\\nF\\002\\224\""},{name="ap",value="0x20000220 \"\\b\\004\""},{name="sbuf",value="\"\\210\\212BLr\340\304\345E\353\\006\3608\\177\347P\\200\\216r\344}\245\\017\\206a\\003dTC\375\\216\255\3106>\303{\\211\\022\316\3536\316\242\350'y\256Q6-y\273u\\177uJC\327G\344\\214\257\351:H\\003B\\035\325A\272\344\\\\V\304nx\\204\\f\331\343\276\\r_f\\224\276\342YNy\\215\374\347o*:\314\\032\\233M\\216\325T\352c\\n\315\\207H~\\204bIM.\\203/\343\264bU\251\277\274/\366\""},{name="cstr1",value="\"\\025#\\2148\355\\vP\\t\""},{name="cstr2",value="\"z/\\237\\\\Y\264M\352#\""},{name="sbuf2",value="0x8003d08 \"\\221\\001\""},{name="cstr3",value="\"(wZ\\021?cR\\033\350\""},{name="loc",value="0x0"},{name="sa",value="{0xdfa97417 \"\", 0xa68048bd \"\", 0x5dff22d9 \"\", 0x2348bbcb \"\", 0x7b6b5da5 \"\"}"}]
+(gdb) 
+195^done,depth="1"
+(gdb) 
+196^done
+(gdb) 
+197^done,threads=[{id="1",target-id="Thread 1",frame={level="0",addr="0x080006fe",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="144",arch="armv7e-m"},state="stopped"}]
+(gdb) 
+198^done,groups=[{id="i1",type="process",pid="1",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+199^done,changelist=[{name="var1",value="10",in_scope="true",type_changed="false",has_more="0"}]
+(gdb) 
+200^done,changelist=[]
+(gdb) 
+201^done,changelist=[]
+(gdb) 
+202^done,changelist=[]
+(gdb) 
+203^done,changelist=[]
+(gdb) 
+204^done,changelist=[]
+(gdb) 
+205^done,changelist=[]
+(gdb) 
+206^done,changelist=[]
+(gdb) 
+207^done,changelist=[]
+(gdb) 
+208^done,changelist=[]
+(gdb) 
+209^done,changelist=[]
+(gdb) 
+210^done,changelist=[]
+(gdb) 
+211^done,changelist=[]
+(gdb) 
+212^done,changelist=[]
+(gdb) 
+213^done,changelist=[]
+(gdb) 
+214^done,changelist=[]
+(gdb) 
+215^done,changelist=[]
+(gdb) 
+216^done,changelist=[]
+(gdb) 
+217^running
+*running,thread-id="all"
+(gdb) 
+*stopped,reason="end-stepping-range",frame={addr="0x0800070a",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="145",arch="armv7e-m"},thread-id="1",stopped-threads="all"
+218^done,locals=[{name="i",value="10"},{name="ip",value="0x8003d04"},{name="s",value="{a = -1811971949, b = -1066768422, c = 1964170393}"},{name="a",value="\"\310\\nF\\002\\224\""},{name="ap",value="0x20000220 \"\\b\\004\""},{name="sbuf",value="\"\\210\\212BLr\340\304\345E\353\\006\3608\\177\347P\\200\\216r\344}\245\\017\\206a\\003dTC\375\\216\255\3106>\303{\\211\\022\316\3536\316\242\350'y\256Q6-y\273u\\177uJC\327G\344\\214\257\351:H\\003B\\035\325A\272\344\\\\V\304nx\\204\\f\331\343\276\\r_f\\224\276\342YNy\\215\374\347o*:\314\\032\\233M\\216\325T\352c\\n\315\\207H~\\204bIM.\\203/\343\264bU\251\277\274/\366\""},{name="cstr1",value="\"\\025#\\2148\355\\vP\\t\""},{name="cstr2",value="\"z/\\237\\\\Y\264M\352#\""},{name="sbuf2",value="0x8003d08 \"\\221\\001\""},{name="cstr3",value="\"(wZ\\021?cR\\033\350\""},{name="loc",value="0x0"},{name="sa",value="{0xdfa97417 \"\", 0xa68048bd \"\", 0x5dff22d9 \"\", 0x2348bbcb \"\", 0x7b6b5da5 \"\"}"}]
+(gdb) 
+219^done,depth="1"
+(gdb) 
+220^done
+(gdb) 
+221^done,threads=[{id="1",target-id="Thread 1",frame={level="0",addr="0x0800070a",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="145",arch="armv7e-m"},state="stopped"}]
+(gdb) 
+222^done,groups=[{id="i1",type="process",pid="1",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+223^done,changelist=[]
+(gdb) 
+224^done,changelist=[]
+(gdb) 
+225^done,changelist=[]
+(gdb) 
+226^done,changelist=[]
+(gdb) 
+227^done,changelist=[]
+(gdb) 
+228^done,changelist=[]
+(gdb) 
+229^done,changelist=[]
+(gdb) 
+230^done,changelist=[]
+(gdb) 
+231^done,changelist=[]
+(gdb) 
+232^done,changelist=[]
+(gdb) 
+233^done,changelist=[]
+(gdb) 
+234^done,changelist=[]
+(gdb) 
+235^done,changelist=[]
+(gdb) 
+236^done,changelist=[]
+(gdb) 
+237^done,changelist=[]
+(gdb) 
+238^done,changelist=[]
+(gdb) 
+239^done,changelist=[]
+(gdb) 
+240^done,changelist=[]
+(gdb) 
+241^running
+*running,thread-id="all"
+(gdb) 
+*stopped,reason="end-stepping-range",frame={addr="0x08000714",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="146",arch="armv7e-m"},thread-id="1",stopped-threads="all"
+242^done,locals=[{name="i",value="10"},{name="ip",value="0x8003d04"},{name="s",value="{a = -1811971949, b = -1066768422, c = 1964170393}"},{name="a",value="\"\310\\nF\\002\\224\""},{name="ap",value="0x20000220 \"\\b\\004\""},{name="sbuf",value="\"\\210\\212BLr\340\304\345E\353\\006\3608\\177\347P\\200\\216r\344}\245\\017\\206a\\003dTC\375\\216\255\3106>\303{\\211\\022\316\3536\316\242\350'y\256Q6-y\273u\\177uJC\327G\344\\214\257\351:H\\003B\\035\325A\272\344\\\\V\304nx\\204\\f\331\343\276\\r_f\\224\276\342YNy\\215\374\347o*:\314\\032\\233M\\216\325T\352c\\n\315\\207H~\\204bIM.\\203/\343\264bU\251\277\274/\366\""},{name="cstr1",value="\"\\025#\\2148\355\\vP\\t\""},{name="cstr2",value="\"z/\\237\\\\Y\264M\352#\""},{name="sbuf2",value="0x8003d08 \"\\221\\001\""},{name="cstr3",value="\"(wZ\\021?cR\\033\350\""},{name="loc",value="0x0"},{name="sa",value="{0xdfa97417 \"\", 0xa68048bd \"\", 0x5dff22d9 \"\", 0x2348bbcb \"\", 0x7b6b5da5 \"\"}"}]
+(gdb) 
+243^done,depth="1"
+(gdb) 
+244^done,changelist=[]
+(gdb) 
+245^done,changelist=[]
+(gdb) 
+246^done,changelist=[]
+(gdb) 
+247^done,changelist=[]
+(gdb) 
+248^done,changelist=[]
+(gdb) 
+249^done,changelist=[]
+(gdb) 
+250^done,changelist=[]
+(gdb) 
+251^done,changelist=[]
+(gdb) 
+252^done,changelist=[]
+(gdb) 
+253^done,changelist=[]
+(gdb) 
+254^done,changelist=[]
+(gdb) 
+255^done,changelist=[]
+(gdb) 
+256^done
+(gdb) 
+257^done,threads=[{id="1",target-id="Thread 1",frame={level="0",addr="0x08000714",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="146",arch="armv7e-m"},state="stopped"}]
+(gdb) 
+258^done,groups=[{id="i1",type="process",pid="1",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+259^done,changelist=[]
+(gdb) 
+260^done,changelist=[]
+(gdb) 
+261^done,changelist=[]
+(gdb) 
+262^done,changelist=[]
+(gdb) 
+263^done,changelist=[]
+(gdb) 
+264^done,changelist=[]
+(gdb) 
+265^running
+*running,thread-id="all"
+(gdb) 
+*stopped,reason="end-stepping-range",frame={addr="0x08000720",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="149",arch="armv7e-m"},thread-id="1",stopped-threads="all"
+266^done,locals=[{name="i",value="10"},{name="ip",value="0x8003d04"},{name="s",value="{a = -1811971949, b = -1066768422, c = 1964170393}"},{name="a",value="\"\310\\nF\\002\\224\""},{name="ap",value="0x20000220 \"\\b\\004\""},{name="sbuf",value="\"\\210\\212BLr\340\304\345E\353\\006\3608\\177\347P\\200\\216r\344}\245\\017\\206a\\003dTC\375\\216\255\3106>\303{\\211\\022\316\3536\316\242\350'y\256Q6-y\273u\\177uJC\327G\344\\214\257\351:H\\003B\\035\325A\272\344\\\\V\304nx\\204\\f\331\343\276\\r_f\\224\276\342YNy\\215\374\347o*:\314\\032\\233M\\216\325T\352c\\n\315\\207H~\\204bIM.\\203/\343\264bU\251\277\274/\366\""},{name="cstr1",value="\"\\025#\\2148\355\\vP\\t\""},{name="cstr2",value="\"z/\\237\\\\Y\264M\352#\""},{name="sbuf2",value="0x8003d08 \"\\221\\001\""},{name="cstr3",value="\"(wZ\\021?cR\\033\350\""},{name="loc",value="0x0"},{name="sa",value="{0xdfa97417 \"\", 0xa68048bd \"\", 0x5dff22d9 \"\", 0x2348bbcb \"\", 0x7b6b5da5 \"\"}"}]
+(gdb) 
+267^done,depth="1"
+(gdb) 
+268^done,changelist=[]
+(gdb) 
+269^done,changelist=[]
+(gdb) 
+270^done,changelist=[]
+(gdb) 
+271^done,changelist=[]
+(gdb) 
+272^done,changelist=[]
+(gdb) 
+273^done,changelist=[]
+(gdb) 
+274^done,changelist=[]
+(gdb) 
+275^done,changelist=[]
+(gdb) 
+276^done,changelist=[]
+(gdb) 
+277^done,changelist=[]
+(gdb) 
+278^done,changelist=[]
+(gdb) 
+279^done,changelist=[]
+(gdb) 
+280^done
+(gdb) 
+281^done,threads=[{id="1",target-id="Thread 1",frame={level="0",addr="0x08000720",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="149",arch="armv7e-m"},state="stopped"}]
+(gdb) 
+282^done,groups=[{id="i1",type="process",pid="1",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+283^done,changelist=[]
+(gdb) 
+284^done,changelist=[]
+(gdb) 
+285^done,changelist=[]
+(gdb) 
+286^done,changelist=[]
+(gdb) 
+287^done,changelist=[]
+(gdb) 
+288^done,changelist=[]
+(gdb) 
+289^running
+*running,thread-id="all"
+(gdb) 
+*stopped,reason="end-stepping-range",frame={addr="0x08000730",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="150",arch="armv7e-m"},thread-id="1",stopped-threads="all"
+290^done,locals=[{name="i",value="11"},{name="ip",value="0x8003d04"},{name="s",value="{a = -1811971949, b = -1066768422, c = 1964170393}"},{name="a",value="\"\310\\nF\\002\\224\""},{name="ap",value="0x20000220 \"\\b\\004\""},{name="sbuf",value="\"\\210\\212BLr\340\304\345E\353\\006\3608\\177\347P\\200\\216r\344}\245\\017\\206a\\003dTC\375\\216\255\3106>\303{\\211\\022\316\3536\316\242\350'y\256Q6-y\273u\\177uJC\327G\344\\214\257\351:H\\003B\\035\325A\272\344\\\\V\304nx\\204\\f\331\343\276\\r_f\\224\276\342YNy\\215\374\347o*:\314\\032\\233M\\216\325T\352c\\n\315\\207H~\\204bIM.\\203/\343\264bU\251\277\274/\366\""},{name="cstr1",value="\"\\025#\\2148\355\\vP\\t\""},{name="cstr2",value="\"z/\\237\\\\Y\264M\352#\""},{name="sbuf2",value="0x8003d08 \"\\221\\001\""},{name="cstr3",value="\"(wZ\\021?cR\\033\350\""},{name="loc",value="0x0"},{name="sa",value="{0xdfa97417 \"\", 0xa68048bd \"\", 0x5dff22d9 \"\", 0x2348bbcb \"\", 0x7b6b5da5 \"\"}"}]
+(gdb) 
+291^done,depth="1"
+(gdb) 
+292^done
+(gdb) 
+293^done,threads=[{id="1",target-id="Thread 1",frame={level="0",addr="0x08000730",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="150",arch="armv7e-m"},state="stopped"}]
+(gdb) 
+294^done,groups=[{id="i1",type="process",pid="1",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+295^done,changelist=[{name="var1",value="11",in_scope="true",type_changed="false",has_more="0"}]
+(gdb) 
+296^done,changelist=[]
+(gdb) 
+297^done,changelist=[]
+(gdb) 
+298^done,changelist=[]
+(gdb) 
+299^done,changelist=[]
+(gdb) 
+300^done,changelist=[]
+(gdb) 
+301^done,changelist=[]
+(gdb) 
+302^done,changelist=[]
+(gdb) 
+303^done,changelist=[]
+(gdb) 
+304^done,changelist=[]
+(gdb) 
+305^done,changelist=[]
+(gdb) 
+306^done,changelist=[]
+(gdb) 
+307^done,changelist=[]
+(gdb) 
+308^done,changelist=[]
+(gdb) 
+309^done,changelist=[]
+(gdb) 
+310^done,changelist=[]
+(gdb) 
+311^done,changelist=[]
+(gdb) 
+312^done,changelist=[]
+(gdb) 
+313^running
+*running,thread-id="all"
+(gdb) 
+*stopped,reason="end-stepping-range",frame={addr="0x0800073c",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="152",arch="armv7e-m"},thread-id="1",stopped-threads="all"
+314^done,locals=[{name="i",value="11"},{name="ip",value="0x8003d04"},{name="s",value="{a = -1811971949, b = -1066768422, c = 1964170393}"},{name="a",value="\"\310\\nF\\002\\224\""},{name="ap",value="0x20000220 \"\\b\\004\""},{name="sbuf",value="\"\\210\\212BLr\340\304\345E\353\\006\3608\\177\347P\\200\\216r\344}\245\\017\\206a\\003dTC\375\\216\255\3106>\303{\\211\\022\316\3536\316\242\350'y\256Q6-y\273u\\177uJC\327G\344\\214\257\351:H\\003B\\035\325A\272\344\\\\V\304nx\\204\\f\331\343\276\\r_f\\224\276\342YNy\\215\374\347o*:\314\\032\\233M\\216\325T\352c\\n\315\\207H~\\204bIM.\\203/\343\264bU\251\277\274/\366\""},{name="cstr1",value="\"\\025#\\2148\355\\vP\\t\""},{name="cstr2",value="\"z/\\237\\\\Y\264M\352#\""},{name="sbuf2",value="0x8003d08 \"\\221\\001\""},{name="cstr3",value="\"(wZ\\021?cR\\033\350\""},{name="loc",value="0x0"},{name="sa",value="{0xdfa97417 \"\", 0xa68048bd \"\", 0x5dff22d9 \"\", 0x2348bbcb \"\", 0x7b6b5da5 \"\"}"}]
+(gdb) 
+315^done,depth="1"
+(gdb) 
+316^done,changelist=[]
+(gdb) 
+317^done,changelist=[]
+(gdb) 
+318^done,changelist=[]
+(gdb) 
+319^done,changelist=[]
+(gdb) 
+320^done,changelist=[]
+(gdb) 
+321^done,changelist=[]
+(gdb) 
+322^done,changelist=[]
+(gdb) 
+323^done,changelist=[]
+(gdb) 
+324^done,changelist=[]
+(gdb) 
+325^done,changelist=[]
+(gdb) 
+326^done,changelist=[]
+(gdb) 
+327^done,changelist=[]
+(gdb) 
+328^done
+(gdb) 
+329^done,changelist=[]
+(gdb) 
+330^done,changelist=[]
+(gdb) 
+331^done,threads=[{id="1",target-id="Thread 1",frame={level="0",addr="0x0800073c",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="152",arch="armv7e-m"},state="stopped"}]
+(gdb) 
+332^done,groups=[{id="i1",type="process",pid="1",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+333^done,changelist=[]
+(gdb) 
+334^done,changelist=[]
+(gdb) 
+335^done,changelist=[]
+(gdb) 
+336^done,changelist=[]
+(gdb) 
+337^running
+*running,thread-id="all"
+(gdb) 
+*stopped,reason="end-stepping-range",frame={addr="0x08000746",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="153",arch="armv7e-m"},thread-id="1",stopped-threads="all"
+338^done,locals=[{name="i",value="12"},{name="ip",value="0x8003d04"},{name="s",value="{a = -1811971949, b = -1066768422, c = 1964170393}"},{name="a",value="\"\310\\nF\\002\\224\""},{name="ap",value="0x20000220 \"\\b\\004\""},{name="sbuf",value="\"\\210\\212BLr\340\304\345E\353\\006\3608\\177\347P\\200\\216r\344}\245\\017\\206a\\003dTC\375\\216\255\3106>\303{\\211\\022\316\3536\316\242\350'y\256Q6-y\273u\\177uJC\327G\344\\214\257\351:H\\003B\\035\325A\272\344\\\\V\304nx\\204\\f\331\343\276\\r_f\\224\276\342YNy\\215\374\347o*:\314\\032\\233M\\216\325T\352c\\n\315\\207H~\\204bIM.\\203/\343\264bU\251\277\274/\366\""},{name="cstr1",value="\"\\025#\\2148\355\\vP\\t\""},{name="cstr2",value="\"z/\\237\\\\Y\264M\352#\""},{name="sbuf2",value="0x8003d08 \"\\221\\001\""},{name="cstr3",value="\"(wZ\\021?cR\\033\350\""},{name="loc",value="0x0"},{name="sa",value="{0xdfa97417 \"\", 0xa68048bd \"\", 0x5dff22d9 \"\", 0x2348bbcb \"\", 0x7b6b5da5 \"\"}"}]
+(gdb) 
+339^done,depth="1"
+(gdb) 
+340^done
+(gdb) 
+341^done,threads=[{id="1",target-id="Thread 1",frame={level="0",addr="0x08000746",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="153",arch="armv7e-m"},state="stopped"}]
+(gdb) 
+342^done,groups=[{id="i1",type="process",pid="1",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+343^done,changelist=[{name="var1",value="12",in_scope="true",type_changed="false",has_more="0"}]
+(gdb) 
+344^done,changelist=[]
+(gdb) 
+345^done,changelist=[]
+(gdb) 
+346^done,changelist=[]
+(gdb) 
+347^done,changelist=[]
+(gdb) 
+348^done,changelist=[]
+(gdb) 
+349^done,changelist=[]
+(gdb) 
+350^done,changelist=[]
+(gdb) 
+351^done,changelist=[]
+(gdb) 
+352^done,changelist=[]
+(gdb) 
+353^done,changelist=[]
+(gdb) 
+354^done,changelist=[]
+(gdb) 
+355^done,changelist=[]
+(gdb) 
+356^done,changelist=[]
+(gdb) 
+357^done,changelist=[]
+(gdb) 
+358^done,changelist=[]
+(gdb) 
+359^done,changelist=[]
+(gdb) 
+360^done,changelist=[]
+(gdb) 
+361^running
+*running,thread-id="all"
+(gdb) 
+*stopped,reason="end-stepping-range",frame={addr="0x08000752",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="156",arch="armv7e-m"},thread-id="1",stopped-threads="all"
+362^done,locals=[{name="i",value="12"},{name="ip",value="0x8003d04"},{name="s",value="{a = -1811971949, b = -1066768422, c = 1964170393}"},{name="a",value="\"\310\\nF\\002\\224\""},{name="ap",value="0x20000220 \"\\b\\004\""},{name="sbuf",value="\"\\210\\212BLr\340\304\345E\353\\006\3608\\177\347P\\200\\216r\344}\245\\017\\206a\\003dTC\375\\216\255\3106>\303{\\211\\022\316\3536\316\242\350'y\256Q6-y\273u\\177uJC\327G\344\\214\257\351:H\\003B\\035\325A\272\344\\\\V\304nx\\204\\f\331\343\276\\r_f\\224\276\342YNy\\215\374\347o*:\314\\032\\233M\\216\325T\352c\\n\315\\207H~\\204bIM.\\203/\343\264bU\251\277\274/\366\""},{name="cstr1",value="\"\\025#\\2148\355\\vP\\t\""},{name="cstr2",value="\"z/\\237\\\\Y\264M\352#\""},{name="sbuf2",value="0x8003d08 \"\\221\\001\""},{name="cstr3",value="\"(wZ\\021?cR\\033\350\""},{name="loc",value="0x0"},{name="sa",value="{0xdfa97417 \"\", 0xa68048bd \"\", 0x5dff22d9 \"\", 0x2348bbcb \"\", 0x7b6b5da5 \"\"}"}]
+(gdb) 
+363^done,depth="1"
+(gdb) 
+364^done
+(gdb) 
+365^done,changelist=[]
+(gdb) 
+366^done,changelist=[]
+(gdb) 
+367^done,changelist=[]
+(gdb) 
+368^done,changelist=[]
+(gdb) 
+369^done,changelist=[]
+(gdb) 
+370^done,changelist=[]
+(gdb) 
+371^done,changelist=[]
+(gdb) 
+372^done,changelist=[]
+(gdb) 
+373^done,changelist=[]
+(gdb) 
+374^done,changelist=[]
+(gdb) 
+375^done,changelist=[]
+(gdb) 
+376^done,changelist=[]
+(gdb) 
+377^done,threads=[{id="1",target-id="Thread 1",frame={level="0",addr="0x08000752",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="156",arch="armv7e-m"},state="stopped"}]
+(gdb) 
+378^done,groups=[{id="i1",type="process",pid="1",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+379^done,changelist=[]
+(gdb) 
+380^done,changelist=[]
+(gdb) 
+381^done,changelist=[]
+(gdb) 
+382^done,changelist=[]
+(gdb) 
+383^done,changelist=[]
+(gdb) 
+384^done,changelist=[]
+(gdb) 
+385^running
+*running,thread-id="all"
+(gdb) 
+*stopped,reason="end-stepping-range",frame={addr="0x0800075a",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="157",arch="armv7e-m"},thread-id="1",stopped-threads="all"
+386^done,depth="1"
+(gdb) 
+387^done
+(gdb) 
+388^done,threads=[{id="1",target-id="Thread 1",frame={level="0",addr="0x0800075a",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="157",arch="armv7e-m"},state="stopped"}]
+(gdb) 
+389^done,groups=[{id="i1",type="process",pid="1",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+390^running
+*running,thread-id="all"
+(gdb) 
+*stopped,reason="end-stepping-range",frame={addr="0x08000762",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="158",arch="armv7e-m"},thread-id="1",stopped-threads="all"
+391^done,depth="1"
+(gdb) 
+392^done
+(gdb) 
+393^done,threads=[{id="1",target-id="Thread 1",frame={level="0",addr="0x08000762",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="158",arch="armv7e-m"},state="stopped"}]
+(gdb) 
+394^done,groups=[{id="i1",type="process",pid="1",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+395^running
+*running,thread-id="all"
+(gdb) 
+*stopped,reason="end-stepping-range",frame={addr="0x0800076a",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="159",arch="armv7e-m"},thread-id="1",stopped-threads="all"
+396^done,depth="1"
+(gdb) 
+397^done
+(gdb) 
+398^done,threads=[{id="1",target-id="Thread 1",frame={level="0",addr="0x0800076a",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="159",arch="armv7e-m"},state="stopped"}]
+(gdb) 
+399^done,groups=[{id="i1",type="process",pid="1",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+400^running
+*running,thread-id="all"
+(gdb) 
+*stopped,reason="end-stepping-range",frame={addr="0x08000776",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="161",arch="armv7e-m"},thread-id="1",stopped-threads="all"
+401^done,depth="1"
+(gdb) 
+402^done
+(gdb) 
+403^done,threads=[{id="1",target-id="Thread 1",frame={level="0",addr="0x08000776",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="161",arch="armv7e-m"},state="stopped"}]
+(gdb) 
+404^done,groups=[{id="i1",type="process",pid="1",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+405^running
+*running,thread-id="all"
+(gdb) 
+*stopped,reason="end-stepping-range",frame={addr="0x08000782",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="162",arch="armv7e-m"},thread-id="1",stopped-threads="all"
+406^done,depth="1"
+(gdb) 
+407^done
+(gdb) 
+408^done,threads=[{id="1",target-id="Thread 1",frame={level="0",addr="0x08000782",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="162",arch="armv7e-m"},state="stopped"}]
+(gdb) 
+409^done,groups=[{id="i1",type="process",pid="1",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+410^running
+*running,thread-id="all"
+(gdb) 
+*stopped,reason="end-stepping-range",frame={addr="0x08000794",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="163",arch="armv7e-m"},thread-id="1",stopped-threads="all"
+411^done,depth="1"
+(gdb) 
+412^done
+(gdb) 
+413^done,threads=[{id="1",target-id="Thread 1",frame={level="0",addr="0x08000794",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="163",arch="armv7e-m"},state="stopped"}]
+(gdb) 
+414^done,groups=[{id="i1",type="process",pid="1",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+415^running
+*running,thread-id="all"
+(gdb) 
+*stopped,reason="end-stepping-range",frame={addr="0x080007a0",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="164",arch="armv7e-m"},thread-id="1",stopped-threads="all"
+416^done,depth="1"
+(gdb) 
+417^done
+(gdb) 
+418^done,threads=[{id="1",target-id="Thread 1",frame={level="0",addr="0x080007a0",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="164",arch="armv7e-m"},state="stopped"}]
+(gdb) 
+419^done,groups=[{id="i1",type="process",pid="1",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+420^running
+*running,thread-id="all"
+(gdb) 
+*stopped,reason="end-stepping-range",frame={addr="0x080007b2",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="166",arch="armv7e-m"},thread-id="1",stopped-threads="all"
+421^done,depth="1"
+(gdb) 
+422^done
+(gdb) 
+423^done,threads=[{id="1",target-id="Thread 1",frame={level="0",addr="0x080007b2",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="166",arch="armv7e-m"},state="stopped"}]
+(gdb) 
+424^done,groups=[{id="i1",type="process",pid="1",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+425^running
+*running,thread-id="all"
+(gdb) 
+*stopped,reason="end-stepping-range",frame={addr="0x080007d0",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="167",arch="armv7e-m"},thread-id="1",stopped-threads="all"
+426^done,depth="1"
+(gdb) 
+427^done
+(gdb) 
+428^done,threads=[{id="1",target-id="Thread 1",frame={level="0",addr="0x080007d0",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="167",arch="armv7e-m"},state="stopped"}]
+(gdb) 
+429^done,groups=[{id="i1",type="process",pid="1",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+430^running
+*running,thread-id="all"
+(gdb) 
+*stopped,reason="end-stepping-range",frame={addr="0x080007e2",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="169",arch="armv7e-m"},thread-id="1",stopped-threads="all"
+431^done,depth="1"
+(gdb) 
+432^done
+(gdb) 
+433^done,threads=[{id="1",target-id="Thread 1",frame={level="0",addr="0x080007e2",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="169",arch="armv7e-m"},state="stopped"}]
+(gdb) 
+434^done,groups=[{id="i1",type="process",pid="1",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+435^running
+*running,thread-id="all"
+(gdb) 
+*stopped,reason="end-stepping-range",frame={addr="0x080007e8",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="170",arch="armv7e-m"},thread-id="1",stopped-threads="all"
+436^done,depth="1"
+(gdb) 
+437^done
+(gdb) 
+438^done,threads=[{id="1",target-id="Thread 1",frame={level="0",addr="0x080007e8",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="170",arch="armv7e-m"},state="stopped"}]
+(gdb) 
+439^done,groups=[{id="i1",type="process",pid="1",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+440^running
+*running,thread-id="all"
+(gdb) 
+*stopped,reason="end-stepping-range",frame={addr="0x080007fa",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="171",arch="armv7e-m"},thread-id="1",stopped-threads="all"
+441^done,depth="1"
+(gdb) 
+442^done
+(gdb) 
+443^done,threads=[{id="1",target-id="Thread 1",frame={level="0",addr="0x080007fa",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="171",arch="armv7e-m"},state="stopped"}]
+(gdb) 
+444^done,groups=[{id="i1",type="process",pid="1",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+445^running
+*running,thread-id="all"
+(gdb) 
+*stopped,reason="end-stepping-range",frame={addr="0x08000804",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="172",arch="armv7e-m"},thread-id="1",stopped-threads="all"
+446^done,depth="1"
+(gdb) 
+447^done
+(gdb) 
+448^done,threads=[{id="1",target-id="Thread 1",frame={level="0",addr="0x08000804",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="172",arch="armv7e-m"},state="stopped"}]
+(gdb) 
+449^done,groups=[{id="i1",type="process",pid="1",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+450^running
+*running,thread-id="all"
+(gdb) 
+*stopped,reason="end-stepping-range",frame={addr="0x08000816",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="174",arch="armv7e-m"},thread-id="1",stopped-threads="all"
+451^done,depth="1"
+(gdb) 
+452^done
+(gdb) 
+453^done,threads=[{id="1",target-id="Thread 1",frame={level="0",addr="0x08000816",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="174",arch="armv7e-m"},state="stopped"}]
+(gdb) 
+454^done,groups=[{id="i1",type="process",pid="1",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+455^running
+*running,thread-id="all"
+(gdb) 
+*stopped,reason="end-stepping-range",frame={addr="0x08000826",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="182",arch="armv7e-m"},thread-id="1",stopped-threads="all"
+456^done,depth="1"
+(gdb) 
+457^done
+(gdb) 
+458^done,threads=[{id="1",target-id="Thread 1",frame={level="0",addr="0x08000826",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="182",arch="armv7e-m"},state="stopped"}]
+(gdb) 
+459^done,groups=[{id="i1",type="process",pid="1",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+460^running
+*running,thread-id="all"
+(gdb) 
+*stopped,reason="end-stepping-range",frame={addr="0x0800082e",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="183",arch="armv7e-m"},thread-id="1",stopped-threads="all"
+461^done,depth="1"
+(gdb) 
+462^done
+(gdb) 
+463^done,threads=[{id="1",target-id="Thread 1",frame={level="0",addr="0x0800082e",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="183",arch="armv7e-m"},state="stopped"}]
+(gdb) 
+464^done,groups=[{id="i1",type="process",pid="1",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+465^running
+*running,thread-id="all"
+(gdb) 
+*stopped,reason="end-stepping-range",frame={addr="0x08000846",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="182",arch="armv7e-m"},thread-id="1",stopped-threads="all"
+466^done,depth="1"
+(gdb) 
+467^done
+(gdb) 
+468^done,threads=[{id="1",target-id="Thread 1",frame={level="0",addr="0x08000846",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="182",arch="armv7e-m"},state="stopped"}]
+(gdb) 
+469^done,groups=[{id="i1",type="process",pid="1",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+470^running
+*running,thread-id="all"
+(gdb) 
+*stopped,reason="end-stepping-range",frame={addr="0x0800082e",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="183",arch="armv7e-m"},thread-id="1",stopped-threads="all"
+471^done,depth="1"
+(gdb) 
+472^done
+(gdb) 
+473^done,threads=[{id="1",target-id="Thread 1",frame={level="0",addr="0x0800082e",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="183",arch="armv7e-m"},state="stopped"}]
+(gdb) 
+474^done,groups=[{id="i1",type="process",pid="1",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+475^running
+*running,thread-id="all"
+(gdb) 
+*stopped,reason="end-stepping-range",frame={addr="0x08000846",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="182",arch="armv7e-m"},thread-id="1",stopped-threads="all"
+476^done,depth="1"
+(gdb) 
+477^done
+(gdb) 
+478^done,threads=[{id="1",target-id="Thread 1",frame={level="0",addr="0x08000846",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="182",arch="armv7e-m"},state="stopped"}]
+(gdb) 
+479^done,groups=[{id="i1",type="process",pid="1",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+480^running
+*running,thread-id="all"
+(gdb) 
+*stopped,reason="end-stepping-range",frame={addr="0x0800082e",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="183",arch="armv7e-m"},thread-id="1",stopped-threads="all"
+481^done,depth="1"
+(gdb) 
+482^done
+(gdb) 
+483^done,threads=[{id="1",target-id="Thread 1",frame={level="0",addr="0x0800082e",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="183",arch="armv7e-m"},state="stopped"}]
+(gdb) 
+484^done,groups=[{id="i1",type="process",pid="1",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+485^running
+*running,thread-id="all"
+(gdb) 
+*stopped,reason="end-stepping-range",frame={addr="0x08000846",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="182",arch="armv7e-m"},thread-id="1",stopped-threads="all"
+486^done,depth="1"
+(gdb) 
+487^done
+(gdb) 
+488^done,threads=[{id="1",target-id="Thread 1",frame={level="0",addr="0x08000846",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="182",arch="armv7e-m"},state="stopped"}]
+(gdb) 
+489^done,groups=[{id="i1",type="process",pid="1",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+490^running
+*running,thread-id="all"
+(gdb) 
+*stopped,reason="end-stepping-range",frame={addr="0x0800082e",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="183",arch="armv7e-m"},thread-id="1",stopped-threads="all"
+491^done,depth="1"
+(gdb) 
+492^done
+(gdb) 
+493^done,threads=[{id="1",target-id="Thread 1",frame={level="0",addr="0x0800082e",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="183",arch="armv7e-m"},state="stopped"}]
+(gdb) 
+494^done,groups=[{id="i1",type="process",pid="1",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+495^running
+*running,thread-id="all"
+(gdb) 
+*stopped,reason="end-stepping-range",frame={addr="0x08000846",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="182",arch="armv7e-m"},thread-id="1",stopped-threads="all"
+496^done,depth="1"
+(gdb) 
+497^done
+(gdb) 
+498^done,threads=[{id="1",target-id="Thread 1",frame={level="0",addr="0x08000846",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="182",arch="armv7e-m"},state="stopped"}]
+(gdb) 
+499^done,groups=[{id="i1",type="process",pid="1",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+500^running
+*running,thread-id="all"
+(gdb) 
+*stopped,reason="end-stepping-range",frame={addr="0x0800082e",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="183",arch="armv7e-m"},thread-id="1",stopped-threads="all"
+501^done,depth="1"
+(gdb) 
+502^done
+(gdb) 
+503^done,threads=[{id="1",target-id="Thread 1",frame={level="0",addr="0x0800082e",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="183",arch="armv7e-m"},state="stopped"}]
+(gdb) 
+504^done,groups=[{id="i1",type="process",pid="1",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+505^running
+*running,thread-id="all"
+(gdb) 
+*stopped,reason="end-stepping-range",frame={addr="0x08000846",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="182",arch="armv7e-m"},thread-id="1",stopped-threads="all"
+506^done,depth="1"
+(gdb) 
+507^done
+(gdb) 
+508^done,threads=[{id="1",target-id="Thread 1",frame={level="0",addr="0x08000846",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="182",arch="armv7e-m"},state="stopped"}]
+(gdb) 
+509^done,groups=[{id="i1",type="process",pid="1",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+510^running
+*running,thread-id="all"
+(gdb) 
+*stopped,reason="end-stepping-range",frame={addr="0x08000858",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="187",arch="armv7e-m"},thread-id="1",stopped-threads="all"
+511^done,depth="1"
+(gdb) 
+512^done
+(gdb) 
+513^done,threads=[{id="1",target-id="Thread 1",frame={level="0",addr="0x08000858",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="187",arch="armv7e-m"},state="stopped"}]
+(gdb) 
+514^done,groups=[{id="i1",type="process",pid="1",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+515^running
+*running,thread-id="all"
+(gdb) 
+*stopped,reason="end-stepping-range",frame={addr="0x08000860",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="189",arch="armv7e-m"},thread-id="1",stopped-threads="all"
+516^done,depth="1"
+(gdb) 
+517^done
+(gdb) 
+518^done,threads=[{id="1",target-id="Thread 1",frame={level="0",addr="0x08000860",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="189",arch="armv7e-m"},state="stopped"}]
+(gdb) 
+519^done,groups=[{id="i1",type="process",pid="1",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+520^running
+*running,thread-id="all"
+(gdb) 
+*stopped,reason="end-stepping-range",frame={addr="0x08000868",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="190",arch="armv7e-m"},thread-id="1",stopped-threads="all"
+521^done,depth="1"
+(gdb) 
+522^done
+(gdb) 
+523^done,threads=[{id="1",target-id="Thread 1",frame={level="0",addr="0x08000868",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="190",arch="armv7e-m"},state="stopped"}]
+(gdb) 
+524^done,groups=[{id="i1",type="process",pid="1",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+525^running
+*running,thread-id="all"
+(gdb) 
+*stopped,reason="end-stepping-range",frame={addr="0x08000880",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="189",arch="armv7e-m"},thread-id="1",stopped-threads="all"
+526^done,depth="1"
+(gdb) 
+527^done
+(gdb) 
+528^done,threads=[{id="1",target-id="Thread 1",frame={level="0",addr="0x08000880",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="189",arch="armv7e-m"},state="stopped"}]
+(gdb) 
+529^done,groups=[{id="i1",type="process",pid="1",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+530^running
+*running,thread-id="all"
+(gdb) 
+531^error,msg="Cannot execute this command while the target is running.\nUse the \"interrupt\" command to stop the target\nand then try again."
+(gdb) 
+*stopped,reason="end-stepping-range",frame={addr="0x08000868",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="190",arch="armv7e-m"},thread-id="1",stopped-threads="all"
+532^done,depth="1"
+(gdb) 
+533^done
+(gdb) 
+534^done,threads=[{id="1",target-id="Thread 1",frame={level="0",addr="0x08000868",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="190",arch="armv7e-m"},state="stopped"}]
+(gdb) 
+535^done,groups=[{id="i1",type="process",pid="1",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+536^running
+*running,thread-id="all"
+(gdb) 
+*stopped,reason="end-stepping-range",frame={addr="0x08000880",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="189",arch="armv7e-m"},thread-id="1",stopped-threads="all"
+537^done,depth="1"
+(gdb) 
+538^done
+(gdb) 
+539^done,threads=[{id="1",target-id="Thread 1",frame={level="0",addr="0x08000880",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="189",arch="armv7e-m"},state="stopped"}]
+(gdb) 
+540^done,groups=[{id="i1",type="process",pid="1",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+541^running
+*running,thread-id="all"
+(gdb) 
+*stopped,reason="end-stepping-range",frame={addr="0x08000868",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="190",arch="armv7e-m"},thread-id="1",stopped-threads="all"
+542^done,depth="1"
+(gdb) 
+543^done
+(gdb) 
+544^done,threads=[{id="1",target-id="Thread 1",frame={level="0",addr="0x08000868",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="190",arch="armv7e-m"},state="stopped"}]
+(gdb) 
+545^done,groups=[{id="i1",type="process",pid="1",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+546^running
+*running,thread-id="all"
+(gdb) 
+*stopped,reason="end-stepping-range",frame={addr="0x08000880",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="189",arch="armv7e-m"},thread-id="1",stopped-threads="all"
+547^done,depth="1"
+(gdb) 
+548^done
+(gdb) 
+549^done,threads=[{id="1",target-id="Thread 1",frame={level="0",addr="0x08000880",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="189",arch="armv7e-m"},state="stopped"}]
+(gdb) 
+550^done,groups=[{id="i1",type="process",pid="1",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+551^running
+*running,thread-id="all"
+(gdb) 
+*stopped,reason="end-stepping-range",frame={addr="0x08000868",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="190",arch="armv7e-m"},thread-id="1",stopped-threads="all"
+552^done,depth="1"
+(gdb) 
+553^done
+(gdb) 
+554^done,threads=[{id="1",target-id="Thread 1",frame={level="0",addr="0x08000868",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="190",arch="armv7e-m"},state="stopped"}]
+(gdb) 
+555^done,groups=[{id="i1",type="process",pid="1",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+556^running
+*running,thread-id="all"
+(gdb) 
+*stopped,reason="end-stepping-range",frame={addr="0x08000880",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="189",arch="armv7e-m"},thread-id="1",stopped-threads="all"
+557^done,depth="1"
+(gdb) 
+558^done
+(gdb) 
+559^done,threads=[{id="1",target-id="Thread 1",frame={level="0",addr="0x08000880",func="main",args=[],file="../Core/Src/main.c",fullname="/home/lth/src/stm32fun/stm32world_variables/Core/Src/main.c",line="189",arch="armv7e-m"},state="stopped"}]
+(gdb) 
+560^done,groups=[{id="i1",type="process",pid="1",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+~"Kill the program being debugged? (y or n) [answered Y; input not from terminal]\n"
+=thread-exited,id="1",group-id="i1"
+=thread-group-exited,id="i1"
+~"[Inferior 1 (Remote target) killed]\n"
+561^done
+(gdb) 
+562^done,threads=[]
+(gdb) 
+563^done,groups=[{id="i1",type="process",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+564^done,groups=[{id="i1",type="process",executable="/home/lth/src/stm32fun/stm32world_variables/Debug/stm32world_variables.elf"}]
+(gdb) 
+565^exit
