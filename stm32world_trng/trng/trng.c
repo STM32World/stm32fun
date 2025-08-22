@@ -20,11 +20,9 @@ uint32_t trng_get() {
     TRNG_DBG("CR = 0x%08lx\n", *trng_cr);
     TRNG_DBG("SR = 0x%08lx\n", *trng_sr);
 
-    while (*trng_dr == last_rng);
+    //while ((*trng_sr & TRNG_SR_DRDY) == 0); // Wait for it.
 
-    last_rng = *trng_dr;
-
-    return last_rng;
+    return *trng_dr;
 }
 
 void trng_init() {
@@ -42,6 +40,6 @@ void trng_init() {
     // Fire up the RNG
     *trng_cr |= TRNG_CR_RNGEN;
 
-    trng_get();
+    //trng_get();
 
 }

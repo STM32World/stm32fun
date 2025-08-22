@@ -8,7 +8,7 @@
 #ifndef TRNG_H_
 #define TRNG_H_
 
-#ifdef DEBUGxxx
+#ifdef DEBUG
 #include <stdio.h>
 #define TRNG_DBG(...) printf(__VA_ARGS__);
 #else
