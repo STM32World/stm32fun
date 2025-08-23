@@ -75,46 +75,90 @@ void HAL_MspInit(void)
 }
 
 /**
-  * @brief DCACHE MSP Initialization
+  * @brief SPI MSP Initialization
   * This function configures the hardware resources used in this example
-  * @param hdcache: DCACHE handle pointer
+  * @param hspi: SPI handle pointer
   * @retval None
   */
-void HAL_DCACHE_MspInit(DCACHE_HandleTypeDef* hdcache)
+void HAL_SPI_MspInit(SPI_HandleTypeDef* hspi)
 {
-  if(hdcache->Instance==DCACHE1)
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
+  RCC_PeriphCLKInitTypeDef PeriphClkInitStruct = {0};
+  if(hspi->Instance==SPI2)
   {
-    /* USER CODE BEGIN DCACHE1_MspInit 0 */
+    /* USER CODE BEGIN SPI2_MspInit 0 */
 
-    /* USER CODE END DCACHE1_MspInit 0 */
+    /* USER CODE END SPI2_MspInit 0 */
+
+  /** Initializes the peripherals clock
+  */
+    PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_SPI2;
+    PeriphClkInitStruct.PLL3.PLL3Source = RCC_PLL3_SOURCE_CSI;
+    PeriphClkInitStruct.PLL3.PLL3M = 1;
+    PeriphClkInitStruct.PLL3.PLL3N = 38;
+    PeriphClkInitStruct.PLL3.PLL3P = 2;
+    PeriphClkInitStruct.PLL3.PLL3Q = 2;
+    PeriphClkInitStruct.PLL3.PLL3R = 2;
+    PeriphClkInitStruct.PLL3.PLL3RGE = RCC_PLL3_VCIRANGE_0;
+    PeriphClkInitStruct.PLL3.PLL3VCOSEL = RCC_PLL3_VCORANGE_MEDIUM;
+    PeriphClkInitStruct.PLL3.PLL3FRACN = 0.0;
+    PeriphClkInitStruct.PLL3.PLL3ClockOut = RCC_PLL3_DIVP;
+    PeriphClkInitStruct.Spi2ClockSelection = RCC_SPI2CLKSOURCE_PLL3P;
+    if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
+    {
+      Error_Handler();
+    }
+
     /* Peripheral clock enable */
-    __HAL_RCC_DCACHE1_CLK_ENABLE();
-    /* USER CODE BEGIN DCACHE1_MspInit 1 */
+    __HAL_RCC_SPI2_CLK_ENABLE();
 
-    /* USER CODE END DCACHE1_MspInit 1 */
+    __HAL_RCC_GPIOB_CLK_ENABLE();
+    /**SPI2 GPIO Configuration
+    PB13     ------> SPI2_SCK
+    PB14     ------> SPI2_MISO
+    PB15     ------> SPI2_MOSI
+    */
+    GPIO_InitStruct.Pin = GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15;
+    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+    GPIO_InitStruct.Alternate = GPIO_AF5_SPI2;
+    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+    /* USER CODE BEGIN SPI2_MspInit 1 */
+
+    /* USER CODE END SPI2_MspInit 1 */
 
   }
 
 }
 
 /**
-  * @brief DCACHE MSP De-Initialization
+  * @brief SPI MSP De-Initialization
   * This function freeze the hardware resources used in this example
-  * @param hdcache: DCACHE handle pointer
+  * @param hspi: SPI handle pointer
   * @retval None
   */
-void HAL_DCACHE_MspDeInit(DCACHE_HandleTypeDef* hdcache)
+void HAL_SPI_MspDeInit(SPI_HandleTypeDef* hspi)
 {
-  if(hdcache->Instance==DCACHE1)
+  if(hspi->Instance==SPI2)
   {
-    /* USER CODE BEGIN DCACHE1_MspDeInit 0 */
+    /* USER CODE BEGIN SPI2_MspDeInit 0 */
 
-    /* USER CODE END DCACHE1_MspDeInit 0 */
+    /* USER CODE END SPI2_MspDeInit 0 */
     /* Peripheral clock disable */
-    __HAL_RCC_DCACHE1_CLK_DISABLE();
-    /* USER CODE BEGIN DCACHE1_MspDeInit 1 */
+    __HAL_RCC_SPI2_CLK_DISABLE();
 
-    /* USER CODE END DCACHE1_MspDeInit 1 */
+    /**SPI2 GPIO Configuration
+    PB13     ------> SPI2_SCK
+    PB14     ------> SPI2_MISO
+    PB15     ------> SPI2_MOSI
+    */
+    HAL_GPIO_DeInit(GPIOB, GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15);
+
+    /* USER CODE BEGIN SPI2_MspDeInit 1 */
+
+    /* USER CODE END SPI2_MspDeInit 1 */
   }
 
 }
