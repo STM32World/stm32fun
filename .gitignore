@@ -1,6 +1,7 @@
 language.settings.xml
 Debug/
 test/
+
 # Prerequisites
 *.d
 
@@ -53,4 +54,4 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
-/.metadata/
+.metadata/
