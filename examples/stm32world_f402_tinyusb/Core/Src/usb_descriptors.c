@@ -26,8 +26,8 @@ uint8_t const desc_fs_configuration[] =
 char const* string_desc_arr [] =
 {
   (const char[]) { 0x09, 0x04 }, // 0: is supported language is English (0x0409)
-  "TinyUSB",                     // 1: Manufacturer
-  "Private Inc",                 // 2: Product
+  "STM32World",                  // 1: Manufacturer
+  "TinyUSB Test",                // 2: Product
   "123456",                      // 3: Serials, should use chip ID
   "TinyUSB CDC",                 // 4: CDC Interface
 };
