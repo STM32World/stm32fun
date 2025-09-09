@@ -200,18 +200,21 @@ static int8_t CUSTOM_HID_OutEvent_FS(uint8_t event_idx, uint8_t state)
  * @param  len: The report length
  * @retval USBD_OK if all operations are OK else USBD_FAIL
  */
-/*
  static int8_t USBD_CUSTOM_HID_SendReport_FS(uint8_t *report, uint16_t len)
  {
  return USBD_CUSTOM_HID_SendReport(&hUsbDeviceFS, report, len);
  }
- */
 /* USER CODE END 7 */
 
 /* USER CODE BEGIN PRIVATE_FUNCTIONS_IMPLEMENTATION */
 
 __weak void CUSTOM_HID_OutEvent_FS_Handler(uint8_t *buffer) {
     UNUSED(buffer);
+}
+
+__weak void CUSTOM_HID_SendReport_FS(uint8_t *report, uint16_t len) {
+    UNUSED(report);
+    UNUSED(len);
 }
 
 /* USER CODE END PRIVATE_FUNCTIONS_IMPLEMENTATION */
