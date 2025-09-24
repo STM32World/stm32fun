@@ -6,7 +6,7 @@
  ******************************************************************************
  * @attention
  *
- * Copyright (c) 2024 Lars Boegild Thomsen <lth@stm32world.com>
+ * Copyright (c) 2024, 2025 Lars Boegild Thomsen <lth@stm32world.com>
  * All rights reserved.
  *
  * This software is licensed under terms that can be found in the LICENSE file
@@ -63,8 +63,9 @@ uint32_t cb_half = 0;
 uint16_t dma_buffer[2 * DMA_BUFFER_SIZE];
 
 float angle = 0;
-float angle_change = 440 * (2 * M_PI / SAMPLE_FREQ);
+float angle_change = 0.1 * (2 * M_PI / SAMPLE_FREQ);
 float amplifier = 0.9;
+uint16_t last_buf;
 
 /* USER CODE END PV */
 
@@ -113,6 +114,7 @@ void do_dac(uint16_t *buffer) {
             angle -= two_pi;
         }
     }
+    last_buf = buffer[0];
 }
 
 void HAL_DAC_ConvCpltCallbackCh1(DAC_HandleTypeDef *hdac) {
