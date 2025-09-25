@@ -46,7 +46,14 @@ UART_HandleTypeDef huart1;
 
 /* USER CODE BEGIN PV */
 extern USBD_HandleTypeDef hUsbDeviceFS;
-uint32_t v = 0;
+
+uint8_t in_report[64] = {0};
+
+uint32_t *now = (uint32_t *)&in_report[0];
+uint32_t *loop = (uint32_t *)&in_report[4];
+uint32_t *v = (uint32_t *)&in_report[8];
+
+//uint32_t v = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -91,9 +98,9 @@ void CUSTOM_HID_OutEvent_FS_Handler(uint8_t *buffer) {
 
         uint32_t new = ((uint32_t) buffer[1] << 24) | ((uint32_t) buffer[2] << 16) | ((uint32_t) buffer[3] << 8) | buffer[4];
 
-        printf("Setting v to: 0x%08x\n", new);
+        printf("Setting v to: 0x%08lx\n", new);
 
-        v = new;
+        *v = new;
 
         break;
 
@@ -146,29 +153,29 @@ int main(void)
     /* Infinite loop */
     /* USER CODE BEGIN WHILE */
 
-    uint32_t now = 0, loop_cnt = 0, next_blink = 500, next_tick = 1000;
+    uint32_t next_blink = 500, next_tick = 1000;
 
     while (1) {
 
-        now = uwTick;
+        *now = uwTick;
 
-        if (now >= next_blink) {
+        if (*now >= next_blink) {
             HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-            next_blink = now + 500;
+            next_blink = *now + 500;
         }
 
-        if (now >= next_tick) {
+        if (*now >= next_tick) {
 
-            uint8_t r = USBD_CUSTOM_HID_SendReport(&hUsbDeviceFS, (uint8_t *)&v, 4);
+            uint8_t r = USBD_CUSTOM_HID_SendReport(&hUsbDeviceFS, (uint8_t*) in_report, 64);
 
-            printf("Tick %lu (loop=%lu v=%lu r=%d)\n", now / 1000, loop_cnt, v, r);
+            printf("Tick %lu (loop=%lu v=%lu r=%d)\n", *now / 1000, *loop, *v, r);
 
-            loop_cnt = 0;
-            next_tick = now + 1000;
+            *loop = 0;
+            next_tick = *now + 1000;
 
         }
 
-        ++loop_cnt;
+        ++*loop;
         /* USER CODE END WHILE */
 
         /* USER CODE BEGIN 3 */
