@@ -62,7 +62,8 @@ void Error_Handler(void);
 
 /* USER CODE BEGIN Private defines */
 
-#define CUSTOM_HID_EPIN_SIZE 0x16U
+#define CUSTOM_HID_EPIN_SIZE 0x40U
+#define CUSTOM_HID_EPOUT_SIZE 0x40U
 #define USBD_MAX_POWER                              0xFAU // request 500 mA
 #define USBD_CUSTOMHID_REPORT_BUFFER_EVENT_ENABLED  1
 
