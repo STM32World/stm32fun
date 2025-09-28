@@ -47,11 +47,11 @@ UART_HandleTypeDef huart1;
 /* USER CODE BEGIN PV */
 extern USBD_HandleTypeDef hUsbDeviceFS;
 
-uint8_t in_report[64] = {0};
+uint8_t in_report[64] = { 0 };
 
-uint32_t *now = (uint32_t *)&in_report[0];
-uint32_t *loop = (uint32_t *)&in_report[4];
-uint32_t *v = (uint32_t *)&in_report[8];
+uint32_t *now = (uint32_t*) &in_report[0];
+uint32_t *loop = (uint32_t*) &in_report[4];
+uint32_t *v = (uint32_t*) &in_report[8];
 
 //uint32_t v = 0;
 /* USER CODE END PV */
