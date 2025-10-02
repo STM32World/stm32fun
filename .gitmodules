@@ -1,3 +1,6 @@
 [submodule "tinyusb"]
 	path = tinyusb
 	url = git@github.com:lbthomsen/tinyusb.git
+[submodule "stm32-ws2812"]
+	path = stm32-ws2812
+	url = git@github.com:lbthomsen/stm32-ws2812.git
