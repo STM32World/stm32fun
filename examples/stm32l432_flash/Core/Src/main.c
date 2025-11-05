@@ -32,7 +32,8 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
+#define F_START 0x803c000
+#define PAGE_SIZE 2048
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -44,6 +45,11 @@
 UART_HandleTypeDef huart1;
 
 /* USER CODE BEGIN PV */
+
+const uint32_t *f = (uint32_t *)F_START;
+
+uint32_t *test1 = (uint32_t *)(F_START);
+uint32_t *test2 = (uint32_t *)(F_START + 8);
 
 /* USER CODE END PV */
 
@@ -106,14 +112,14 @@ int main(void)
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
 
-    printf("\n\n\n\nStarting...\n");
+    printf("\n\n\n\nStarting flash test...\n");
 
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 
-    uint32_t now = 0, next_blink = 500, next_tick = 1000, loop_cnt = 0;
+    uint32_t now = 0, next_blink = 500, next_tick = 1000, next_write = 10000, loop_cnt = 0;
 
     while (1) {
 
@@ -126,9 +132,45 @@ int main(void)
         }
 
         if (now >= next_tick) {
-            printf("Tick %lu (lc=%lu)\n", now / 1000, loop_cnt);
+            printf("Tick %lu (lc=%lu tst=0x%08lx)\n", now / 1000, loop_cnt, *test1);
             loop_cnt = 0;
             next_tick = now + 1000;
+        }
+
+        if (now >= next_write) {
+
+            HAL_FLASH_Unlock();
+
+            // First let's print what is there now.
+            printf("test1=0x%08lx test2=0x%02lx\n", (uint32_t)*test1, (uint32_t)*test2);
+
+            // Determine page address
+            uint32_t pg1 = (((uint32_t)test1 - 0x08000000) / PAGE_SIZE);
+            uint32_t pg2 = (((uint32_t)test2 - 0x08000000) / PAGE_SIZE);
+
+            // Print addresses
+            printf("test1=0x%08lx pg1=0x%08lx test2=0x%08lx pg2=0x%08lx\n", (uint32_t)test1, pg1, (uint32_t)test2, pg2);
+
+            uint32_t err;
+            FLASH_EraseInitTypeDef erase = {0};
+            erase.TypeErase = FLASH_TYPEERASE_PAGES;
+            erase.Page = pg1;
+            erase.NbPages = 1;
+
+            if (HAL_FLASHEx_Erase(&erase, &err) != HAL_OK) {
+                printf("Erase error: 0x%08lx\n", err);
+            }
+
+            printf("Flash sector erased!\n");
+
+            printf("test1=0x%08lx test2=0x%02lx\n", (uint32_t)*test1, (uint32_t)*test2);
+
+            uint64_t d = now / 1000;
+            HAL_FLASH_Program(FLASH_TYPEPROGRAM_DOUBLEWORD, (uint32_t)test1, d);
+
+            HAL_FLASH_Lock();
+
+            next_write = now + 10000;
         }
 
         ++loop_cnt;
