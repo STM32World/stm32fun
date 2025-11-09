@@ -64,6 +64,9 @@ void Error_Handler(void);
 
 /* USER CODE BEGIN Private defines */
 
+#define FLASH_STORAGE_ADDRESS 0x803c000
+#define FLASH_STORAGE_SIZE 16 * 1024
+
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus
