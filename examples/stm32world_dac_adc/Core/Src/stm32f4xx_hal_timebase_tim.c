@@ -45,12 +45,15 @@ HAL_StatusTypeDef HAL_InitTick(uint32_t TickPriority)
 
   uint32_t              uwPrescalerValue = 0U;
   uint32_t              pFLatency;
+
   HAL_StatusTypeDef     status;
 
   /* Enable TIM14 clock */
   __HAL_RCC_TIM14_CLK_ENABLE();
+
   /* Get clock configuration */
   HAL_RCC_GetClockConfig(&clkconfig, &pFLatency);
+
   /* Get APB1 prescaler */
   uwAPB1Prescaler = clkconfig.APB1CLKDivider;
   /* Compute TIM14 clock */
@@ -70,12 +73,11 @@ HAL_StatusTypeDef HAL_InitTick(uint32_t TickPriority)
   htim14.Instance = TIM14;
 
   /* Initialize TIMx peripheral as follow:
-
-  + Period = [(TIM14CLK/1000) - 1]. to have a (1/1000) s time base.
-  + Prescaler = (uwTimclock/1000000 - 1) to have a 1MHz counter clock.
-  + ClockDivision = 0
-  + Counter direction = Up
-  */
+   * Period = [(TIM14CLK/1000) - 1]. to have a (1/1000) s time base.
+   * Prescaler = (uwTimclock/1000000 - 1) to have a 1MHz counter clock.
+   * ClockDivision = 0
+   * Counter direction = Up
+   */
   htim14.Init.Period = (1000000U / 1000U) - 1U;
   htim14.Init.Prescaler = uwPrescalerValue;
   htim14.Init.ClockDivision = 0;
