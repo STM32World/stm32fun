@@ -1,8 +1,18 @@
-/*
- * trng.h
+/**
+ ******************************************************************************
+ * @file           : trng.h
+ * @brief          : True Random Generator low level header
+ ******************************************************************************
+ * @attention
  *
- *  Created on: Sep 1, 2024
- *      Author: lth
+ * Copyright (c) 2025 STM32World <lth@stm32world.com>
+ * All rights reserved.
+ *
+ * This software is licensed under terms that can be found in the LICENSE file
+ * in the root directory of this software component.
+ * If no LICENSE file comes with this software, it is provided AS-IS.
+ *
+ ******************************************************************************
  */
 
 #ifndef TRNG_H_

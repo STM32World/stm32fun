@@ -1,17 +1,28 @@
-/*
- * trng.c
+/**
+ ******************************************************************************
+ * @file           : trng.c
+ * @brief          : True Random Generator low level source
+ ******************************************************************************
+ * @attention
  *
- *  Created on: Sep 1, 2024
- *      Author: lth
+ * Copyright (c) 2025 STM32World <lth@stm32world.com>
+ * All rights reserved.
+ *
+ * This software is licensed under terms that can be found in the LICENSE file
+ * in the root directory of this software component.
+ * If no LICENSE file comes with this software, it is provided AS-IS.
+ *
+ ******************************************************************************
  */
+
 
 #include "main.h"
 
 #include "trng.h"
 
-uint32_t *trng_cr = (uint32_t *)TRNG_CR_ADDR;
-uint32_t *trng_sr = (uint32_t *)TRNG_SR_ADDR;
-uint32_t *trng_dr = (uint32_t *)TRNG_DR_ADDR;
+uint32_t *trng_cr = (uint32_t*) TRNG_CR_ADDR;
+uint32_t *trng_sr = (uint32_t*) TRNG_SR_ADDR;
+uint32_t *trng_dr = (uint32_t*) TRNG_DR_ADDR;
 
 uint32_t last_rng = 0;
 
@@ -20,7 +31,8 @@ uint32_t trng_get() {
     TRNG_DBG("CR = 0x%08lx\n", *trng_cr);
     TRNG_DBG("SR = 0x%08lx\n", *trng_sr);
 
-    while ((*trng_sr & TRNG_SR_DRDY) == 0); // Wait for it.
+    while ((*trng_sr & TRNG_SR_DRDY) == 0)
+        ; // Wait for it.
 
     return *trng_dr;
 }
@@ -39,7 +51,5 @@ void trng_init() {
 
     // Fire up the RNG
     *trng_cr |= TRNG_CR_RNGEN;
-
-    //trng_get();
 
 }
