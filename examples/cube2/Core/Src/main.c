@@ -1,20 +1,20 @@
 /* USER CODE BEGIN Header */
 /**
- ******************************************************************************
- * @file           : main.c
- * @brief          : Main program body
- ******************************************************************************
- * @attention
- *
- * Copyright (c) 2025 STM32World <lth@stm32world.com>
- * All rights reserved.
- *
- * This software is licensed under terms that can be found in the LICENSE file
- * in the root directory of this software component.
- * If no LICENSE file comes with this software, it is provided AS-IS.
- *
- ******************************************************************************
- */
+  ******************************************************************************
+  * @file           : main.c
+  * @brief          : Main program body
+  ******************************************************************************
+  * @attention
+  *
+  * Copyright (c) 2025 STMicroelectronics.
+  * All rights reserved.
+  *
+  * This software is licensed under terms that can be found in the LICENSE file
+  * in the root directory of this software component.
+  * If no LICENSE file comes with this software, it is provided AS-IS.
+  *
+  ******************************************************************************
+  */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
@@ -26,7 +26,7 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-#include "trng.h"
+
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -40,6 +40,8 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
+RNG_HandleTypeDef hrng;
+
 UART_HandleTypeDef huart1;
 
 /* USER CODE BEGIN PV */
@@ -50,6 +52,7 @@ UART_HandleTypeDef huart1;
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_USART1_UART_Init(void);
+static void MX_RNG_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -58,17 +61,17 @@ static void MX_USART1_UART_Init(void);
 /* USER CODE BEGIN 0 */
 
 // Send printf to uart1
-int _write(int fd, char *ptr, int len) {
-    HAL_StatusTypeDef hstatus;
+int _write(int fd, char* ptr, int len) {
+  HAL_StatusTypeDef hstatus;
 
-    if (fd == 1 || fd == 2) {
-        hstatus = HAL_UART_Transmit(&huart1, (uint8_t*) ptr, len, HAL_MAX_DELAY);
-        if (hstatus == HAL_OK)
-            return len;
-        else
-            return -1;
-    }
-    return -1;
+  if (fd == 1 || fd == 2) {
+    hstatus = HAL_UART_Transmit(&huart1, (uint8_t *) ptr, len, HAL_MAX_DELAY);
+    if (hstatus == HAL_OK)
+      return len;
+    else
+      return -1;
+  }
+  return -1;
 }
 
 /* USER CODE END 0 */
@@ -103,35 +106,31 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_USART1_UART_Init();
+  MX_RNG_Init();
   /* USER CODE BEGIN 2 */
 
-    printf("\n\n\n--------\nStarting\n");
-
-    trng_init();
+  printf("\n\n\nStarting\n");
 
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 
-    uint32_t now, next_tick = 1000;
+  uint32_t now = 0, next_tick = 1000;
 
-    while (1) {
+  while (1) {
 
-        now = uwTick;
+      now = uwTick;
 
-        if (now >= next_tick) {
-
-            uint32_t r = trng_get();
-
-            printf("Tick %05lu (r=0x%08x)\n", now / 1000, r);
-            next_tick = now + 1000;
-        }
+      if (now >= next_tick) {
+          printf("Tick %lu\n", now / 1000);
+          next_tick = now + 1000;
+      }
 
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-    }
+  }
   /* USER CODE END 3 */
 }
 
@@ -159,7 +158,7 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.PLL.PLLM = 8;
   RCC_OscInitStruct.PLL.PLLN = 168;
   RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
-  RCC_OscInitStruct.PLL.PLLQ = 4;
+  RCC_OscInitStruct.PLL.PLLQ = 7;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
     Error_Handler();
@@ -178,6 +177,32 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
+}
+
+/**
+  * @brief RNG Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_RNG_Init(void)
+{
+
+  /* USER CODE BEGIN RNG_Init 0 */
+
+  /* USER CODE END RNG_Init 0 */
+
+  /* USER CODE BEGIN RNG_Init 1 */
+
+  /* USER CODE END RNG_Init 1 */
+  hrng.Instance = RNG;
+  if (HAL_RNG_Init(&hrng) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN RNG_Init 2 */
+
+  /* USER CODE END RNG_Init 2 */
+
 }
 
 /**
@@ -202,7 +227,7 @@ static void MX_USART1_UART_Init(void)
   huart1.Init.Parity = UART_PARITY_NONE;
   huart1.Init.Mode = UART_MODE_TX_RX;
   huart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
-  huart1.Init.OverSampling = UART_OVERSAMPLING_8;
+  huart1.Init.OverSampling = UART_OVERSAMPLING_16;
   if (HAL_UART_Init(&huart1) != HAL_OK)
   {
     Error_Handler();
@@ -220,14 +245,25 @@ static void MX_USART1_UART_Init(void)
   */
 static void MX_GPIO_Init(void)
 {
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
   /* USER CODE BEGIN MX_GPIO_Init_1 */
 
   /* USER CODE END MX_GPIO_Init_1 */
 
   /* GPIO Ports Clock Enable */
+  __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOH_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
-  __HAL_RCC_GPIOB_CLK_ENABLE();
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);
+
+  /*Configure GPIO pin : LED_Pin */
+  GPIO_InitStruct.Pin = LED_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(LED_GPIO_Port, &GPIO_InitStruct);
 
   /* USER CODE BEGIN MX_GPIO_Init_2 */
 
@@ -245,11 +281,11 @@ static void MX_GPIO_Init(void)
 void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
-    /* User can add his own implementation to report the HAL error return state */
-    __disable_irq();
-    while (1)
-    {
-    }
+  /* User can add his own implementation to report the HAL error return state */
+  __disable_irq();
+  while (1)
+  {
+  }
   /* USER CODE END Error_Handler_Debug */
 }
 #ifdef USE_FULL_ASSERT
