@@ -88,7 +88,7 @@ union {
         uint8_t debug_mode :1;  // [5]
         uint8_t reserved :1;  // [6]
         uint8_t factory_test :1;  // [7] MSB
-    } fields;
+    } field;
 } bp_byte;
 
 /* USER CODE END PV */
@@ -156,7 +156,11 @@ int main(void)
 
     printf("bp.raw = %d\n", bp_byte.raw);
 
-    bp_byte.fields.idle = 1;
+    bp_byte.field.idle = 1;
+
+    bp_byte.field.low_brightness = 1;
+
+    bp_byte.field.debug_mode = 1;
 
     printf("bp.raw = %d\n", bp_byte.raw);
 
