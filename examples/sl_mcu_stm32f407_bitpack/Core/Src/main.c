@@ -15,16 +15,15 @@
  *
  ******************************************************************************
  */
-
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "fatfs.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
 #include <string.h>
+#include <math.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -43,23 +42,60 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
-SD_HandleTypeDef hsd;
-DMA_HandleTypeDef hdma_sdio;
-
 UART_HandleTypeDef huart1;
 
 /* USER CODE BEGIN PV */
-const char total_uptime_filename[] = "uptime.dat";
-const char tick_filename[] = "tick.txt";
-const char big_filename[] = "big.dat";
-uint32_t total_uptime;
+
+struct rng {
+    union {
+        uint32_t reg;
+        struct {
+            uint32_t RES1 :2;
+            uint32_t RNGEN :1;
+            uint32_t IE :1;
+            uint32_t RES2 :28;
+        } field;
+    } CR;
+    union {
+        uint32_t reg;
+        struct {
+            uint32_t DRDY :1;
+            uint32_t CECS :1;
+            uint32_t RES1 :2;
+            uint32_t CEIS :1;
+            uint32_t SEIS :1;
+            uint32_t RES2 :25;
+        } field;
+    } SR;
+    union {
+        uint32_t reg;
+        struct {
+            uint32_t RNDATA :32;
+        } field;
+    } DR;
+};
+
+#define TRNG ((volatile struct rng *) 0x50060800)
+
+union {
+    uint8_t raw;
+    struct {
+        uint8_t idle :1;  // [0]
+        uint8_t low_brightness :1;  // [1]
+        uint8_t normal_brightness :1;  // [2]
+        uint8_t high_brightness :1;  // [3]
+        uint8_t party_mode :1;  // [4]
+        uint8_t debug_mode :1;  // [5]
+        uint8_t reserved :1;  // [6]
+        uint8_t factory_test :1;  // [7] MSB
+    } fields;
+} bp_byte;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
-static void MX_DMA_Init(void);
-static void MX_SDIO_SD_Init(void);
 static void MX_USART1_UART_Init(void);
 /* USER CODE BEGIN PFP */
 
@@ -80,73 +116,6 @@ int _write(int fd, char *ptr, int len) {
             return -1;
     }
     return -1;
-}
-
-uint8_t BSP_SD_IsDetected(void)
-{
-    __IO uint8_t status = SD_PRESENT;
-
-    if (HAL_GPIO_ReadPin(SD_DET_GPIO_Port, SD_DET_Pin) != GPIO_PIN_RESET) {
-        status = SD_NOT_PRESENT;
-    }
-
-    return status;
-}
-
-void ls() {
-
-    FRESULT res;
-    DIR dir;
-    char *path;
-
-    path = ""; // where you want to list
-
-    res = f_opendir(&dir, path);
-
-#ifdef DEBUG
-    if (res != FR_OK)
-        printf("res = %d f_opendir\n", res);
-#endif
-
-    if (res == FR_OK) {
-        while (1) {
-
-            FILINFO fno;
-
-            res = f_readdir(&dir, &fno);
-
-#ifdef DEBUG
-            if (res != FR_OK)
-                printf("res = %d f_readdir\n", res);
-#endif
-
-            if ((res != FR_OK) || (fno.fname[0] == 0))
-                break;
-
-            printf("%c%c%c%c %10d %s/%s\n",
-                    ((fno.fattrib & AM_DIR) ? 'D' : '-'),
-                    ((fno.fattrib & AM_RDO) ? 'R' : '-'),
-                    ((fno.fattrib & AM_SYS) ? 'S' : '-'),
-                    ((fno.fattrib & AM_HID) ? 'H' : '-'),
-                    (int) fno.fsize, path, fno.fname);
-        }
-
-    }
-
-    uint32_t free_clusters;
-    FATFS *fs_ptr;
-
-    res = f_getfree("", &free_clusters, &fs_ptr);
-    if (res == FR_OK) {
-        uint32_t totalBlocks = (fs_ptr->n_fatent - 2) * fs_ptr->csize;
-        uint32_t freeBlocks = free_clusters * fs_ptr->csize;
-
-        printf("Total blocks: %lu (%lu Mb)\n", totalBlocks, totalBlocks / 2000);
-        printf("Free blocks : %lu (%lu Mb)\n", freeBlocks, freeBlocks / 2000);
-    } else {
-        printf("Unable to get free space\n");
-    }
-
 }
 
 /* USER CODE END 0 */
@@ -180,85 +149,28 @@ int main(void)
 
     /* Initialize all configured peripherals */
     MX_GPIO_Init();
-    MX_DMA_Init();
-    MX_SDIO_SD_Init();
-    MX_FATFS_Init();
     MX_USART1_UART_Init();
     /* USER CODE BEGIN 2 */
 
-    HAL_Delay(10);
-
     printf("\n\n\n\n--------\nStarting\n");
 
-    printf("SD Card Information:\n");
-    printf("Block size  : %lu\n", hsd.SdCard.BlockSize);
-    printf("Block nmbr  : %lu\n", hsd.SdCard.BlockNbr);
-    printf("Card size   : %lu\n", (hsd.SdCard.BlockSize * hsd.SdCard.BlockNbr) / 1000);
-    printf("Card version: %lu\n", hsd.SdCard.CardVersion);
+    printf("bp.raw = %d\n", bp_byte.raw);
 
-    uint32_t wbytes, rbytes;
+    bp_byte.fields.idle = 1;
 
-    if (f_mount(&SDFatFS, (TCHAR const*) SDPath, 0) != FR_OK) {
-        printf("Unable to mount disk\n");
-        Error_Handler();
-    }
+    printf("bp.raw = %d\n", bp_byte.raw);
 
-    if (f_open(&SDFile, total_uptime_filename, FA_OPEN_EXISTING | FA_READ) == FR_OK) {
-        if (f_read(&SDFile, &total_uptime, sizeof(total_uptime), (void*) &rbytes) == FR_OK) {
-            printf("Total uptime = %lu\n", total_uptime);
-            f_close(&SDFile);
-        } else {
-            printf("Unable to read\n");
-            Error_Handler();
-        }
-    } else {
-        // File did not exist - let's create it
-        if (f_open(&SDFile, total_uptime_filename, FA_CREATE_ALWAYS | FA_WRITE) == FR_OK) {
-            if (f_write(&SDFile, &total_uptime, sizeof(total_uptime), (void*) &wbytes) == FR_OK) {
-                printf("File %s created\n", total_uptime_filename);
-                f_close(&SDFile);
-            } else {
-                printf("Unable to write\n");
-                Error_Handler();
-            }
-        } else {
-            printf("Unable to create\n");
-            Error_Handler();
-        }
-    }
+    __HAL_RCC_RNG_CLK_ENABLE();
 
-    // Create tick file always
-    if (f_open(&SDFile, tick_filename, FA_CREATE_ALWAYS | FA_WRITE) == FR_OK) {
-        f_close(&SDFile);
-    }
-
-    uint8_t buf[1024]; // 1K buffer
-
-    for (uint16_t i = 0; i < 1024; ++i) {
-        buf[i] = (uint8_t) i;
-    }
-
-    uint32_t start = uwTick;
-    if (f_open(&SDFile, big_filename, FA_CREATE_ALWAYS | FA_WRITE) == FR_OK) {
-        for (uint16_t i = 0; i < 1 * 1024; ++i) {
-            if (f_write(&SDFile, &buf, sizeof(buf), (void*) &wbytes) != FR_OK) {
-                printf("Unable to write\n");
-            }
-        }
-        f_close(&SDFile);
-    } else {
-        printf("Unable to open %s\n", big_filename);
-    }
-    printf("Write took %lu ms\n", uwTick - start);
-
-    // ls();
+    //TRNG->CR.reg = (1 << 2);
+    TRNG->CR.field.RNGEN = 1; // Enable TRNG
 
     /* USER CODE END 2 */
 
     /* Infinite loop */
     /* USER CODE BEGIN WHILE */
 
-    uint32_t now = 0, loop_cnt = 0, next_blink = 500, next_tick = 1000, next_ls = 10000;
+    uint32_t now = 0, loop_cnt = 0, next_blink = 500, next_tick = 1000;
 
     while (1) {
 
@@ -271,54 +183,13 @@ int main(void)
 
         if (now >= next_tick) {
 
-            ++total_uptime;
+            while (!TRNG->SR.field.DRDY) {
+            };
 
-            char s[128];
-
-            sprintf(s, "Tick %lu (loop = %lu total = %lu)\n", now / 1000, loop_cnt, total_uptime);
-
-            printf("%s", s);
-
-            // Write tick line to file
-            if (f_open(&SDFile, tick_filename, FA_OPEN_APPEND | FA_WRITE) == FR_OK) {
-                if (f_write(&SDFile, &s, strlen(s) + 1, (void*) &wbytes) != FR_OK) {
-                    printf("Unable to write\n");
-                }
-                f_close(&SDFile);
-            } else {
-                printf("Unable to open tick file\n");
-            }
-
-            // Update the total uptime file
-            if (f_open(&SDFile, total_uptime_filename, FA_OPEN_EXISTING | FA_WRITE) == FR_OK) {
-                if (f_write(&SDFile, &total_uptime, sizeof(total_uptime), (void*) &wbytes) != FR_OK) {
-                    printf("Unable to write\n");
-                }
-                f_close(&SDFile);
-            } else {
-                printf("Unable to open file\n");
-            }
+            printf("Tick %lu ( loop = %lu rnd = 0x%08x )\r\n", now / 1000, loop_cnt, TRNG->DR.reg);
 
             loop_cnt = 0;
             next_tick = now + 1000;
-        }
-
-        if (now >= next_ls) {
-
-            uint32_t start = uwTick;
-            uint32_t total = 0;
-            if (f_open(&SDFile, big_filename, FA_OPEN_EXISTING | FA_READ) == FR_OK) {
-                while (f_read(&SDFile, &buf, sizeof(buf), (void*) &rbytes) == FR_OK && rbytes == sizeof(buf)) {
-                    total += rbytes;
-                }
-                f_close(&SDFile);
-            } else {
-                printf("Unable to open %s\n", big_filename);
-            }
-            printf("Read %lu bytes took %lu ms\n", total, uwTick - start);
-
-            //ls();
-            next_ls = now + 10000;
         }
 
         ++loop_cnt;
@@ -376,45 +247,6 @@ void SystemClock_Config(void)
 }
 
 /**
- * @brief SDIO Initialization Function
- * @param None
- * @retval None
- */
-static void MX_SDIO_SD_Init(void)
-{
-
-    /* USER CODE BEGIN SDIO_Init 0 */
-
-    /* USER CODE END SDIO_Init 0 */
-
-    /* USER CODE BEGIN SDIO_Init 1 */
-
-    /* USER CODE END SDIO_Init 1 */
-    hsd.Instance = SDIO;
-    hsd.Init.ClockEdge = SDIO_CLOCK_EDGE_RISING;
-    hsd.Init.ClockBypass = SDIO_CLOCK_BYPASS_DISABLE;
-    hsd.Init.ClockPowerSave = SDIO_CLOCK_POWER_SAVE_DISABLE;
-    hsd.Init.BusWide = SDIO_BUS_WIDE_1B;
-    hsd.Init.HardwareFlowControl = SDIO_HARDWARE_FLOW_CONTROL_DISABLE;
-    hsd.Init.ClockDiv = 0;
-    /* USER CODE BEGIN SDIO_Init 2 */
-
-    // First init with 1B bus - SD card will not initialize with 4 bits
-    hsd.Init.BusWide = SDIO_BUS_WIDE_1B;
-    if (HAL_SD_Init(&hsd) != HAL_OK) {
-        Error_Handler();
-    }
-
-    // Now we can switch to 4 bit mode
-    if (HAL_SD_ConfigWideBusOperation(&hsd, SDIO_BUS_WIDE_4B) != HAL_OK) {
-        Error_Handler();
-    }
-
-    /* USER CODE END SDIO_Init 2 */
-
-}
-
-/**
  * @brief USART1 Initialization Function
  * @param None
  * @retval None
@@ -448,22 +280,6 @@ static void MX_USART1_UART_Init(void)
 }
 
 /**
- * Enable DMA controller clock
- */
-static void MX_DMA_Init(void)
-{
-
-    /* DMA controller clock enable */
-    __HAL_RCC_DMA2_CLK_ENABLE();
-
-    /* DMA interrupt init */
-    /* DMA2_Stream3_IRQn interrupt configuration */
-    HAL_NVIC_SetPriority(DMA2_Stream3_IRQn, 0, 0);
-    HAL_NVIC_EnableIRQ(DMA2_Stream3_IRQn);
-
-}
-
-/**
  * @brief GPIO Initialization Function
  * @param None
  * @retval None
@@ -479,7 +295,6 @@ static void MX_GPIO_Init(void)
     __HAL_RCC_GPIOC_CLK_ENABLE();
     __HAL_RCC_GPIOH_CLK_ENABLE();
     __HAL_RCC_GPIOA_CLK_ENABLE();
-    __HAL_RCC_GPIOD_CLK_ENABLE();
     __HAL_RCC_GPIOB_CLK_ENABLE();
 
     /*Configure GPIO pin Output Level */
@@ -491,12 +306,6 @@ static void MX_GPIO_Init(void)
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
     HAL_GPIO_Init(LED_GPIO_Port, &GPIO_InitStruct);
-
-    /*Configure GPIO pin : SD_DET_Pin */
-    GPIO_InitStruct.Pin = SD_DET_Pin;
-    GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-    GPIO_InitStruct.Pull = GPIO_PULLUP;
-    HAL_GPIO_Init(SD_DET_GPIO_Port, &GPIO_InitStruct);
 
     /* USER CODE BEGIN MX_GPIO_Init_2 */
 
