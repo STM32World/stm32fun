@@ -22,6 +22,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "stdio.h"
+#include "tusb.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -63,18 +64,6 @@ static void MX_USB_HCD_Init(void);
 /* USER CODE BEGIN 0 */
 
 // Send printf to uart1
-//int _write(int fd, char *ptr, int len) {
-//    HAL_StatusTypeDef hstatus;
-//
-//    if (fd == 1 || fd == 2) {
-//        hstatus = HAL_UART_Transmit(&huart1, (uint8_t*) ptr, len, HAL_MAX_DELAY);
-//        if (hstatus == HAL_OK)
-//            return len;
-//        else
-//            return -1;
-//    }
-//    return -1;
-//}
 int __io_putchar(int ch) {
     if (ch == '\n') {
         if (HAL_UART_Transmit(&huart1, (uint8_t*) "\r", 1, HAL_MAX_DELAY) != HAL_OK) {
@@ -123,6 +112,13 @@ int main(void)
     MX_USB_HCD_Init();
     /* USER CODE BEGIN 2 */
 
+    tusb_rhport_init_t dev_init = {
+            .role = TUSB_ROLE_DEVICE,
+            .speed = TUSB_SPEED_FULL
+    };
+
+    tusb_init(0, &dev_init);
+
     printf("\n\n\nStarting\n");
 
     /* USER CODE END 2 */
@@ -131,6 +127,8 @@ int main(void)
     /* USER CODE BEGIN WHILE */
 
     uint32_t now, loop_cnt = 0, next_blink = 500, next_tick = 1000;
+
+    char rxBuf[16];
 
     while (1) {
 
@@ -145,6 +143,18 @@ int main(void)
             printf("Tick %lu (loop = %lu)\n", now / 1000, loop_cnt);
             loop_cnt = 0;
             next_tick = now + 1000;
+        }
+
+        tud_task();
+
+        if (tud_cdc_n_available(0)) {
+            uint32_t rxCnt = tud_cdc_n_read(0, rxBuf, sizeof(rxBuf));
+
+            for (int rxIdx = 0; rxIdx < rxCnt; ++rxIdx) {
+                tud_cdc_n_write_char(0, rxBuf[rxIdx]);
+            }
+
+            tud_cdc_n_write_flush(0);
         }
 
         ++loop_cnt;
