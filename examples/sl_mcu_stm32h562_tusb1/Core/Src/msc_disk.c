@@ -104,7 +104,7 @@ uint8_t msc_disk[DISK_BLOCK_NUM][DISK_BLOCK_SIZE] = {
   //------------- Block2: Root Directory -------------//
 {
     // first entry is volume label
-    'T', 'i', 'n', 'y', 'U', 'S', 'B', ' ', 'M', 'S', 'C', 0x08, 0x00, 0x00, 0x00, 0x00,
+    'S', 'T', 'M', '3', '2', 'W', 'o', 'r', 'l', 'd', ' ', 0x08, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x4F, 0x6D, 0x65, 0x43, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     // second entry is readme file
     'R', 'E', 'A', 'D', 'M', 'E', ' ', ' ', 'T', 'X', 'T', 0x20, 0x00, 0xC6, 0x52, 0x6D,
@@ -122,7 +122,7 @@ uint8_t msc_disk[DISK_BLOCK_NUM][DISK_BLOCK_SIZE] = {
 uint32_t tud_msc_inquiry2_cb(uint8_t lun, scsi_inquiry_resp_t *inquiry_resp, uint32_t bufsize) {
   (void) lun;
   (void) bufsize;
-  const char vid[] = "TinyUSB";
+  const char vid[] = "STM32World";
   const char pid[] = "Mass Storage";
   const char rev[] = "1.0";
 

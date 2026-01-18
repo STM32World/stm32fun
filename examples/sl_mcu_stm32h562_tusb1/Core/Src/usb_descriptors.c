@@ -127,7 +127,7 @@ enum {
 // full speed configuration
 uint8_t const desc_fs_configuration[] = {
     // Config number, interface count, string index, total length, attribute, power in mA
-    TUD_CONFIG_DESCRIPTOR(1, ITF_NUM_TOTAL, 0, CONFIG_TOTAL_LEN, 0x00, 100),
+    TUD_CONFIG_DESCRIPTOR(1, ITF_NUM_TOTAL, 0, CONFIG_TOTAL_LEN, 0x00, 500),
 
     // Interface number, string index, EP notification address and size, EP data address (out, in) and size.
     TUD_CDC_DESCRIPTOR(ITF_NUM_CDC, 4, EPNUM_CDC_NOTIF, 16, EPNUM_CDC_OUT, EPNUM_CDC_IN, 64),
@@ -226,10 +226,10 @@ enum {
 char const *string_desc_arr[] = {
     (const char[]) { 0x09, 0x04 }, // 0: is supported language is English (0x0409)
     "STM32World",                     // 1: Manufacturer
-    "TinyUSB Device",              // 2: Product
+    "STM32World USB Device",              // 2: Product
     NULL,                          // 3: Serials will use unique ID if possible
-    "TinyUSB CDC",                 // 4: CDC Interface
-    "TinyUSB MSC",                 // 5: MSC Interface
+    "STM32World CDC",                 // 4: CDC Interface
+    "STM32World MSC",                 // 5: MSC Interface
 };
 
 static uint16_t _desc_str[32 + 1];
