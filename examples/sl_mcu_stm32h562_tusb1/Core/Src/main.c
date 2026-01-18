@@ -21,7 +21,8 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "stdio.h"
+#include <stdlib.h>
+#include <stdio.h>
 #include "tusb.h"
 /* USER CODE END Includes */
 
@@ -112,11 +113,13 @@ int main(void)
     MX_USB_HCD_Init();
     /* USER CODE BEGIN 2 */
 
+    // Create a TinyUSB handler
     tusb_rhport_init_t dev_init = {
             .role = TUSB_ROLE_DEVICE,
             .speed = TUSB_SPEED_FULL
     };
 
+    // Initialize TinyUSB
     tusb_init(0, &dev_init);
 
     printf("\n\n\nStarting\n");
@@ -145,8 +148,10 @@ int main(void)
             next_tick = now + 1000;
         }
 
+        // Call the TinyUSB task - as often as possible
         tud_task();
 
+        // Echo everything received straight back out
         if (tud_cdc_n_available(0)) {
             uint32_t rxCnt = tud_cdc_n_read(0, rxBuf, sizeof(rxBuf));
 
