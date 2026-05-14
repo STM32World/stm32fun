@@ -52,7 +52,9 @@ UART_HandleTypeDef huart1;
 const char total_uptime_filename[] = "uptime.dat";
 const char tick_filename[] = "tick.txt";
 const char big_filename[] = "big.dat";
+const char boot_filename[] = "boot.dat";
 uint32_t total_uptime;
+uint32_t boot_count;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -203,6 +205,42 @@ int main(void)
         Error_Handler();
     }
 
+    if (f_open(&SDFile, boot_filename, FA_OPEN_EXISTING | FA_READ) == FR_OK) {
+        if (f_read(&SDFile, &boot_count, sizeof(boot_count), (void*) &rbytes) == FR_OK) {
+            printf("Boot count = %lu\r\n", boot_count);
+            f_close(&SDFile);
+
+            ++boot_count;
+            if (f_open(&SDFile, boot_filename, FA_OPEN_EXISTING | FA_WRITE) == FR_OK) {
+                if (f_write(&SDFile, &boot_count, sizeof(boot_count), (void*) &wbytes) != FR_OK) {
+                    printf("Unable to write\r\n");
+                }
+                f_close(&SDFile);
+            } else {
+                printf("Unable to open file\r\n");
+            }
+
+        } else {
+            printf("Unable to read\r\n");
+            Error_Handler();
+        }
+    } else {
+        // File did not exist - let's create it
+        if (f_open(&SDFile, boot_filename, FA_CREATE_ALWAYS | FA_WRITE) == FR_OK) {
+            boot_count = 1;
+            if (f_write(&SDFile, &boot_count, sizeof(boot_count), (void*) &wbytes) == FR_OK) {
+                printf("File %s created\r\n", boot_filename);
+                f_close(&SDFile);
+            } else {
+                printf("Unable to write\r\n");
+                Error_Handler();
+            }
+        } else {
+            printf("Unable to create\r\n");
+            Error_Handler();
+        }
+    }
+
     if (f_open(&SDFile, total_uptime_filename, FA_OPEN_EXISTING | FA_READ) == FR_OK) {
         if (f_read(&SDFile, &total_uptime, sizeof(total_uptime), (void*) &rbytes) == FR_OK) {
             printf("Total uptime = %lu\r\n", total_uptime);
@@ -251,7 +289,7 @@ int main(void)
     }
     printf("Write took %lu ms\r\n", uwTick - start);
 
-    ls();
+    //ls();
 
     /* USER CODE END 2 */
 
@@ -317,7 +355,7 @@ int main(void)
             }
             printf("Read %lu bytes took %lu ms\r\n", total, uwTick - start);
 
-            //ls();
+            ls();
             next_ls = now + 10000;
         }
 

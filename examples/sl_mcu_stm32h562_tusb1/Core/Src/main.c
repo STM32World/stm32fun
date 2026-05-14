@@ -148,18 +148,22 @@ int main(void)
             next_tick = now + 1000;
         }
 
-        // Call the TinyUSB task - as often as possible
-        tud_task();
+        if (!(loop_cnt % 100)) { // only once per 100 loops
 
-        // Echo everything received straight back out
-        if (tud_cdc_n_available(0)) {
-            uint32_t rxCnt = tud_cdc_n_read(0, rxBuf, sizeof(rxBuf));
+            // Call the TinyUSB task - as often as possible
+            tud_task();
 
-            for (int rxIdx = 0; rxIdx < rxCnt; ++rxIdx) {
-                tud_cdc_n_write_char(0, rxBuf[rxIdx]);
+            // Echo everything received straight back out
+            if (tud_cdc_n_available(0)) {
+                uint32_t rxCnt = tud_cdc_n_read(0, rxBuf, sizeof(rxBuf));
+
+                for (int rxIdx = 0; rxIdx < rxCnt; ++rxIdx) {
+                    tud_cdc_n_write_char(0, rxBuf[rxIdx]);
+                }
+
+                tud_cdc_n_write_flush(0);
             }
 
-            tud_cdc_n_write_flush(0);
         }
 
         ++loop_cnt;
