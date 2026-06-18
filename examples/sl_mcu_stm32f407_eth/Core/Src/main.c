@@ -105,7 +105,7 @@ int main(void)
 
     printf("\n\n\n--------\nStarting Managed Boot\n");
 
-    HAL_Delay(500);
+    HAL_Delay(100);
 
     printf("Initializing LwIP Stack...\n");
 
