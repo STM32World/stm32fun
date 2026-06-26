@@ -129,10 +129,9 @@ int main(void)
 
     printf("Initializing LwIP Stack...\n");
 
-    // 3. Manually call the LwIP setup function now that the bus is clear
+    // Manually call the LwIP setup function now that the bus is clear
     MX_LWIP_Init();
 
-    // 4. Force LwIP to treat the link as active
     extern struct netif gnetif;
     netif_set_link_up(&gnetif);
     netif_set_up(&gnetif);
@@ -142,6 +141,7 @@ int main(void)
     } else {
         printf("LwIP Interface: DOWN\n");
     }
+
     /* USER CODE END 2 */
 
     /* Infinite loop */
@@ -171,6 +171,7 @@ int main(void)
 
             loop_cnt = 0;
             next_tick = now + 1000;
+
         }
 
         MX_LWIP_Process();
@@ -206,7 +207,7 @@ void SystemClock_Config(void)
     RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
     RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
     RCC_OscInitStruct.PLL.PLLM = 8;
-    RCC_OscInitStruct.PLL.PLLN = 150;
+    RCC_OscInitStruct.PLL.PLLN = 168;
     RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
     RCC_OscInitStruct.PLL.PLLQ = 7;
     if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
@@ -223,7 +224,7 @@ void SystemClock_Config(void)
     RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
     RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
 
-    if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_4) != HAL_OK)
+    if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_5) != HAL_OK)
             {
         Error_Handler();
     }
