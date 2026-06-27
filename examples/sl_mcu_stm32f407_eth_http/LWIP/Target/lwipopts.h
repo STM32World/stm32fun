@@ -71,6 +71,10 @@
 #define TCP_SNDQUEUELOWAT 5
 /*----- Value in opt.h for TCP_WND_UPDATE_THRESHOLD: LWIP_MIN(TCP_WND/4, TCP_MSS*4) -----*/
 #define TCP_WND_UPDATE_THRESHOLD 536
+/*----- Default Value for LWIP_SINGLE_NETIF: 0 ---*/
+#define LWIP_SINGLE_NETIF 1
+/*----- Default Value for LWIP_NETIF_HOSTNAME: 0 ---*/
+#define LWIP_NETIF_HOSTNAME 1
 /*----- Value in opt.h for LWIP_NETIF_LINK_CALLBACK: 0 -----*/
 #define LWIP_NETIF_LINK_CALLBACK 1
 /*----- Value in opt.h for LWIP_NETCONN: 1 -----*/
