@@ -6,7 +6,7 @@
   ******************************************************************************
   * @attention
   *
-  * Copyright (c) 2026 STMicroelectronics.
+  * Copyright (c) 2026 STM32World <lth@stm32world.com>
   * All rights reserved.
   *
   * This software is licensed under terms that can be found in the LICENSE file
@@ -22,7 +22,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include <stdio.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -104,6 +104,8 @@ int main(void)
   MX_USB_OTG_FS_PCD_Init();
   MX_MBEDTLS_Init();
   /* USER CODE BEGIN 2 */
+
+  printf("\n\n\nApplication starting\n");
 
   /* USER CODE END 2 */
 
