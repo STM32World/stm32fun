@@ -1,6 +1,15 @@
 [submodule "tinyusb"]
 	path = tinyusb
 	url = git@github.com:lbthomsen/tinyusb.git
+	branch = master
 [submodule "stm32-ws2812"]
 	path = stm32-ws2812
 	url = git@github.com:lbthomsen/stm32-ws2812.git
+	branch = master
+[submodule "stm32-w25qxx"]
+	path = stm32-w25qxx
+	url = git@github.com:lbthomsen/stm32-w25qxx.git
+	branch = master
+[submodule "littlefs"]
+	path = littlefs
+	url = git@github.com:littlefs-project/littlefs.git
