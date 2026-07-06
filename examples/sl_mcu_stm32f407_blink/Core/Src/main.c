@@ -6,7 +6,7 @@
  ******************************************************************************
  * @attention
  *
- * Copyright (c) 2025 STM32World <lth@stm32world.com>
+ * Copyright (c) 2026 STM32World <lth@stm32world.com>
  * All rights reserved.
  *
  * This software is licensed under terms that can be found in the LICENSE file
@@ -112,7 +112,7 @@ int main(void)
     /* Infinite loop */
     /* USER CODE BEGIN WHILE */
 
-    uint32_t now = 0, loop_cnt = 0, next_blink = 500, next_tick = 1000;
+    register uint32_t now = 0, loop_cnt = 0, next_blink = 500, next_tick = 1000;
 
     while (1) {
 
