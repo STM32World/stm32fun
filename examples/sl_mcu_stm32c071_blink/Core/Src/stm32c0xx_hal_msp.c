@@ -153,6 +153,62 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* huart)
 
 }
 
+/**
+  * @brief PCD MSP Initialization
+  * This function configures the hardware resources used in this example
+  * @param hpcd: PCD handle pointer
+  * @retval None
+  */
+void HAL_PCD_MspInit(PCD_HandleTypeDef* hpcd)
+{
+  RCC_PeriphCLKInitTypeDef PeriphClkInit = {0};
+  if(hpcd->Instance==USB_DRD_FS)
+  {
+    /* USER CODE BEGIN USB_DRD_FS_MspInit 0 */
+
+    /* USER CODE END USB_DRD_FS_MspInit 0 */
+
+  /** Initializes the peripherals clocks
+  */
+    PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_USB;
+    PeriphClkInit.UsbClockSelection = RCC_USBCLKSOURCE_HSI48;
+    if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
+    {
+      Error_Handler();
+    }
+
+    /* Peripheral clock enable */
+    __HAL_RCC_USB_CLK_ENABLE();
+    /* USER CODE BEGIN USB_DRD_FS_MspInit 1 */
+
+    /* USER CODE END USB_DRD_FS_MspInit 1 */
+
+  }
+
+}
+
+/**
+  * @brief PCD MSP De-Initialization
+  * This function freeze the hardware resources used in this example
+  * @param hpcd: PCD handle pointer
+  * @retval None
+  */
+void HAL_PCD_MspDeInit(PCD_HandleTypeDef* hpcd)
+{
+  if(hpcd->Instance==USB_DRD_FS)
+  {
+    /* USER CODE BEGIN USB_DRD_FS_MspDeInit 0 */
+
+    /* USER CODE END USB_DRD_FS_MspDeInit 0 */
+    /* Peripheral clock disable */
+    __HAL_RCC_USB_CLK_DISABLE();
+    /* USER CODE BEGIN USB_DRD_FS_MspDeInit 1 */
+
+    /* USER CODE END USB_DRD_FS_MspDeInit 1 */
+  }
+
+}
+
 /* USER CODE BEGIN 1 */
 
 /* USER CODE END 1 */
