@@ -125,7 +125,7 @@ int main(void)
 
     init_eth_phy();
 
-    HAL_Delay(1500); // Wait a bit to make sure PHY have negotiated on ethernet
+    HAL_Delay(100); // Wait a bit to make sure PHY have negotiated on ethernet
 
     printf("Initializing LwIP Stack...\n");
 

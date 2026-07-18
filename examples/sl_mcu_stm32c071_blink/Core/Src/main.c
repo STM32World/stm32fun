@@ -18,7 +18,6 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "app_usbx_device.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -44,8 +43,6 @@
 
 UART_HandleTypeDef huart1;
 
-PCD_HandleTypeDef hpcd_USB_DRD_FS;
-
 /* USER CODE BEGIN PV */
 
 /* USER CODE END PV */
@@ -54,7 +51,6 @@ PCD_HandleTypeDef hpcd_USB_DRD_FS;
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_USART1_UART_Init(void);
-static void MX_USB_PCD_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -105,8 +101,6 @@ int main(void)
     /* Initialize all configured peripherals */
     MX_GPIO_Init();
     MX_USART1_UART_Init();
-    MX_USB_PCD_Init();
-    MX_USBX_Device_Init();
     /* USER CODE BEGIN 2 */
 
     printf("\n\n\nBlink example starting\n");
@@ -156,12 +150,10 @@ void SystemClock_Config(void)
     /** Initializes the RCC Oscillators according to the specified parameters
      * in the RCC_OscInitTypeDef structure.
      */
-    RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI | RCC_OSCILLATORTYPE_HSI48;
+    RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
     RCC_OscInitStruct.HSIState = RCC_HSI_ON;
     RCC_OscInitStruct.HSIDiv = RCC_HSI_DIV1;
     RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
-    RCC_OscInitStruct.HSI48State = RCC_HSI48_ON;
-
     if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
             {
         Error_Handler();
@@ -227,42 +219,6 @@ static void MX_USART1_UART_Init(void)
     /* USER CODE BEGIN USART1_Init 2 */
 
     /* USER CODE END USART1_Init 2 */
-
-}
-
-/**
- * @brief USB Initialization Function
- * @param None
- * @retval None
- */
-static void MX_USB_PCD_Init(void)
-{
-
-    /* USER CODE BEGIN USB_Init 0 */
-
-    /* USER CODE END USB_Init 0 */
-
-    /* USER CODE BEGIN USB_Init 1 */
-
-    /* USER CODE END USB_Init 1 */
-    hpcd_USB_DRD_FS.Instance = USB_DRD_FS;
-    hpcd_USB_DRD_FS.Init.dev_endpoints = 8;
-    hpcd_USB_DRD_FS.Init.speed = USBD_FS_SPEED;
-    hpcd_USB_DRD_FS.Init.phy_itface = PCD_PHY_EMBEDDED;
-    hpcd_USB_DRD_FS.Init.Sof_enable = DISABLE;
-    hpcd_USB_DRD_FS.Init.low_power_enable = DISABLE;
-    hpcd_USB_DRD_FS.Init.lpm_enable = DISABLE;
-    hpcd_USB_DRD_FS.Init.battery_charging_enable = DISABLE;
-    hpcd_USB_DRD_FS.Init.vbus_sensing_enable = DISABLE;
-    hpcd_USB_DRD_FS.Init.bulk_doublebuffer_enable = DISABLE;
-    hpcd_USB_DRD_FS.Init.iso_singlebuffer_enable = DISABLE;
-    if (HAL_PCD_Init(&hpcd_USB_DRD_FS) != HAL_OK)
-            {
-        Error_Handler();
-    }
-    /* USER CODE BEGIN USB_Init 2 */
-
-    /* USER CODE END USB_Init 2 */
 
 }
 
