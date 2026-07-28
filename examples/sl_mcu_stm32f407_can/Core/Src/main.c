@@ -146,14 +146,14 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan) {
                 }
             } else if (RxHeader.StdId == CAN_ID_RND) {
 
-                printf("CAN1 transmitting Random Message\n");
+                uint32_t rnd = HAL_RNG_GetRandomNumber(&hrng);
+
+                printf("CAN1 transmitting Random Message: %lu\n", rnd);
 
                 TxHeader.DLC = 4;
                 TxHeader.IDE = CAN_ID_STD;
                 TxHeader.RTR = CAN_RTR_DATA;
                 TxHeader.StdId = CAN_ID_RND;
-
-                uint32_t rnd = HAL_RNG_GetRandomNumber(&hrng);
 
                 uint32_t mb0;
                 if (HAL_CAN_AddTxMessage(&hcan1, &TxHeader, (uint8_t*) &rnd, &mb0) != HAL_OK) {
