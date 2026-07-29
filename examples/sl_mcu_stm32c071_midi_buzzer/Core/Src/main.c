@@ -41,11 +41,12 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
+
 TIM_HandleTypeDef htim1;
 
 UART_HandleTypeDef huart1;
 
-PCD_HandleTypeDef hpcd_USB_OTG_FS;
+PCD_HandleTypeDef hpcd_USB_DRD_FS;
 
 /* USER CODE BEGIN PV */
 
@@ -73,9 +74,9 @@ static uint8_t current_note = 0xFF;
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
-static void MX_USART1_UART_Init(void);
 static void MX_TIM1_Init(void);
-static void MX_USB_OTG_FS_PCD_Init(void);
+static void MX_USART1_UART_Init(void);
+static void MX_USB_PCD_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -161,28 +162,28 @@ void tud_midi_rx_cb(uint8_t itf)
         uint8_t channel = (status & 0x0F) + 1;
         uint8_t msg_type = status & 0xF0;
 
-        printf("RAW Packet: [%02X %02X %02X %02X] | Cable: %d | CIN: 0x%X\r\n",
-                packet[0], packet[1], packet[2], packet[3], cable, cin);
+        //printf("RAW Packet: [%02X %02X %02X %02X] | Cable: %d | CIN: 0x%X\r\n",
+        //        packet[0], packet[1], packet[2], packet[3], cable, cin);
 
         switch (msg_type)
         {
         case 0x90: // Note On
             if (data2 > 0) {
-                printf("  -> [Ch %d] Note ON  | Note: %d, Velocity: %d\r\n", channel, data1, data2);
+                printf("ON  | %d, Velocity: %d\n", data1, data2);
                 buzzer_note_on(data1);  // <--- PLAY NOTE
             } else {
-                printf("  -> [Ch %d] Note OFF | Note: %d (Vel 0)\r\n", channel, data1);
+                printf("OFF | %d (Vel 0)\n", data1);
                 buzzer_note_off(data1); // <--- STOP NOTE
             }
             break;
 
         case 0x80: // Note Off
-            printf("  -> [Ch %d] Note OFF | Note: %d, Velocity: %d\r\n", channel, data1, data2);
+            printf("OFF | %d, Velocity: %d\n", data1, data2);
             buzzer_note_off(data1);     // <--- STOP NOTE
             break;
 
         case 0xB0: // Control Change (e.g. All Notes Off / Controller 123)
-            printf("  -> [Ch %d] CC       | Controller: %d, Value: %d\r\n", channel, data1, data2);
+            printf("CC       | Controller: %d, Value: %d\n", data1, data2);
             if (data1 == 123 || data1 == 120) {
                 buzzer_note_off(0xFF); // Kill sound on All Notes Off CC
             }
@@ -225,9 +226,9 @@ int main(void)
 
     /* Initialize all configured peripherals */
     MX_GPIO_Init();
-    MX_USART1_UART_Init();
     MX_TIM1_Init();
-    MX_USB_OTG_FS_PCD_Init();
+    MX_USART1_UART_Init();
+    MX_USB_PCD_Init();
     /* USER CODE BEGIN 2 */
 
     printf("\n\n\n--------\nStarting\n");
@@ -239,7 +240,6 @@ int main(void)
 
     /* Infinite loop */
     /* USER CODE BEGIN WHILE */
-
     register uint32_t now = 0, loop_cnt = 0, next_blink = 500, next_tick = 1000;
 
     while (1) {
@@ -248,7 +248,7 @@ int main(void)
 
         if (now >= next_blink) {
             HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-            next_blink += 500;
+            next_blink = now + 500;
         }
 
         if (now >= next_tick) {
@@ -262,7 +262,6 @@ int main(void)
         tud_task();
 
         ++loop_cnt;
-
         /* USER CODE END WHILE */
 
         /* USER CODE BEGIN 3 */
@@ -279,22 +278,14 @@ void SystemClock_Config(void)
     RCC_OscInitTypeDef RCC_OscInitStruct = { 0 };
     RCC_ClkInitTypeDef RCC_ClkInitStruct = { 0 };
 
-    /** Configure the main internal regulator output voltage
-     */
-    __HAL_RCC_PWR_CLK_ENABLE();
-    __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
+    __HAL_FLASH_SET_LATENCY(FLASH_LATENCY_1);
 
     /** Initializes the RCC Oscillators according to the specified parameters
      * in the RCC_OscInitTypeDef structure.
      */
-    RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
-    RCC_OscInitStruct.HSEState = RCC_HSE_ON;
-    RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
-    RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
-    RCC_OscInitStruct.PLL.PLLM = 8;
-    RCC_OscInitStruct.PLL.PLLN = 168;
-    RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
-    RCC_OscInitStruct.PLL.PLLQ = 7;
+    RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI48;
+    RCC_OscInitStruct.HSI48State = RCC_HSI48_ON;
+
     if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
             {
         Error_Handler();
@@ -303,13 +294,13 @@ void SystemClock_Config(void)
     /** Initializes the CPU, AHB and APB buses clocks
      */
     RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK
-            | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
-    RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
-    RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
-    RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
-    RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
+            | RCC_CLOCKTYPE_PCLK1;
+    RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSIUSB48;
+    RCC_ClkInitStruct.SYSCLKDivider = RCC_SYSCLK_DIV1;
+    RCC_ClkInitStruct.AHBCLKDivider = RCC_HCLK_DIV1;
+    RCC_ClkInitStruct.APB1CLKDivider = RCC_APB1_DIV1;
 
-    if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_5) != HAL_OK)
+    if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_1) != HAL_OK)
             {
         Error_Handler();
     }
@@ -336,7 +327,7 @@ static void MX_TIM1_Init(void)
 
     /* USER CODE END TIM1_Init 1 */
     htim1.Instance = TIM1;
-    htim1.Init.Prescaler = 84 - 1;
+    htim1.Init.Prescaler = 48 - 1;
     htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
     htim1.Init.Period = 65535;
     htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
@@ -356,6 +347,7 @@ static void MX_TIM1_Init(void)
         Error_Handler();
     }
     sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+    sMasterConfig.MasterOutputTrigger2 = TIM_TRGO2_RESET;
     sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
     if (HAL_TIMEx_MasterConfigSynchronization(&htim1, &sMasterConfig) != HAL_OK)
             {
@@ -378,6 +370,12 @@ static void MX_TIM1_Init(void)
     sBreakDeadTimeConfig.DeadTime = 0;
     sBreakDeadTimeConfig.BreakState = TIM_BREAK_DISABLE;
     sBreakDeadTimeConfig.BreakPolarity = TIM_BREAKPOLARITY_HIGH;
+    sBreakDeadTimeConfig.BreakFilter = 0;
+    sBreakDeadTimeConfig.BreakAFMode = TIM_BREAK_AFMODE_INPUT;
+    sBreakDeadTimeConfig.Break2State = TIM_BREAK2_DISABLE;
+    sBreakDeadTimeConfig.Break2Polarity = TIM_BREAK2POLARITY_HIGH;
+    sBreakDeadTimeConfig.Break2Filter = 0;
+    sBreakDeadTimeConfig.Break2AFMode = TIM_BREAK_AFMODE_INPUT;
     sBreakDeadTimeConfig.AutomaticOutput = TIM_AUTOMATICOUTPUT_DISABLE;
     if (HAL_TIMEx_ConfigBreakDeadTime(&htim1, &sBreakDeadTimeConfig) != HAL_OK)
             {
@@ -412,8 +410,23 @@ static void MX_USART1_UART_Init(void)
     huart1.Init.Parity = UART_PARITY_NONE;
     huart1.Init.Mode = UART_MODE_TX_RX;
     huart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
-    huart1.Init.OverSampling = UART_OVERSAMPLING_8;
+    huart1.Init.OverSampling = UART_OVERSAMPLING_16;
+    huart1.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
+    huart1.Init.ClockPrescaler = UART_PRESCALER_DIV1;
+    huart1.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
     if (HAL_UART_Init(&huart1) != HAL_OK)
+            {
+        Error_Handler();
+    }
+    if (HAL_UARTEx_SetTxFifoThreshold(&huart1, UART_TXFIFO_THRESHOLD_1_8) != HAL_OK)
+            {
+        Error_Handler();
+    }
+    if (HAL_UARTEx_SetRxFifoThreshold(&huart1, UART_RXFIFO_THRESHOLD_1_8) != HAL_OK)
+            {
+        Error_Handler();
+    }
+    if (HAL_UARTEx_DisableFifoMode(&huart1) != HAL_OK)
             {
         Error_Handler();
     }
@@ -424,37 +437,38 @@ static void MX_USART1_UART_Init(void)
 }
 
 /**
- * @brief USB_OTG_FS Initialization Function
+ * @brief USB Initialization Function
  * @param None
  * @retval None
  */
-static void MX_USB_OTG_FS_PCD_Init(void)
+static void MX_USB_PCD_Init(void)
 {
 
-    /* USER CODE BEGIN USB_OTG_FS_Init 0 */
+    /* USER CODE BEGIN USB_Init 0 */
 
-    /* USER CODE END USB_OTG_FS_Init 0 */
+    /* USER CODE END USB_Init 0 */
 
-    /* USER CODE BEGIN USB_OTG_FS_Init 1 */
+    /* USER CODE BEGIN USB_Init 1 */
 
-    /* USER CODE END USB_OTG_FS_Init 1 */
-    hpcd_USB_OTG_FS.Instance = USB_OTG_FS;
-    hpcd_USB_OTG_FS.Init.dev_endpoints = 4;
-    hpcd_USB_OTG_FS.Init.speed = PCD_SPEED_FULL;
-    hpcd_USB_OTG_FS.Init.dma_enable = DISABLE;
-    hpcd_USB_OTG_FS.Init.phy_itface = PCD_PHY_EMBEDDED;
-    hpcd_USB_OTG_FS.Init.Sof_enable = DISABLE;
-    hpcd_USB_OTG_FS.Init.low_power_enable = DISABLE;
-    hpcd_USB_OTG_FS.Init.lpm_enable = DISABLE;
-    hpcd_USB_OTG_FS.Init.vbus_sensing_enable = DISABLE;
-    hpcd_USB_OTG_FS.Init.use_dedicated_ep1 = DISABLE;
-    if (HAL_PCD_Init(&hpcd_USB_OTG_FS) != HAL_OK)
+    /* USER CODE END USB_Init 1 */
+    hpcd_USB_DRD_FS.Instance = USB_DRD_FS;
+    hpcd_USB_DRD_FS.Init.dev_endpoints = 8;
+    hpcd_USB_DRD_FS.Init.speed = USBD_FS_SPEED;
+    hpcd_USB_DRD_FS.Init.phy_itface = PCD_PHY_EMBEDDED;
+    hpcd_USB_DRD_FS.Init.Sof_enable = DISABLE;
+    hpcd_USB_DRD_FS.Init.low_power_enable = DISABLE;
+    hpcd_USB_DRD_FS.Init.lpm_enable = DISABLE;
+    hpcd_USB_DRD_FS.Init.battery_charging_enable = DISABLE;
+    hpcd_USB_DRD_FS.Init.vbus_sensing_enable = DISABLE;
+    hpcd_USB_DRD_FS.Init.bulk_doublebuffer_enable = DISABLE;
+    hpcd_USB_DRD_FS.Init.iso_singlebuffer_enable = DISABLE;
+    if (HAL_PCD_Init(&hpcd_USB_DRD_FS) != HAL_OK)
             {
         Error_Handler();
     }
-    /* USER CODE BEGIN USB_OTG_FS_Init 2 */
+    /* USER CODE BEGIN USB_Init 2 */
 
-    /* USER CODE END USB_OTG_FS_Init 2 */
+    /* USER CODE END USB_Init 2 */
 
 }
 
@@ -472,16 +486,14 @@ static void MX_GPIO_Init(void)
 
     /* GPIO Ports Clock Enable */
     __HAL_RCC_GPIOC_CLK_ENABLE();
-    __HAL_RCC_GPIOH_CLK_ENABLE();
     __HAL_RCC_GPIOA_CLK_ENABLE();
-    __HAL_RCC_GPIOB_CLK_ENABLE();
 
     /*Configure GPIO pin Output Level */
-    HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);
+    HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
 
     /*Configure GPIO pin : LED_Pin */
     GPIO_InitStruct.Pin = LED_Pin;
-    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
     HAL_GPIO_Init(LED_GPIO_Port, &GPIO_InitStruct);
