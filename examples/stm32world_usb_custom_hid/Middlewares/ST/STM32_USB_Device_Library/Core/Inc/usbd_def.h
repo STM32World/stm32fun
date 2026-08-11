@@ -305,13 +305,12 @@ typedef struct
 /* USB Device handle structure */
 typedef struct
 {
+  uint32_t status;
   uint32_t total_length;
   uint32_t rem_length;
-  uint32_t bInterval;
-  uint16_t maxpacket;
-  uint8_t status;
-  uint8_t is_used;
-  uint8_t *pbuffer;
+  uint32_t maxpacket;
+  uint16_t is_used;
+  uint16_t bInterval;
 } USBD_EndpointTypeDef;
 
 #ifdef USE_USBD_COMPOSITE
