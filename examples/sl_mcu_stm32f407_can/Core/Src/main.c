@@ -293,7 +293,7 @@ int main(void)
             CAN_IT_RX_FIFO1_MSG_PENDING |
             CAN_IT_RX_FIFO1_FULL |
             CAN_IT_RX_FIFO1_OVERRUN |
-            CAN_IT_WAKEUP |
+            //CAN_IT_WAKEUP |
             CAN_IT_SLEEP_ACK |
             CAN_IT_ERROR_WARNING |
             CAN_IT_ERROR_PASSIVE |
@@ -311,7 +311,7 @@ int main(void)
             CAN_IT_RX_FIFO1_MSG_PENDING |
             CAN_IT_RX_FIFO1_FULL |
             CAN_IT_RX_FIFO1_OVERRUN |
-            CAN_IT_WAKEUP |
+            //CAN_IT_WAKEUP |
             CAN_IT_SLEEP_ACK |
             CAN_IT_ERROR_WARNING |
             CAN_IT_ERROR_PASSIVE |
