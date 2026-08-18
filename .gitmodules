@@ -13,6 +13,8 @@
 [submodule "littlefs"]
 	path = littlefs
 	url = git@github.com:littlefs-project/littlefs.git
+	branch = master
 [submodule "lwip"]
 	path = lwip
 	url = https://git.savannah.nongnu.org/git/lwip.git
+	branch = master

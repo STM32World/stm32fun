@@ -47,25 +47,6 @@ PCD_HandleTypeDef hpcd_USB_OTG_FS;
 
 /* USER CODE BEGIN PV */
 
-// Lookup table converting MIDI Note numbers (0-127) to Frequency (Hz)
-// Rounded to nearest integer. 0 = Note off / out of range.
-static const uint16_t midi_note_freq[128] = {
-        8, 9, 9, 10, 10, 11, 12, 12, 13, 14, 15, 15,   // 0-11
-        16, 17, 18, 19, 21, 22, 23, 24, 26, 28, 29, 31,   // 12-23
-        33, 35, 37, 39, 41, 44, 46, 49, 52, 55, 58, 62,   // 24-35
-        65, 69, 73, 78, 82, 87, 92, 98, 104, 110, 117, 123,  // 36-47
-        131, 139, 147, 156, 165, 175, 185, 196, 208, 220, 233, 247,  // 48-59
-        262, 277, 294, 311, 330, 349, 370, 392, 415, 440, 466, 494,  // 60-71 (60 = C4/Middle C, 69 = A4/440Hz)
-        523, 554, 587, 622, 659, 698, 740, 784, 831, 880, 932, 988,  // 72-83
-        1047, 1109, 1175, 1245, 1319, 1397, 1480, 1568, 1661, 1760, 1865, 1976, // 84-95
-        2093, 2217, 2349, 2489, 2637, 2794, 2960, 3136, 3322, 3520, 3729, 3951, // 96-107
-        4186, 4435, 4699, 4978, 5274, 5588, 5920, 6272, 6645, 7040, 7459, 7902, // 108-119
-        8372, 8870, 9397, 9956, 10548, 11175, 11840, 12544                         // 120-127
-        };
-
-// Tracks the last active note so Note-Off only kills the sound if it matches
-static uint8_t current_note = 0xFF;
-
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -89,104 +70,6 @@ int __io_putchar(int ch) {
         return -1;
     }
     return ch;
-}
-
-/**
- * @brief Sets PWM frequency (20 Hz - 8000 Hz) at a fixed 50% duty cycle.
- * @param htim Pointer to the TIM_HandleTypeDef structure
- * @param Channel TIM Channels to be configured (e.g., TIM_CHANNEL_1)
- * @param frequency Target frequency in Hz (20 to 8000)
- */
-void set_frequency(TIM_HandleTypeDef *htim, uint32_t Channel, uint32_t frequency)
-{
-    // Clamp frequency range
-    if (frequency < 20)
-        frequency = 20;
-    if (frequency > 8000)
-        frequency = 8000;
-
-    // Frequency = Timer_Clock / (ARR + 1)  ==>  ARR = (Timer_Clock / Frequency) - 1
-    uint32_t new_arr = (TIMER_CLOCK_FREQ / frequency) - 1;
-
-    // 2. Calculate CCR for 50% duty cycle
-    uint32_t new_ccr = (new_arr + 1) / 2;
-
-    // 3. Update Timer Registers
-    __HAL_TIM_SET_AUTORELOAD(htim, new_arr);
-    __HAL_TIM_SET_COMPARE(htim, Channel, new_ccr);
-
-}
-
-/**
- * Helper function to play or stop sound on the buzzer
- */
-void buzzer_note_on(uint8_t note) {
-    if (note > 127)
-        return;
-
-    uint16_t freq = midi_note_freq[note];
-    current_note = note;
-
-    // Set PWM frequency and enable PWM Output Channel
-    set_frequency(&htim1, TIM_CHANNEL_1, freq);
-    HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
-}
-
-void buzzer_note_off(uint8_t note) {
-    // Only stop playing if the note being released is the currently active note
-    if (note == current_note || note == 0xFF) {
-        HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_1);
-        current_note = 0xFF;
-    }
-}
-
-// TinyUSB callback when receiving midi message
-void tud_midi_rx_cb(uint8_t itf)
-{
-    (void) itf;
-    uint8_t packet[4];
-
-    while (tud_midi_packet_read(packet))
-    {
-        uint8_t cable = packet[0] >> 4;
-        uint8_t cin = packet[0] & 0x0F;
-        uint8_t status = packet[1];
-        uint8_t data1 = packet[2]; // MIDI Note
-        uint8_t data2 = packet[3]; // Velocity
-
-        uint8_t channel = (status & 0x0F) + 1;
-        uint8_t msg_type = status & 0xF0;
-
-        printf("RAW Packet: [%02X %02X %02X %02X] | Cable: %d | CIN: 0x%X\r\n",
-                packet[0], packet[1], packet[2], packet[3], cable, cin);
-
-        switch (msg_type) {
-        case 0x90: // Note On
-            if (data2 > 0) {
-                printf("  -> [Ch %d] Note ON  | Note: %d, Velocity: %d\r\n", channel, data1, data2);
-                buzzer_note_on(data1);  // <--- PLAY NOTE
-            } else {
-                printf("  -> [Ch %d] Note OFF | Note: %d (Vel 0)\r\n", channel, data1);
-                buzzer_note_off(data1); // <--- STOP NOTE
-            }
-            break;
-
-        case 0x80: // Note Off
-            printf("  -> [Ch %d] Note OFF | Note: %d, Velocity: %d\r\n", channel, data1, data2);
-            buzzer_note_off(data1);     // <--- STOP NOTE
-            break;
-
-        case 0xB0: // Control Change (e.g. All Notes Off / Controller 123)
-            printf("  -> [Ch %d] CC       | Controller: %d, Value: %d\r\n", channel, data1, data2);
-            if (data1 == 123 || data1 == 120) {
-                buzzer_note_off(0xFF); // Kill sound on All Notes Off CC
-            }
-            break;
-
-        default:
-            break;
-        }
-    }
 }
 
 /* USER CODE END 0 */
