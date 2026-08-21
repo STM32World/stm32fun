@@ -32,9 +32,6 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 
-// Example filter
-//#define CAN_RX_ID    0b10111111100
-//#define CAN_RX_MASK  0b11111111100
 // Our Message IDs
 #define CAN_ID_UPT     0b10111111100   // 0x5fc - 1532
 #define CAN_ID_RND     0b10111111101   // 0x5fd - 1533
