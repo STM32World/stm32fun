@@ -125,11 +125,11 @@ int __io_putchar(int ch) {
 
 void process_buffer(channel_queue_t *channel) {
     // Pre-calculate inverse constants to replace slow division with multiplication
-    const float inv_two_pi = 1.0f / (float)M_TWOPI;
+    const float inv_two_pi = 1.0f / (float) M_TWOPI;
 
     // Pre-calculate invariant scaling limits based on the channel's attenuation
     float peak_to_peak = (OUTPUT_MAX - 1) * channel->attenuation;
-    float minimum_val  = OUTPUT_MID - (peak_to_peak / 2.0f);
+    float minimum_val = OUTPUT_MID - (peak_to_peak / 2.0f);
 
     // Run through the buffer using Loop Unswitching for maximum performance
     switch (channel->wave_type) {
@@ -140,11 +140,11 @@ void process_buffer(channel_queue_t *channel) {
 
         for (int i = 0; i < DMA_BUFFER_SIZE; ++i) {
             // arm_cos_f32 uses the FPU excellently, no division required
-            channel->buffer[i] = (uint16_t)(OUTPUT_MID - (sine_amp * arm_cos_f32(channel->angle)));
+            channel->buffer[i] = (uint16_t) (OUTPUT_MID - (sine_amp * arm_cos_f32(channel->angle)));
 
             channel->angle += channel->angle_change;
-            if (channel->angle >= (float)M_TWOPI) {
-                channel->angle -= (float)M_TWOPI;
+            if (channel->angle >= (float) M_TWOPI) {
+                channel->angle -= (float) M_TWOPI;
             }
         }
         break;
@@ -154,11 +154,11 @@ void process_buffer(channel_queue_t *channel) {
         for (int i = 0; i < DMA_BUFFER_SIZE; ++i) {
             float normalized_phase = channel->angle * inv_two_pi;
 
-            channel->buffer[i] = (uint16_t)(minimum_val + (normalized_phase * peak_to_peak));
+            channel->buffer[i] = (uint16_t) (minimum_val + (normalized_phase * peak_to_peak));
 
             channel->angle += channel->angle_change;
-            if (channel->angle >= (float)M_TWOPI) {
-                channel->angle -= (float)M_TWOPI;
+            if (channel->angle >= (float) M_TWOPI) {
+                channel->angle -= (float) M_TWOPI;
             }
         }
         break;
@@ -168,11 +168,11 @@ void process_buffer(channel_queue_t *channel) {
             float normalized_phase = channel->angle * inv_two_pi;
 
             // Invert the phase step to make it ramp downwards
-            channel->buffer[i] = (uint16_t)(minimum_val + ((1.0f - normalized_phase) * peak_to_peak));
+            channel->buffer[i] = (uint16_t) (minimum_val + ((1.0f - normalized_phase) * peak_to_peak));
 
             channel->angle += channel->angle_change;
-            if (channel->angle >= (float)M_TWOPI) {
-                channel->angle -= (float)M_TWOPI;
+            if (channel->angle >= (float) M_TWOPI) {
+                channel->angle -= (float) M_TWOPI;
             }
         }
         break;
@@ -190,19 +190,19 @@ void process_buffer(channel_queue_t *channel) {
                 tri_value = 2.0f - (normalized_phase * 2.0f);
             }
 
-            channel->buffer[i] = (uint16_t)(minimum_val + (tri_value * peak_to_peak));
+            channel->buffer[i] = (uint16_t) (minimum_val + (tri_value * peak_to_peak));
 
             channel->angle += channel->angle_change;
-            if (channel->angle >= (float)M_TWOPI) {
-                channel->angle -= (float)M_TWOPI;
+            if (channel->angle >= (float) M_TWOPI) {
+                channel->angle -= (float) M_TWOPI;
             }
         }
         break;
 
     case SQUARE_WAVE: {
         // Pre-calculate hard high and low values outside the loop
-        uint16_t high_level = (uint16_t)(OUTPUT_MID + (peak_to_peak / 2.0f));
-        uint16_t low_level  = (uint16_t)(OUTPUT_MID - (peak_to_peak / 2.0f));
+        uint16_t high_level = (uint16_t) (OUTPUT_MID + (peak_to_peak / 2.0f));
+        uint16_t low_level = (uint16_t) (OUTPUT_MID - (peak_to_peak / 2.0f));
 
         for (int i = 0; i < DMA_BUFFER_SIZE; ++i) {
             float normalized_phase = channel->angle * inv_two_pi;
@@ -214,8 +214,8 @@ void process_buffer(channel_queue_t *channel) {
             }
 
             channel->angle += channel->angle_change;
-            if (channel->angle >= (float)M_TWOPI) {
-                channel->angle -= (float)M_TWOPI;
+            if (channel->angle >= (float) M_TWOPI) {
+                channel->angle -= (float) M_TWOPI;
             }
         }
         break;
@@ -320,7 +320,8 @@ int main(void)
 
             ++dacs[1].wave_type; // a tad ugly - if interrupt happens while this is one too big it will be handled by switch default
 
-            if (dacs[1].wave_type > 4) dacs[1].wave_type = 0;
+            if (dacs[1].wave_type > 4)
+                dacs[1].wave_type = 0;
 
             change_wave = 0;
         }

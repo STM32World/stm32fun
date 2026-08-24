@@ -91,83 +91,53 @@ int __io_putchar(int ch) {
 // CAN Callbacks
 
 void HAL_CAN_TxMailbox0CompleteCallback(CAN_HandleTypeDef *hcan) {
-    printf("HAL_CAN_TxMailbox0CompleteCallback\n");
+    printf("ST HAL_CAN_TxMailbox0CompleteCallback\n");
 }
 
 void HAL_CAN_TxMailbox1CompleteCallback(CAN_HandleTypeDef *hcan) {
-    printf("HAL_CAN_TxMailbox1CompleteCallback\n");
+    printf("ST HAL_CAN_TxMailbox1CompleteCallback\n");
 }
 
 void HAL_CAN_TxMailbox2CompleteCallback(CAN_HandleTypeDef *hcan) {
-    printf("HAL_CAN_TxMailbox2CompleteCallback\n");
+    printf("ST HAL_CAN_TxMailbox2CompleteCallback\n");
 }
 
 void HAL_CAN_TxMailbox0AbortCallback(CAN_HandleTypeDef *hcan) {
-    printf("HAL_CAN_TxMailbox0AbortCallback\n");
+    printf("ST HAL_CAN_TxMailbox0AbortCallback\n");
 }
 
 void HAL_CAN_TxMailbox1AbortCallback(CAN_HandleTypeDef *hcan) {
-    printf("HAL_CAN_TxMailbox1AbortCallback\n");
+    printf("ST HAL_CAN_TxMailbox1AbortCallback\n");
 }
 
 void HAL_CAN_TxMailbox2AbortCallback(CAN_HandleTypeDef *hcan) {
-    printf("HAL_CAN_TxMailbox2AbortCallback\n");
+    printf("ST HAL_CAN_TxMailbox2AbortCallback\n");
 }
 
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan) {
-    printf("HAL_CAN_RxFifo0MsgPendingCallback\n");
+    printf("ST HAL_CAN_RxFifo0MsgPendingCallback\n");
     if (HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &RxHeader, RxData) != HAL_OK) {
-        printf("Error receiving\n");
+        printf("ST Error receiving\n");
         Error_Handler();
-        //printf("Got message %lu - id=0x%04lx type=%lx len=0x%lx, data=%02x%02x%02x%02x%02x%02x%02x%02x\n", msg_count + 1, RxHeader.StdId, RxHeader.RTR, RxHeader.DLC, RxData[0], RxData[1], RxData[2], RxData[3], RxData[4], RxData[5], RxData[6], RxData[7]);
     }
 
     if (hcan->Instance == CAN1) {
-        printf("Got message on CAN1\n");
+        printf("ST Got message on CAN1\n");
         if (RxHeader.RTR == CAN_RTR_REMOTE) {
-            if (RxHeader.StdId == CAN_ID_UPT) {
 
-                printf("CAN1 transmitting Uptime Message\n");
+            printf("ST CAN1 does not handle RTR\n");
 
-                TxHeader.DLC = 4;
-                TxHeader.IDE = CAN_ID_STD;
-                TxHeader.RTR = CAN_RTR_DATA;
-                TxHeader.StdId = CAN_ID_UPT;
-
-                uint32_t upt = uwTick / 1000;
-                uint32_t mb0;
-                if (HAL_CAN_AddTxMessage(&hcan1, &TxHeader, (uint8_t*) &upt, &mb0) != HAL_OK) {
-                    Error_Handler();
-                }
-            } else if (RxHeader.StdId == CAN_ID_RND) {
-
-                uint32_t rnd = HAL_RNG_GetRandomNumber(&hrng);
-
-                printf("CAN1 transmitting Random Message: %lu\n", rnd);
-
-                TxHeader.DLC = 4;
-                TxHeader.IDE = CAN_ID_STD;
-                TxHeader.RTR = CAN_RTR_DATA;
-                TxHeader.StdId = CAN_ID_RND;
-
-                uint32_t mb0;
-                if (HAL_CAN_AddTxMessage(&hcan1, &TxHeader, (uint8_t*) &rnd, &mb0) != HAL_OK) {
-                    Error_Handler();
-                }
-            } else {
-                printf("Unknown remote request on can 1\n");
-            }
         } else {
 
             uint32_t *i = (uint32_t*) &RxData[0];
 
             if (RxHeader.RTR == CAN_RTR_DATA) {
                 if (RxHeader.StdId == CAN_ID_UPT) {
-                    printf("CAN1 received uptime: %lu\n", *i);
+                    printf("ST CAN1 received uptime: %lu\n", *i);
                 } else if (RxHeader.StdId == CAN_ID_RND) {
-                    printf("CAN1 received random: %lu\n", *i);
+                    printf("ST CAN1 received random: %lu\n", *i);
                 } else {
-                    printf("Unknown dataa message on can 1\n");
+                    printf("ST Unknown data message on CAN1\n");
                 }
             }
 
@@ -177,27 +147,27 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan) {
 }
 
 void HAL_CAN_RxFifo0FullCallback(CAN_HandleTypeDef *hcan) {
-    printf("HAL_CAN_RxFifo0FullCallback\n");
+    printf("ST HAL_CAN_RxFifo0FullCallback\n");
 }
 
 void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan) {
-    printf("HAL_CAN_RxFifo1MsgPendingCallback\n");
+    printf("ST HAL_CAN_RxFifo1MsgPendingCallback\n");
 }
 
 void HAL_CAN_RxFifo1FullCallback(CAN_HandleTypeDef *hcan) {
-    printf("HAL_CAN_RxFifo1FullCallback\n");
+    printf("ST HAL_CAN_RxFifo1FullCallback\n");
 }
 
 void HAL_CAN_SleepCallback(CAN_HandleTypeDef *hcan) {
-    printf("HAL_CAN_SleepCallback\n");
+    printf("ST HAL_CAN_SleepCallback\n");
 }
 
 void HAL_CAN_WakeUpFromRxMsgCallback(CAN_HandleTypeDef *hcan) {
-    printf("HAL_CAN_WakeUpFromRxMsgCallback\n");
+    printf("ST HAL_CAN_WakeUpFromRxMsgCallback\n");
 }
 
 void HAL_CAN_ErrorCallback(CAN_HandleTypeDef *hcan) {
-    printf("HAL_CAN_ErrorCallback\n");
+    printf("ST HAL_CAN_ErrorCallback\n");
 }
 
 /* USER CODE END 0 */
@@ -236,11 +206,11 @@ int main(void)
     MX_RNG_Init();
     /* USER CODE BEGIN 2 */
 
-    printf("\n\n\n\n--------\r\nStarting CAN Test\n");
+    printf("\n\n\n\n--------\r\nST Starting CAN Test\n");
 
     CAN_FilterTypeDef canfilterconfig;
 
-    // Create filter for CAN1 - only REMOTE messages will be received
+    // Create filter for CAN1
     canfilterconfig.FilterActivation = CAN_FILTER_ENABLE;
     canfilterconfig.FilterBank = 0;  // anything between 0 to SlaveStartFilterBank
     canfilterconfig.SlaveStartFilterBank = 13;  // 13 to 27 are assigned to slave CAN (CAN 2) OR 0 to 12 are assgned to CAN1
@@ -298,7 +268,7 @@ int main(void)
 
         if (now >= next_tx0) {
 
-            printf("CAN1 Requesting uptime\n");
+            printf("ST CAN1 Requesting uptime\n");
 
             TxHeader.DLC = 4;
             TxHeader.IDE = CAN_ID_STD;
@@ -315,7 +285,7 @@ int main(void)
 
         if (now >= next_tx1) {
 
-            printf("CAN1 Requesting random\n");
+            printf("ST CAN1 Requesting random\n");
 
             TxHeader.DLC = 4;
             TxHeader.IDE = CAN_ID_STD;
