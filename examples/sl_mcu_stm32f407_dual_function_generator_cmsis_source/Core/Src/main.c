@@ -82,14 +82,14 @@ channel_queue_t dacs[2] = {
                 &dma_buffer_1[0],
                 SINE_WAVE,
                 0,
-                1000 * (2 * M_PI / SAMPLE_FREQ),
+                5000 * (2 * M_PI / SAMPLE_FREQ),
                 0.99
         },
         {
                 &dma_buffer_2[0],
                 SINE_WAVE,
                 0,
-                1000 * (2 * M_PI / SAMPLE_FREQ),
+                4999.95 * (2 * M_PI / SAMPLE_FREQ),
                 0.99
         }
 };
