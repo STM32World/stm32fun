@@ -18,3 +18,7 @@
 	path = lwip
 	url = https://git.savannah.nongnu.org/git/lwip.git
 	branch = master
+[submodule "CMSIS-DSP"]
+	path = CMSIS-DSP
+	url = git@github.com:ARM-software/CMSIS-DSP.git
+	branch = main
