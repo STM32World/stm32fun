@@ -37,15 +37,33 @@ enum wave_t {
     SQUARE_WAVE = 4
 };
 
+typedef enum {
+    ENVELOPE_IDLE = 0,
+    ENVELOPE_ATTACK,
+    ENVELOPE_DECAY,
+    ENVELOPE_SUSTAIN,
+    ENVELOPE_RELEASE
+} env_stage_t;
+
 typedef struct {
-    uint16_t *buffer;
+    float attack_rate;   // Gain increase per sample
+    float decay_rate;    // Gain decrease per sample
+    float sustain_level; // Target level [0.0f - 1.0f]
+    float release_rate;  // Gain decrease per sample
+} adsr_config_t;
+
+typedef struct {
+    uint8_t active;
+    uint8_t note;
+    float velocity_gain;
     enum wave_t wave_type;
     float angle;
     float angle_change;
-    float attenuation;
-} channel_queue_t;
 
-
+    // ADSR State Data
+    env_stage_t env_stage;
+    float env_level;
+} synth_voice_t;
 
 /* USER CODE END PTD */
 
@@ -53,9 +71,11 @@ typedef struct {
 /* USER CODE BEGIN PD */
 
 #define DMA_BUFFER_SIZE 16
-#define SAMPLE_FREQ 20000
+#define SAMPLE_FREQ 48000
 #define OUTPUT_MID 2048
 #define OUTPUT_MAX 4096
+
+#define MAX_VOICES 10
 
 /* USER CODE END PD */
 
@@ -65,26 +85,6 @@ typedef struct {
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
-static const float MIDI_NOTE_TO_FREQ[128] = {
-    8.1758f,    8.6620f,    9.1770f,    9.7227f,    10.3009f,   10.9134f,   11.5623f,   12.2499f,   // 0 - 7
-    12.9783f,   13.7500f,   14.5676f,   15.4339f,   16.3516f,   17.3239f,   18.3540f,   19.4454f,   // 8 - 15
-    20.6017f,   21.8268f,   23.1247f,   24.4997f,   25.9565f,   27.5000f,   29.1352f,   30.8677f,   // 16 - 23
-    32.7032f,   34.6478f,   36.7081f,   38.8909f,   41.2034f,   43.6535f,   46.2493f,   48.9994f,   // 24 - 31
-    51.9131f,   55.0000f,   58.2705f,   61.7354f,   65.4064f,   69.2957f,   73.4162f,   77.7817f,   // 32 - 39
-    82.4069f,   87.3071f,   92.4986f,   97.9989f,   103.8262f,  110.0000f,  116.5409f,  123.4708f,  // 40 - 47
-    130.8128f,  138.5913f,  146.8324f,  155.5635f,  164.8138f,  174.6141f,  185.0000f,  195.9977f,  // 48 - 55
-    207.6523f,  220.0000f,  233.0819f,  246.9417f,  261.6256f,  277.1826f,  293.6648f,  311.1270f,  // 56 - 63
-    329.6276f,  349.2282f,  369.9944f,  391.9954f,  415.3047f,  440.0000f,  466.1638f,  493.8833f,  // 64 - 71
-    523.2511f,  554.3653f,  587.3295f,  622.2540f,  659.2551f,  698.4565f,  739.9888f,  783.9909f,  // 72 - 79
-    830.6094f,  880.0000f,  932.3275f,  987.7666f,  1046.5023f, 1108.7305f, 1174.6591f, 1244.5079f, // 80 - 87
-    1318.5102f, 1396.9129f, 1479.9777f, 1567.9817f, 1661.2188f, 1760.0000f, 1864.6550f, 1975.5332f, // 88 - 95
-    2093.0045f, 2217.4610f, 2349.3181f, 2489.0159f, 2637.0205f, 2793.8259f, 2959.9554f, 3135.9635f, // 96 - 103
-    3322.4376f, 3520.0000f, 3729.3101f, 3951.0664f, 4186.0090f, 4434.9221f, 4698.6363f, 4978.0317f, // 104 - 111
-    5274.0410f, 5587.6518f, 5919.9108f, 6271.9270f, 6644.8752f, 7040.0000f, 7458.6202f, 7902.1328f, // 112 - 119
-    8372.0181f, 8869.8443f, 9397.2726f, 9956.0635f, 10548.0820f,11175.3037f,11839.8216f,12543.8540f // 120 - 127
-};
-
-
 DAC_HandleTypeDef hdac;
 DMA_HandleTypeDef hdma_dac1;
 
@@ -96,26 +96,50 @@ PCD_HandleTypeDef hpcd_USB_OTG_FS;
 
 /* USER CODE BEGIN PV */
 
-uint16_t dma_buffer_1[2 * DMA_BUFFER_SIZE];
-//uint16_t dma_buffer_2[2 * DMA_BUFFER_SIZE];
+static const float MIDI_NOTE_TO_FREQ[128] = {
+        8.1758f, 8.6620f, 9.1770f, 9.7227f, 10.3009f, 10.9134f, 11.5623f, 12.2499f,   // 0 - 7
+        12.9783f, 13.7500f, 14.5676f, 15.4339f, 16.3516f, 17.3239f, 18.3540f, 19.4454f,   // 8 - 15
+        20.6017f, 21.8268f, 23.1247f, 24.4997f, 25.9565f, 27.5000f, 29.1352f, 30.8677f,   // 16 - 23
+        32.7032f, 34.6478f, 36.7081f, 38.8909f, 41.2034f, 43.6535f, 46.2493f, 48.9994f,   // 24 - 31
+        51.9131f, 55.0000f, 58.2705f, 61.7354f, 65.4064f, 69.2957f, 73.4162f, 77.7817f,   // 32 - 39
+        82.4069f, 87.3071f, 92.4986f, 97.9989f, 103.8262f, 110.0000f, 116.5409f, 123.4708f,  // 40 - 47
+        130.8128f, 138.5913f, 146.8324f, 155.5635f, 164.8138f, 174.6141f, 185.0000f, 195.9977f,  // 48 - 55
+        207.6523f, 220.0000f, 233.0819f, 246.9417f, 261.6256f, 277.1826f, 293.6648f, 311.1270f,  // 56 - 63
+        329.6276f, 349.2282f, 369.9944f, 391.9954f, 415.3047f, 440.0000f, 466.1638f, 493.8833f,  // 64 - 71
+        523.2511f, 554.3653f, 587.3295f, 622.2540f, 659.2551f, 698.4565f, 739.9888f, 783.9909f,  // 72 - 79
+        830.6094f, 880.0000f, 932.3275f, 987.7666f, 1046.5023f, 1108.7305f, 1174.6591f, 1244.5079f, // 80 - 87
+        1318.5102f, 1396.9129f, 1479.9777f, 1567.9817f, 1661.2188f, 1760.0000f, 1864.6550f, 1975.5332f, // 88 - 95
+        2093.0045f, 2217.4610f, 2349.3181f, 2489.0159f, 2637.0205f, 2793.8259f, 2959.9554f, 3135.9635f, // 96 - 103
+        3322.4376f, 3520.0000f, 3729.3101f, 3951.0664f, 4186.0090f, 4434.9221f, 4698.6363f, 4978.0317f, // 104 - 111
+        5274.0410f, 5587.6518f, 5919.9108f, 6271.9270f, 6644.8752f, 7040.0000f, 7458.6202f, 7902.1328f, // 112 - 119
+        8372.0181f, 8869.8443f, 9397.2726f, 9956.0635f, 10548.0820f, 11175.3037f, 11839.8216f, 12543.8540f // 120 - 127
+        };
 
-// Handler for both channels
-channel_queue_t dacs[2] = {
-        {
-                &dma_buffer_1[0],
-                SINE_WAVE,
-                0,
-                1000 * (2 * M_PI / SAMPLE_FREQ),
-                0.99
-        },
-        {
-                &dma_buffer_2[0],
-                SINE_WAVE,
-                0,
-                1000 * (2 * M_PI / SAMPLE_FREQ),
-                0.99
-        }
+uint16_t dma_buffer[2 * DMA_BUFFER_SIZE];
+
+synth_voice_t voices[MAX_VOICES] = { 0 };
+enum wave_t global_wave_type = SINE_WAVE;
+
+// ADSR profile: Attack 15ms, Decay 80ms, Sustain 70%, Release 120ms
+adsr_config_t global_adsr = {
+        .attack_rate = 1.0f / (0.015f * SAMPLE_FREQ),
+        .decay_rate = (1.0f - 0.7f) / (0.080f * SAMPLE_FREQ),
+        .sustain_level = 0.7f,
+        .release_rate = 0.7f / (0.120f * SAMPLE_FREQ)
 };
+
+// Single-Pole IIR Low-Pass Filter state
+static float lpf_state = 0.0f;
+static float lpf_alpha = 0.15f; // Alpha scale [0.0 - 1.0]: Lower values = warmer/darker, higher = brighter
+
+// Helper function to update low-pass filter cutoff frequency in Hz dynamically
+void synth_set_cutoff(float cutoff_hz) {
+    if (cutoff_hz > (SAMPLE_FREQ / 2.0f))
+        cutoff_hz = SAMPLE_FREQ / 2.0f;
+    float dt = 1.0f / (float) SAMPLE_FREQ;
+    float rc = 1.0f / (2.0f * (float) M_PI * cutoff_hz);
+    lpf_alpha = dt / (rc + dt);
+}
 
 uint8_t change_wave = 0;
 
@@ -147,141 +171,193 @@ int __io_putchar(int ch) {
     return ch;
 }
 
-void process_buffer(channel_queue_t *channel) {
-    // Pre-calculate inverse constants to replace slow division with multiplication
-    const float inv_two_pi = 1.0f / (float)M_TWOPI;
+void process_buffer(uint16_t *out_buffer) {
+    float mix_buffer[DMA_BUFFER_SIZE] = { 0.0f };
+    const float inv_two_pi = 1.0f / (2.0f * (float) M_PI);
+    uint8_t active_count = 0;
 
-    // Pre-calculate invariant scaling limits based on the channel's attenuation
-    float peak_to_peak = (OUTPUT_MAX - 1) * channel->attenuation;
-    float minimum_val  = OUTPUT_MID - (peak_to_peak / 2.0f);
+    for (int v = 0; v < MAX_VOICES; v++) {
+        synth_voice_t *voice = &voices[v];
 
-    // Run through the buffer using Loop Unswitching for maximum performance
-    switch (channel->wave_type) {
+        if (!voice->active)
+            continue;
 
-    case SINE_WAVE: {
-        // Pre-calculate the absolute scaling factor for the sine loop
-        float sine_amp = channel->attenuation * OUTPUT_MID;
+        active_count++;
 
-        for (int i = 0; i < DMA_BUFFER_SIZE; ++i) {
-            // arm_cos_f32 uses the FPU excellently, no division required
-            channel->buffer[i] = (uint16_t)(OUTPUT_MID - (sine_amp * arm_cos_f32(channel->angle)));
+        for (int i = 0; i < DMA_BUFFER_SIZE; i++) {
+            // ADSR state update
+            switch (voice->env_stage) {
+            case ENVELOPE_ATTACK:
+                voice->env_level += global_adsr.attack_rate;
+                if (voice->env_level >= 1.0f) {
+                    voice->env_level = 1.0f;
+                    voice->env_stage = ENVELOPE_DECAY;
+                }
+                break;
 
-            channel->angle += channel->angle_change;
-            if (channel->angle >= (float)M_TWOPI) {
-                channel->angle -= (float)M_TWOPI;
+            case ENVELOPE_DECAY:
+                voice->env_level -= global_adsr.decay_rate;
+                if (voice->env_level <= global_adsr.sustain_level) {
+                    voice->env_level = global_adsr.sustain_level;
+                    voice->env_stage = ENVELOPE_SUSTAIN;
+                }
+                break;
+
+            case ENVELOPE_SUSTAIN:
+                voice->env_level = global_adsr.sustain_level;
+                break;
+
+            case ENVELOPE_RELEASE:
+                voice->env_level -= global_adsr.release_rate;
+                if (voice->env_level <= 0.001f) {
+                    voice->env_level = 0.0f;
+                    voice->env_stage = ENVELOPE_IDLE;
+                    voice->active = 0;
+                }
+                break;
+
+            default:
+                break;
+            }
+
+            if (!voice->active)
+                break;
+
+            // Waveform core generator
+            float sample = 0.0f;
+            switch (voice->wave_type) {
+            case SINE_WAVE:
+                sample = arm_cos_f32(voice->angle);
+                break;
+
+            case SAW_RIGHT_WAVE: {
+                float phase = voice->angle * inv_two_pi;
+                sample = (2.0f * phase) - 1.0f;
+                break;
+            }
+
+            case SAW_LEFT_WAVE: {
+                float phase = voice->angle * inv_two_pi;
+                sample = 1.0f - (2.0f * phase);
+                break;
+            }
+
+            case TRIANGLE_WAVE: {
+                float phase = voice->angle * inv_two_pi;
+                sample = (phase < 0.5f) ? (4.0f * phase - 1.0f) : (3.0f - 4.0f * phase);
+                break;
+            }
+
+            case SQUARE_WAVE: {
+                float phase = voice->angle * inv_two_pi;
+                sample = (phase < 0.5f) ? 1.0f : -1.0f;
+                break;
+            }
+            }
+
+            mix_buffer[i] += sample * voice->velocity_gain * voice->env_level;
+
+            voice->angle += voice->angle_change;
+            if (voice->angle >= (2.0f * (float) M_PI)) {
+                voice->angle -= (2.0f * (float) M_PI);
             }
         }
-        break;
     }
 
-    case SAW_RIGHT_WAVE:
-        for (int i = 0; i < DMA_BUFFER_SIZE; ++i) {
-            float normalized_phase = channel->angle * inv_two_pi;
+    float master_gain = (active_count > 0) ? (1.0f / sqrtf((float) active_count)) * 2000.0f : 0.0f;
 
-            channel->buffer[i] = (uint16_t)(minimum_val + (normalized_phase * peak_to_peak));
+    for (int i = 0; i < DMA_BUFFER_SIZE; i++) {
+        if (active_count == 0) {
+            // Decay LPF state to zero cleanly when silent
+            lpf_state = 0.0f;
+            out_buffer[i] = OUTPUT_MID;
+        } else {
+            float raw_val = mix_buffer[i] * master_gain;
 
-            channel->angle += channel->angle_change;
-            if (channel->angle >= (float)M_TWOPI) {
-                channel->angle -= (float)M_TWOPI;
-            }
+            // Apply Single-Pole Low-Pass Filter: y[n] = y[n-1] + alpha * (x[n] - y[n-1])
+            lpf_state += lpf_alpha * (raw_val - lpf_state);
+
+            float val = OUTPUT_MID + lpf_state;
+
+            // Hard limiting
+            if (val > (OUTPUT_MAX - 1))
+                val = (OUTPUT_MAX - 1);
+            if (val < 0.0f)
+                val = 0.0f;
+
+            out_buffer[i] = (uint16_t) val;
         }
-        break;
-
-    case SAW_LEFT_WAVE:
-        for (int i = 0; i < DMA_BUFFER_SIZE; ++i) {
-            float normalized_phase = channel->angle * inv_two_pi;
-
-            // Invert the phase step to make it ramp downwards
-            channel->buffer[i] = (uint16_t)(minimum_val + ((1.0f - normalized_phase) * peak_to_peak));
-
-            channel->angle += channel->angle_change;
-            if (channel->angle >= (float)M_TWOPI) {
-                channel->angle -= (float)M_TWOPI;
-            }
-        }
-        break;
-
-    case TRIANGLE_WAVE:
-        for (int i = 0; i < DMA_BUFFER_SIZE; ++i) {
-            float normalized_phase = channel->angle * inv_two_pi;
-            float tri_value;
-
-            if (normalized_phase < 0.5f) {
-                // Rise phase: scale [0.0 to 0.5] -> [0.0 to 1.0]
-                tri_value = normalized_phase * 2.0f;
-            } else {
-                // Fall phase: scale [0.5 to 1.0] -> [1.0 to 0.0]
-                tri_value = 2.0f - (normalized_phase * 2.0f);
-            }
-
-            channel->buffer[i] = (uint16_t)(minimum_val + (tri_value * peak_to_peak));
-
-            channel->angle += channel->angle_change;
-            if (channel->angle >= (float)M_TWOPI) {
-                channel->angle -= (float)M_TWOPI;
-            }
-        }
-        break;
-
-    case SQUARE_WAVE: {
-        // Pre-calculate hard high and low values outside the loop
-        uint16_t high_level = (uint16_t)(OUTPUT_MID + (peak_to_peak / 2.0f));
-        uint16_t low_level  = (uint16_t)(OUTPUT_MID - (peak_to_peak / 2.0f));
-
-        for (int i = 0; i < DMA_BUFFER_SIZE; ++i) {
-            float normalized_phase = channel->angle * inv_two_pi;
-
-            if (normalized_phase < 0.5f) {
-                channel->buffer[i] = high_level;
-            } else {
-                channel->buffer[i] = low_level;
-            }
-
-            channel->angle += channel->angle_change;
-            if (channel->angle >= (float)M_TWOPI) {
-                channel->angle -= (float)M_TWOPI;
-            }
-        }
-        break;
-    }
-
-    default:
-        // Graceful fallback: output a flat mid-level DC signal if an invalid wave type is passed
-        for (int i = 0; i < DMA_BUFFER_SIZE; ++i) {
-            channel->buffer[i] = OUTPUT_MID;
-        }
-        break;
     }
 }
 
 void HAL_DAC_ConvHalfCpltCallbackCh1(DAC_HandleTypeDef *hdac) {
-    //++conv_half_ch1;
-    dacs[0].buffer = &dma_buffer_1[0];
-    process_buffer(&dacs[0]);
+    process_buffer(&dma_buffer[0]);
 }
 
 void HAL_DAC_ConvCpltCallbackCh1(DAC_HandleTypeDef *hdac) {
-    //++conv_ch1;
-    dacs[0].buffer = &dma_buffer_1[DMA_BUFFER_SIZE];
-    process_buffer(&dacs[0]);
-}
-
-void HAL_DACEx_ConvHalfCpltCallbackCh2(DAC_HandleTypeDef *hdac) {
-    //++conv_half_ch2;
-    dacs[1].buffer = &dma_buffer_2[0];
-    process_buffer(&dacs[1]);
-}
-
-void HAL_DACEx_ConvCpltCallbackCh2(DAC_HandleTypeDef *hdac) {
-    //++conv_ch2;
-    dacs[1].buffer = &dma_buffer_2[DMA_BUFFER_SIZE];
-    process_buffer(&dacs[1]);
+    process_buffer(&dma_buffer[DMA_BUFFER_SIZE]);
 }
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
     if (GPIO_Pin == BTN_Pin) { // If the button
         change_wave = 1;
     }
+}
+
+void synth_note_off(uint8_t note) {
+    for (int i = 0; i < MAX_VOICES; i++) {
+        if (voices[i].active && voices[i].note == note && voices[i].env_stage != ENVELOPE_RELEASE) {
+            // Trigger release phase instead of turning off immediately
+            voices[i].env_stage = ENVELOPE_RELEASE;
+        }
+    }
+}
+
+void synth_all_notes_off(void) {
+    for (int i = 0; i < MAX_VOICES; i++) {
+        if (voices[i].active) {
+            voices[i].env_stage = ENVELOPE_RELEASE;
+        }
+    }
+}
+
+void synth_note_on(uint8_t note, uint8_t velocity) {
+    if (note > 127 || velocity == 0) {
+        synth_note_off(note);
+        return;
+    }
+
+    int slot = -1;
+
+    // 1. If note is playing, reuse slot
+    for (int i = 0; i < MAX_VOICES; i++) {
+        if (voices[i].active && voices[i].note == note) {
+            slot = i;
+            break;
+        }
+    }
+
+    // 2. Find empty slot
+    if (slot == -1) {
+        for (int i = 0; i < MAX_VOICES; i++) {
+            if (!voices[i].active) {
+                slot = i;
+                break;
+            }
+        }
+    }
+
+    // 3. Fallback: simple voice stealing slot 0
+    if (slot == -1) {
+        slot = 0;
+    }
+
+    voices[slot].note = note;
+    voices[slot].velocity_gain = (float) velocity / 127.0f;
+    voices[slot].angle_change = MIDI_NOTE_TO_FREQ[note] * (2.0f * (float) M_PI / SAMPLE_FREQ);
+    voices[slot].wave_type = global_wave_type;
+    voices[slot].env_stage = ENVELOPE_ATTACK;
+    voices[slot].active = 1;
 }
 
 /* USER CODE END 0 */
@@ -326,27 +402,35 @@ int main(void)
 
     HAL_TIM_Base_Start_IT(&htim6);
 
-    HAL_DAC_Start_DMA(&hdac, DAC_CHANNEL_1, (uint32_t*) &dma_buffer_1, 2 * DMA_BUFFER_SIZE, DAC_ALIGN_12B_R);
-    HAL_DAC_Start_DMA(&hdac, DAC_CHANNEL_2, (uint32_t*) &dma_buffer_2, 2 * DMA_BUFFER_SIZE, DAC_ALIGN_12B_R);
+    HAL_DAC_Start_DMA(&hdac, DAC_CHANNEL_1, (uint32_t*) &dma_buffer, 2 * DMA_BUFFER_SIZE, DAC_ALIGN_12B_R);
 
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 
-    uint32_t now, loop_cnt = 0, next_blink = 500, next_tick = 1000;
+    uint32_t now = 0;
+    uint32_t loop_cnt = 0;
+    uint32_t next_blink = 500;
+    uint32_t next_tick = 1000;
+    uint32_t next_demo_step = 5000;
+    uint8_t demo_step = 0;
+
+    // C Major scale frequencies for demo sequence (MIDI notes: C4, E4, G4, B4)
+    const uint8_t chord_notes[] = { 60, 64, 67, 71 };
+    const uint8_t full_10_notes[10] = { 48, 52, 55, 60, 64, 67, 71, 74, 76, 79 }; // C3 to G5
+
+    // Initialize cutoff filter to ~1.2kHz for warm tone
+    synth_set_cutoff(2400.0f);
 
     while (1) {
 
         now = uwTick;
 
+        // Button waveform selector
         if (change_wave) {
-            printf("Change wave\n");
-
-            ++dacs[1].wave_type; // a tad ugly - if interrupt happens while this is one too big it will be handled by switch default
-
-            if (dacs[1].wave_type > 4) dacs[1].wave_type = 0;
-
+            global_wave_type = (enum wave_t) ((global_wave_type + 1) % 5);
+            printf("Waveform Changed -> %d\n", global_wave_type);
             change_wave = 0;
         }
 
@@ -359,6 +443,58 @@ int main(void)
             printf("Tick %lu (loop=%lu)\n", now / 1000, loop_cnt);
             loop_cnt = 0;
             next_tick = now + 1000;
+        }
+
+        // Expanded Polyphonic Sequencer (Runs step updates every 700ms)
+        if (now >= next_demo_step) {
+            next_demo_step = now + 5000;
+
+            switch (demo_step) {
+            // Steps 0-3: Arpeggio Single Notes
+            case 0:
+                case 1:
+                case 2:
+                case 3:
+                synth_all_notes_off();
+                synth_note_on(chord_notes[demo_step], 100);
+                printf("Demo: Single Note %d\n", chord_notes[demo_step]);
+                break;
+
+                // Step 4: 3-Voice Triad
+            case 4:
+                synth_all_notes_off();
+                synth_note_on(chord_notes[0], 90);
+                synth_note_on(chord_notes[1], 90);
+                synth_note_on(chord_notes[2], 90);
+                printf("Demo: 3-Voice Triad\n");
+                break;
+
+                // Step 5: 4-Voice Maj7
+            case 5:
+                synth_note_on(chord_notes[3], 90);
+                printf("Demo: 4-Voice Maj7\n");
+                break;
+
+                // Step 6: Trigger ALL 10 VOICES simultaneously!
+            case 6:
+                synth_all_notes_off();
+                for (int n = 0; n < 10; n++) {
+                    synth_note_on(full_10_notes[n], 80);
+                }
+                printf("Demo: MAXIMUM POLYPHONY (10 Active Voices)\n");
+                break;
+
+                // Step 7: Release phase
+            case 7:
+                synth_all_notes_off();
+                printf("Demo: Release All\n");
+                break;
+
+            default:
+                break;
+            }
+
+            demo_step = (demo_step + 1) % 8;
         }
 
         ++loop_cnt;
@@ -473,7 +609,7 @@ static void MX_TIM6_Init(void)
 
   /* USER CODE END TIM6_Init 1 */
   htim6.Instance = TIM6;
-  htim6.Init.Prescaler = 84 - 1;
+  htim6.Init.Prescaler = 35 - 1;
   htim6.Init.CounterMode = TIM_COUNTERMODE_UP;
   htim6.Init.Period = 50- 1;
   htim6.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
