@@ -137,7 +137,7 @@ adsr_config_t global_adsr = {
 static float lpf_state = 0.0f;
 static float lpf_alpha = 0.25f; // Alpha scale [0.0 - 1.0]: Lower values = warmer/darker, higher = brighter
 
-static float global_master_volume = 0.7f; // Default 80% volume (range: 0.0f to 1.0f)
+static float global_master_volume = 0.6f; // Default 80% volume (range: 0.0f to 1.0f)
 
 // Helper function to update low-pass filter cutoff frequency in Hz dynamically
 void synth_set_cutoff(float cutoff_hz) {
@@ -504,7 +504,7 @@ int main(void)
     uint32_t loop_cnt = 0;
     uint32_t next_blink = 500;
     uint32_t next_tick = 1000;
-    uint32_t next_demo_step = 5000;
+    uint32_t next_demo_step = 1000;
     uint8_t demo_step = 0;
 
     // C Major scale frequencies for demo sequence (MIDI notes: C4, E4, G4, B4)
@@ -536,57 +536,57 @@ int main(void)
             next_tick = now + 1000;
         }
 
-        // Expanded Polyphonic Sequencer (Runs step updates every 700ms)
-        if (now >= next_demo_step) {
-            next_demo_step = now + 5000;
-
-            switch (demo_step) {
-            // Steps 0-3: Arpeggio Single Notes
-            case 0:
-                case 1:
-                case 2:
-                case 3:
-                synth_all_notes_off();
-                synth_note_on(chord_notes[demo_step], 100);
-                printf("Demo: Single Note %d\n", chord_notes[demo_step]);
-                break;
-
-                // Step 4: 3-Voice Triad
-            case 4:
-                synth_all_notes_off();
-                synth_note_on(chord_notes[0], 90);
-                synth_note_on(chord_notes[1], 90);
-                synth_note_on(chord_notes[2], 90);
-                printf("Demo: 3-Voice Triad\n");
-                break;
-
-                // Step 5: 4-Voice Maj7
-            case 5:
-                synth_note_on(chord_notes[3], 90);
-                printf("Demo: 4-Voice Maj7\n");
-                break;
-
-                // Step 6: Trigger ALL 10 VOICES simultaneously!
-            case 6:
-                synth_all_notes_off();
-                for (int n = 0; n < 10; n++) {
-                    synth_note_on(full_10_notes[n], 80);
-                }
-                printf("Demo: MAXIMUM POLYPHONY (10 Active Voices)\n");
-                break;
-
-                // Step 7: Release phase
-            case 7:
-                synth_all_notes_off();
-                printf("Demo: Release All\n");
-                break;
-
-            default:
-                break;
-            }
-
-            demo_step = (demo_step + 1) % 8;
-        }
+//        // Expanded Polyphonic Sequencer (Runs step updates every 700ms)
+//        if (now >= next_demo_step) {
+//            next_demo_step = now + 1000;
+//
+//            switch (demo_step) {
+//            // Steps 0-3: Arpeggio Single Notes
+//            case 0:
+//                case 1:
+//                case 2:
+//                case 3:
+//                synth_all_notes_off();
+//                synth_note_on(chord_notes[demo_step], 100);
+//                printf("Demo: Single Note %d\n", chord_notes[demo_step]);
+//                break;
+//
+//                // Step 4: 3-Voice Triad
+//            case 4:
+//                synth_all_notes_off();
+//                synth_note_on(chord_notes[0], 90);
+//                synth_note_on(chord_notes[1], 90);
+//                synth_note_on(chord_notes[2], 90);
+//                printf("Demo: 3-Voice Triad\n");
+//                break;
+//
+//                // Step 5: 4-Voice Maj7
+//            case 5:
+//                synth_note_on(chord_notes[3], 90);
+//                printf("Demo: 4-Voice Maj7\n");
+//                break;
+//
+//                // Step 6: Trigger ALL 10 VOICES simultaneously!
+//            case 6:
+//                synth_all_notes_off();
+//                for (int n = 0; n < 10; n++) {
+//                    synth_note_on(full_10_notes[n], 80);
+//                }
+//                printf("Demo: MAXIMUM POLYPHONY (10 Active Voices)\n");
+//                break;
+//
+//                // Step 7: Release phase
+//            case 7:
+//                synth_all_notes_off();
+//                printf("Demo: Release All\n");
+//                break;
+//
+//            default:
+//                break;
+//            }
+//
+//            demo_step = (demo_step + 1) % 8;
+//        }
 
         tud_task();
 
