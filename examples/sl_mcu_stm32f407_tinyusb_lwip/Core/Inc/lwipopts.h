@@ -28,15 +28,18 @@
  * Protocol Support
  * ---------------------------------------------------------------------
  */
-#define LWIP_ARP                1       // Address Resolution Protocol (Required)
-#define LWIP_ETHERNET           1       // Ethernet support (Required for USB CDC-NCM/ECM)
-#define LWIP_IPV4               1       // IPv4 Support
-#define LWIP_ICMP               1       // Ping responder
-#define LWIP_IGMP               1       // Multicast support
-#define LWIP_DHCP               1       // DHCP Server/Client support
-#define LWIP_UDP                1       // UDP Protocol
-#define LWIP_TCP                1       // TCP Protocol
-#define LWIP_DNS                0       // Domain Name Resolution
+#define LWIP_ARP                   1       // Address Resolution Protocol (Required)
+#define LWIP_ETHERNET              1       // Ethernet support (Required for USB CDC-NCM/ECM)
+#define LWIP_IPV4                  1       // IPv4 Support
+#define LWIP_ICMP                  1       // Ping responder
+#define LWIP_IGMP                  1       // Multicast support
+#define LWIP_DHCP                  1       // DHCP Server/Client support
+#define LWIP_UDP                   1       // UDP Protocol
+#define LWIP_TCP                   1       // TCP Protocol
+#define LWIP_DNS                   0       // Domain Name Resolution
+#define LWIP_HTTPD                 1       // Include httpd - web server
+#define LWIP_HTTPD_CUSTOM_FILES    1       // Allows dynamic page generation
+#define LWIP_HTTPD_DYNAMIC_HEADERS 1
 
 /**
  * ---------------------------------------------------------------------

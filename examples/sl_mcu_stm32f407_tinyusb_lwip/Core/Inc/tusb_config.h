@@ -53,25 +53,19 @@ extern "C" {
 // Class Driver Configuration
 //--------------------------------------------------------------------+
 
-// Enable USB MIDI Class Driver
-#define CFG_TUD_MIDI                1
+//------------- CLASS -------------//
+#define CFG_TUD_HID 0
+#define CFG_TUD_CDC 0
+#define CFG_TUD_MSC 0
+#define CFG_TUD_MIDI 0
+#define CFG_TUD_VENDOR 0
+#define CFG_TUD_ECM_RNDIS 0
+#define CFG_TUD_NCM 1
 
-// Disable unused USB Class Drivers to save FLASH/RAM
-#define CFG_TUD_CDC                 0
-#define CFG_TUD_MSC                 0
-#define CFG_TUD_HID                 0
-#define CFG_TUD_VENDOR              0
-
-//--------------------------------------------------------------------+
-// MIDI Class Settings
-//--------------------------------------------------------------------+
-
-// RX (Receive) FIFO buffer size in bytes.
-// Must be a power of 2. 64 bytes = 16 4-byte USB-MIDI packets.
-#define CFG_TUD_MIDI_RX_BUFSIZE     64
-
-// TX (Transmit) FIFO buffer size in bytes.
-#define CFG_TUD_MIDI_TX_BUFSIZE     64
+/* Endpoint and MTU Sizes */
+#define CFG_TUD_NCM_IN_SZ (16 + 1514) // NCM Header + Max Ethernet Frame
+#define CFG_TUD_NCM_OUT_SZ (16 + 1514)
+#define CFG_TUD_NCM_MAX_PACKET_SIZE 64
 
 #ifdef __cplusplus
 }

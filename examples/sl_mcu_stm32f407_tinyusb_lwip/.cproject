@@ -89,8 +89,8 @@
 					<sourceEntries>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Core"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Drivers"/>
-						<entry excluding="apps/http|apps/http/makefsdata|netif/zepif.c|netif/slipif.c|netif/lowpan6.c|netif/lowpan6_common.c|netif/lowpan6_ble.c|netif/bridgeif.c|netif/bridgeif_fdb.c|netif/ppp" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="lwip"/>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="tinyusb"/>
+						<entry excluding="apps/http/fsdata.c|apps/http/makefsdata|netif/zepif.c|netif/slipif.c|netif/lowpan6.c|netif/lowpan6_common.c|netif/lowpan6_ble.c|netif/bridgeif.c|netif/bridgeif_fdb.c|netif/ppp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="lwip"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="tinyusb"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
