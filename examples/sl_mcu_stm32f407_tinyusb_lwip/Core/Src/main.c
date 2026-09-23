@@ -167,8 +167,7 @@ int fs_open_custom(struct fs_file *file, const char *name) {
         GPIO_PinState pin_state = HAL_GPIO_ReadPin(LED_GPIO_Port, LED_Pin);
 
         int len = snprintf(http_response_buf, sizeof(http_response_buf),
-                "{\"status\":\"ok\",\"led\":%d}",
-                pin_state == GPIO_PIN_SET ? 1 : 0);
+                "{\"status\":\"ok\",\"led\":%d}", pin_state == GPIO_PIN_SET ? 1 : 0);
 
         memset(file, 0, sizeof(struct fs_file));
         file->data = http_response_buf;
