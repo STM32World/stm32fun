@@ -132,7 +132,7 @@ synth_voice_t voices[MAX_VOICES] = { 0 };
 enum wave_t global_wave_type = SINE_WAVE;
 
 // Master Volume Scaler [0.0f to 1.0f]
-static float master_volume = 0.8f;
+static float master_volume = 0.6f;
 
 // ADSR profile: Attack 15ms, Decay 80ms, Sustain 70%, Release 120ms
 adsr_config_t global_adsr = {
@@ -474,39 +474,39 @@ int main(void)
     tusb_init();
 
     synth_set_cutoff(2400.0f);
-    synth_set_master_volume(0.8f);
+    synth_set_master_volume(0.6f);
 
-    // Run comparison test on Core 1 using CMSIS-DSP arm_cos_f32() function
-
-    float radians = 0.0f;
-    const float step = 0.01f;
-
-    // Use volatile to force GCC to execute every iteration
-    volatile float dummy_val = 0.0f;
-
-    radians = 0.0f;
-    uint32_t start_ms = uwTick;
-    for (uint32_t i = 0; i < (10 * TOTAL_CALCULATIONS); i++) {
-        dummy_val = cosf(radians);
-
-        radians += step;
-        if (radians >= 6.28318530718f)
-            radians = 0.0f;
-    }
-    uint32_t std_ms = (uint32_t) (uwTick - start_ms);
-
-    start_ms = uwTick;
-    radians = 0.0f;
-    for (uint32_t i = 0; i < (10 * TOTAL_CALCULATIONS); i++) {
-        dummy_val = arm_cos_f32(radians);
-        radians += step;
-        if (radians >= 6.28318530718f)
-            radians = 0.0f;
-    }
-    uint32_t cmsis_ms = (uint32_t) (uwTick - start_ms);
-
-    printf("Startup std cosf : %lu ms\n", std_ms);
-    printf("Startup CMSIS-DSP: %lu ms\n", cmsis_ms);
+//    // Run comparison test on Core 1 using CMSIS-DSP arm_cos_f32() function
+//
+//    float radians = 0.0f;
+//    const float step = 0.01f;
+//
+//    // Use volatile to force GCC to execute every iteration
+//    volatile float dummy_val = 0.0f;
+//
+//    radians = 0.0f;
+//    uint32_t start_ms = uwTick;
+//    for (uint32_t i = 0; i < (10 * TOTAL_CALCULATIONS); i++) {
+//        dummy_val = cosf(radians);
+//
+//        radians += step;
+//        if (radians >= 6.28318530718f)
+//            radians = 0.0f;
+//    }
+//    uint32_t std_ms = (uint32_t) (uwTick - start_ms);
+//
+//    start_ms = uwTick;
+//    radians = 0.0f;
+//    for (uint32_t i = 0; i < (10 * TOTAL_CALCULATIONS); i++) {
+//        dummy_val = arm_cos_f32(radians);
+//        radians += step;
+//        if (radians >= 6.28318530718f)
+//            radians = 0.0f;
+//    }
+//    uint32_t cmsis_ms = (uint32_t) (uwTick - start_ms);
+//
+//    printf("Startup std cosf : %lu ms\n", std_ms);
+//    printf("Startup CMSIS-DSP: %lu ms\n", cmsis_ms);
 
     /* USER CODE END 2 */
 
@@ -520,7 +520,7 @@ int main(void)
 
     while (1) {
 
-        // 1. Process audio buffer IMMEDIATELY when requested by ISR
+        // Process audio buffer IMMEDIATELY when requested by ISR
         if (dma_buffer_to_fill != NULL) {
             int16_t *buf = dma_buffer_to_fill;
             dma_buffer_to_fill = NULL; // Clear flag before processing to prevent double-fills
