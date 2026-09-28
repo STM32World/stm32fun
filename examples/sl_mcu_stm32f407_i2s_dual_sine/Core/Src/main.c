@@ -68,7 +68,7 @@ uint8_t current_freq = 0;
 
 float freq[2] = {
         110,
-        880
+        440
 };
 
 float angle[2] = {
@@ -83,8 +83,8 @@ float angle_change[2] = {
 };
 
 float amplification[2] = {
-        1,
-        1
+        0.5,
+        0.5
 };
 
 int16_t i2s_dma_buffer[I2S_DMA_BUFFER_SIZE];
