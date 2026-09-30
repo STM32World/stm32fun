@@ -1,20 +1,18 @@
 /* USER CODE BEGIN Header */
-/**
- ******************************************************************************
- * @file           : main.c
- * @brief          : USB MIDI Polyphonic Synthesizer (Deferred Processing)
- ******************************************************************************
- * @attention
- *
- * Copyright (c) 2026 STM32World <lth@stm32world.com>
- * All rights reserved.
- *
- * This software is licensed under terms that can be found in the LICENSE file
- * in the root directory of this software component.
- * If no LICENSE file comes with this software, it is provided AS-IS.
- *
- ******************************************************************************
- */
+/*----------------------------------------------------------------------------
+ | @file           : main.c
+ | @brief          : USB MIDI Polyphonic Synthesizer (Deferred Processing)
+ |----------------------------------------------------------------------------
+ | @attention
+ |
+ | Copyright (c) 2026 STM32World
+ | All rights reserved.
+ |
+ | This software is licensed under terms that can be found in the LICENSE file
+ | in the root directory of this software component.
+ | If no LICENSE file comes with this software, it is provided AS-IS.
+ |
+ |----------------------------------------------------------------------------*/
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
@@ -73,7 +71,7 @@ typedef struct {
 
 #define TAU 6.28318530717958647692f
 
-// 32 samples per half-buffer
+// 64 samples per half-buffer (~1.33ms window prevents DMA starvation during USB/UART tasks)
 #define I2S_DMA_BUFFER_SAMPLES 64
 
 // Stereo (2 channels) * 2 half-buffers (Ping-Pong) * Samples
@@ -95,8 +93,6 @@ typedef struct {
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
-
-CRC_HandleTypeDef hcrc;
 
 I2S_HandleTypeDef hi2s2;
 DMA_HandleTypeDef hdma_spi2_tx;
@@ -127,7 +123,7 @@ static const float MIDI_NOTE_TO_FREQ[128] = {
 };
 
 int16_t i2s_dma_buffer[I2S_DMA_BUFFER_SIZE];
-int16_t *dma_buffer_to_fill = NULL; // Deferred buffer processing pointer
+volatile int16_t *dma_buffer_to_fill = NULL; // Deferred buffer processing pointer (volatile for ISR safety)
 
 synth_voice_t voices[MAX_VOICES] = { 0 };
 enum wave_t global_wave_type = TRIANGLE_WAVE; // Sounds best when recording
@@ -148,11 +144,11 @@ static float lpf_state = 0.0f;
 static float lpf_alpha = 0.15f;
 
 void synth_set_cutoff(float cutoff_hz) {
-    if (cutoff_hz > (SAMPLE_FREQ / 2.0f))
-        cutoff_hz = SAMPLE_FREQ / 2.0f;
-    float dt = 1.0f / (float) SAMPLE_FREQ;
-    float rc = 1.0f / (2.0f * (float) M_PI * cutoff_hz);
-    lpf_alpha = dt / (rc + dt);
+    float nyquist = (float) SAMPLE_FREQ * 0.5f;
+    if (cutoff_hz > nyquist)
+        cutoff_hz = nyquist;
+    float w0 = TAU * cutoff_hz;
+    lpf_alpha = w0 / (w0 + (float) SAMPLE_FREQ);
 }
 
 void synth_set_master_volume(float vol) {
@@ -169,8 +165,6 @@ float synth_get_master_volume(void) {
 
 uint8_t change_wave = 0;
 
-uint32_t cb_count = 0;
-
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -178,9 +172,8 @@ void SystemClock_Config(void);
 static void MPU_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_DMA_Init(void);
-static void MX_USART1_UART_Init(void);
-static void MX_CRC_Init(void);
 static void MX_I2S2_Init(void);
+static void MX_USART1_UART_Init(void);
 static void MX_USB_OTG_HS_PCD_Init(void);
 /* USER CODE BEGIN PFP */
 
@@ -233,7 +226,7 @@ void process_buffer(int16_t *out_buffer) {
 
             case ENVELOPE_RELEASE:
                 voice->env_level -= global_adsr.release_rate;
-                if (voice->env_level <= 0.0001f) {
+                if (voice->env_level <= 0.0f) {
                     voice->env_level = 0.0f;
                     voice->env_stage = ENVELOPE_IDLE;
                     voice->active = 0;
@@ -248,7 +241,7 @@ void process_buffer(int16_t *out_buffer) {
                 float sample = 0.0f;
                 switch (voice->wave_type) {
                 case SINE_WAVE:
-                    sample = arm_cos_f32(voice->angle);
+                    sample = arm_sin_f32(voice->angle);
                     break;
 
                 case SAW_RIGHT_WAVE: {
@@ -279,7 +272,7 @@ void process_buffer(int16_t *out_buffer) {
                 mix_buffer[i] += sample * voice->velocity_gain * voice->env_level;
 
                 voice->angle += voice->angle_change;
-                if (voice->angle >= TAU) {
+                while (voice->angle >= TAU) {
                     voice->angle -= TAU;
                 }
             }
@@ -294,7 +287,7 @@ void process_buffer(int16_t *out_buffer) {
 
         float raw_val = mix_buffer[i] * master_gain;
 
-        // Apply Low-Pass Filter
+        // Smooth IIR Low-Pass Filter without harsh instant state resets
         lpf_state += lpf_alpha * (raw_val - lpf_state);
 
         float val = lpf_state;
@@ -310,7 +303,7 @@ void process_buffer(int16_t *out_buffer) {
     }
 }
 
-/* Deferred ISR Callbacks - Correctly dynamic for buffer size */
+/* Deferred ISR Callbacks Correctly dynamic for buffer size */
 void HAL_I2S_TxHalfCpltCallback(I2S_HandleTypeDef *hi2s) {
     if (hi2s->Instance == SPI2) {
         dma_buffer_to_fill = &i2s_dma_buffer[0];
@@ -330,6 +323,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 }
 
 void synth_note_off(uint8_t note) {
+    printf("Off: %d\n", note);
     for (int i = 0; i < MAX_VOICES; i++) {
         if (voices[i].active && voices[i].note == note && voices[i].env_stage != ENVELOPE_RELEASE) {
             voices[i].env_stage = ENVELOPE_RELEASE;
@@ -346,6 +340,7 @@ void synth_all_notes_off(void) {
 }
 
 void synth_note_on(uint8_t note, uint8_t velocity) {
+    printf("On : %d\n", note);
     if (note > 127 || velocity == 0) {
         synth_note_off(note);
         return;
@@ -378,9 +373,17 @@ void synth_note_on(uint8_t note, uint8_t velocity) {
     voices[slot].angle_change = MIDI_NOTE_TO_FREQ[note] * (TAU / SAMPLE_FREQ);
     voices[slot].wave_type = global_wave_type;
 
-    // Reset phase & envelope level to prevent zero-crossing clicks when starting a note
-    voices[slot].angle = 0.0f;
-    voices[slot].env_level = 0.0f;
+    // Set zero-crossing starting phases depending on waveform type to prevent attack clicks
+    if (!voices[slot].active) {
+        if (global_wave_type == TRIANGLE_WAVE) {
+            voices[slot].angle = TAU * 0.25f; // Zero crossing for triangle
+        } else if (global_wave_type == SAW_RIGHT_WAVE || global_wave_type == SAW_LEFT_WAVE) {
+            voices[slot].angle = TAU * 0.50f; // Zero crossing for sawtooth
+        } else {
+            voices[slot].angle = 0.0f; // Sine and Square start at 0
+        }
+        voices[slot].env_level = 0.0f;
+    }
 
     voices[slot].env_stage = ENVELOPE_ATTACK;
     voices[slot].active = 1;
@@ -402,7 +405,6 @@ void tud_midi_rx_cb(uint8_t itf)
         switch (msg_type)
         {
         case 0x90: // Note On
-            printf("On : %d\n", data1);
             if (data2 > 0) {
                 synth_note_on(data1, data2);
             } else {
@@ -411,7 +413,6 @@ void tud_midi_rx_cb(uint8_t itf)
             break;
 
         case 0x80: // Note Off
-            printf("Off: %d\n", data1);
             synth_note_off(data1);
             break;
 
@@ -445,6 +446,11 @@ int main(void)
     /* MPU Configuration--------------------------------------------------------*/
     MPU_Config();
 
+    /* Enable the CPU Cache */
+
+    /* Enable I-Cache---------------------------------------------------------*/
+    SCB_EnableICache();
+
     /* MCU Configuration--------------------------------------------------------*/
 
     /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
@@ -464,9 +470,8 @@ int main(void)
     /* Initialize all configured peripherals */
     MX_GPIO_Init();
     MX_DMA_Init();
-    MX_USART1_UART_Init();
-    MX_CRC_Init();
     MX_I2S2_Init();
+    MX_USART1_UART_Init();
     MX_USB_OTG_HS_PCD_Init();
     /* USER CODE BEGIN 2 */
 
@@ -485,7 +490,7 @@ int main(void)
     // Enable Soft Connect on OTG_HS peripheral (pulls D+ high via internal resistor)
     HAL_PCD_DevConnect(&hpcd_USB_OTG_HS);
 
-    synth_set_cutoff(2400.0f);
+    synth_set_cutoff(8000.0f);
     synth_set_master_volume(0.5f);
 
     /* USER CODE END 2 */
@@ -502,16 +507,15 @@ int main(void)
 
         // Process audio buffer IMMEDIATELY when requested by ISR
         if (dma_buffer_to_fill != NULL) {
-            ++cb_count;
-            int16_t *buf = dma_buffer_to_fill;
+            int16_t *buf = (int16_t*) dma_buffer_to_fill;
             dma_buffer_to_fill = NULL; // Clear flag before processing to prevent double-fills
             process_buffer(buf);
         }
 
-        // Handle TinyUSB events
+        // 2. Handle TinyUSB events
         tud_task();
 
-        // Low priority tasks
+        // 3. Low priority tasks
         now = uwTick;
 
         if (change_wave) {
@@ -526,7 +530,7 @@ int main(void)
         }
 
         if (now >= next_tick) {
-            printf("Tick %lu (loop=%lu cb=%lu)\n", now / 1000, loop_cnt, cb_count);
+            printf("Tick %lu (loop=%lu)\n", now / 1000, loop_cnt);
             loop_cnt = 0;
             next_tick = now + 1000;
         }
@@ -571,7 +575,7 @@ void SystemClock_Config(void)
     RCC_OscInitStruct.PLL.PLLM = 1;
     RCC_OscInitStruct.PLL.PLLN = 34;
     RCC_OscInitStruct.PLL.PLLP = 1;
-    RCC_OscInitStruct.PLL.PLLQ = 3;
+    RCC_OscInitStruct.PLL.PLLQ = 5;
     RCC_OscInitStruct.PLL.PLLR = 2;
     RCC_OscInitStruct.PLL.PLLRGE = RCC_PLL1VCIRANGE_3;
     RCC_OscInitStruct.PLL.PLLVCOSEL = RCC_PLL1VCOWIDE;
@@ -601,37 +605,6 @@ void SystemClock_Config(void)
 }
 
 /**
- * @brief CRC Initialization Function
- * @param None
- * @retval None
- */
-static void MX_CRC_Init(void)
-{
-
-    /* USER CODE BEGIN CRC_Init 0 */
-
-    /* USER CODE END CRC_Init 0 */
-
-    /* USER CODE BEGIN CRC_Init 1 */
-
-    /* USER CODE END CRC_Init 1 */
-    hcrc.Instance = CRC;
-    hcrc.Init.DefaultPolynomialUse = DEFAULT_POLYNOMIAL_ENABLE;
-    hcrc.Init.DefaultInitValueUse = DEFAULT_INIT_VALUE_ENABLE;
-    hcrc.Init.InputDataInversionMode = CRC_INPUTDATA_INVERSION_NONE;
-    hcrc.Init.OutputDataInversionMode = CRC_OUTPUTDATA_INVERSION_DISABLE;
-    hcrc.InputDataFormat = CRC_INPUTDATA_FORMAT_BYTES;
-    if (HAL_CRC_Init(&hcrc) != HAL_OK)
-            {
-        Error_Handler();
-    }
-    /* USER CODE BEGIN CRC_Init 2 */
-
-    /* USER CODE END CRC_Init 2 */
-
-}
-
-/**
  * @brief I2S2 Initialization Function
  * @param None
  * @retval None
@@ -647,7 +620,7 @@ static void MX_I2S2_Init(void)
 
     /* USER CODE END I2S2_Init 1 */
     hi2s2.Instance = SPI2;
-    hi2s2.Init.Mode = I2S_MODE_MASTER_FULLDUPLEX;
+    hi2s2.Init.Mode = I2S_MODE_MASTER_TX;
     hi2s2.Init.Standard = I2S_STANDARD_PHILIPS;
     hi2s2.Init.DataFormat = I2S_DATAFORMAT_16B;
     hi2s2.Init.MCLKOutput = I2S_MCLKOUTPUT_DISABLE;
@@ -797,7 +770,7 @@ static void MX_GPIO_Init(void)
 
     /*Configure GPIO pin : BTN_Pin */
     GPIO_InitStruct.Pin = BTN_Pin;
-    GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+    GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
     GPIO_InitStruct.Pull = GPIO_PULLUP;
     HAL_GPIO_Init(BTN_GPIO_Port, &GPIO_InitStruct);
 

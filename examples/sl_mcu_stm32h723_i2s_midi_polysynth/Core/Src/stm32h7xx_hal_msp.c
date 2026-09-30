@@ -77,51 +77,6 @@ void HAL_MspInit(void)
 }
 
 /**
-  * @brief CRC MSP Initialization
-  * This function configures the hardware resources used in this example
-  * @param hcrc: CRC handle pointer
-  * @retval None
-  */
-void HAL_CRC_MspInit(CRC_HandleTypeDef* hcrc)
-{
-  if(hcrc->Instance==CRC)
-  {
-    /* USER CODE BEGIN CRC_MspInit 0 */
-
-    /* USER CODE END CRC_MspInit 0 */
-    /* Peripheral clock enable */
-    __HAL_RCC_CRC_CLK_ENABLE();
-    /* USER CODE BEGIN CRC_MspInit 1 */
-
-    /* USER CODE END CRC_MspInit 1 */
-
-  }
-
-}
-
-/**
-  * @brief CRC MSP De-Initialization
-  * This function freeze the hardware resources used in this example
-  * @param hcrc: CRC handle pointer
-  * @retval None
-  */
-void HAL_CRC_MspDeInit(CRC_HandleTypeDef* hcrc)
-{
-  if(hcrc->Instance==CRC)
-  {
-    /* USER CODE BEGIN CRC_MspDeInit 0 */
-
-    /* USER CODE END CRC_MspDeInit 0 */
-    /* Peripheral clock disable */
-    __HAL_RCC_CRC_CLK_DISABLE();
-    /* USER CODE BEGIN CRC_MspDeInit 1 */
-
-    /* USER CODE END CRC_MspDeInit 1 */
-  }
-
-}
-
-/**
   * @brief I2S MSP Initialization
   * This function configures the hardware resources used in this example
   * @param hi2s: I2S handle pointer
@@ -140,15 +95,7 @@ void HAL_I2S_MspInit(I2S_HandleTypeDef* hi2s)
   /** Initializes the peripherals clock
   */
     PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_SPI2;
-    PeriphClkInitStruct.PLL2.PLL2M = 8;
-    PeriphClkInitStruct.PLL2.PLL2N = 96;
-    PeriphClkInitStruct.PLL2.PLL2P = 1;
-    PeriphClkInitStruct.PLL2.PLL2Q = 2;
-    PeriphClkInitStruct.PLL2.PLL2R = 2;
-    PeriphClkInitStruct.PLL2.PLL2RGE = RCC_PLL2VCIRANGE_1;
-    PeriphClkInitStruct.PLL2.PLL2VCOSEL = RCC_PLL2VCOWIDE;
-    PeriphClkInitStruct.PLL2.PLL2FRACN = 0;
-    PeriphClkInitStruct.Spi123ClockSelection = RCC_SPI123CLKSOURCE_PLL2;
+    PeriphClkInitStruct.Spi123ClockSelection = RCC_SPI123CLKSOURCE_PLL;
     if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
     {
       Error_Handler();
@@ -160,12 +107,11 @@ void HAL_I2S_MspInit(I2S_HandleTypeDef* hi2s)
     __HAL_RCC_GPIOC_CLK_ENABLE();
     __HAL_RCC_GPIOB_CLK_ENABLE();
     /**I2S2 GPIO Configuration
-    PC2_C     ------> I2S2_SDI
     PC3_C     ------> I2S2_SDO
     PB10     ------> I2S2_CK
     PB12     ------> I2S2_WS
     */
-    GPIO_InitStruct.Pin = GPIO_PIN_2|GPIO_PIN_3;
+    GPIO_InitStruct.Pin = GPIO_PIN_3;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
@@ -186,8 +132,8 @@ void HAL_I2S_MspInit(I2S_HandleTypeDef* hi2s)
     hdma_spi2_tx.Init.Direction = DMA_MEMORY_TO_PERIPH;
     hdma_spi2_tx.Init.PeriphInc = DMA_PINC_DISABLE;
     hdma_spi2_tx.Init.MemInc = DMA_MINC_ENABLE;
-    hdma_spi2_tx.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
-    hdma_spi2_tx.Init.MemDataAlignment = DMA_MDATAALIGN_BYTE;
+    hdma_spi2_tx.Init.PeriphDataAlignment = DMA_PDATAALIGN_HALFWORD;
+    hdma_spi2_tx.Init.MemDataAlignment = DMA_MDATAALIGN_HALFWORD;
     hdma_spi2_tx.Init.Mode = DMA_CIRCULAR;
     hdma_spi2_tx.Init.Priority = DMA_PRIORITY_LOW;
     hdma_spi2_tx.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
@@ -223,12 +169,11 @@ void HAL_I2S_MspDeInit(I2S_HandleTypeDef* hi2s)
     __HAL_RCC_SPI2_CLK_DISABLE();
 
     /**I2S2 GPIO Configuration
-    PC2_C     ------> I2S2_SDI
     PC3_C     ------> I2S2_SDO
     PB10     ------> I2S2_CK
     PB12     ------> I2S2_WS
     */
-    HAL_GPIO_DeInit(GPIOC, GPIO_PIN_2|GPIO_PIN_3);
+    HAL_GPIO_DeInit(GPIOC, GPIO_PIN_3);
 
     HAL_GPIO_DeInit(GPIOB, GPIO_PIN_10|GPIO_PIN_12);
 

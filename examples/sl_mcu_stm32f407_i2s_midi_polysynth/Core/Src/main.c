@@ -1,22 +1,21 @@
 /* USER CODE BEGIN Header */
-/**
- ******************************************************************************
- * @file           : main.c
- * @brief          : USB MIDI Polyphonic Synthesizer (Deferred Processing)
- ******************************************************************************
- * @attention
- *
- * Copyright (c) 2026 STM32World <lth@stm32world.com>
- * All rights reserved.
- *
- * This software is licensed under terms that can be found in the LICENSE file
- * in the root directory of this software component.
- * If no LICENSE file comes with this software, it is provided AS-IS.
- *
- ******************************************************************************
- */
+/*----------------------------------------------------------------------------
+ | @file           : main.c
+ | @brief          : USB MIDI Polyphonic Synthesizer (Deferred Processing)
+ |----------------------------------------------------------------------------
+ | @attention
+ |
+ | Copyright (c) 2026 STM32World
+ | All rights reserved.
+ |
+ | This software is licensed under terms that can be found in the LICENSE file
+ | in the root directory of this software component.
+ | If no LICENSE file comes with this software, it is provided AS-IS.
+ |
+ |----------------------------------------------------------------------------*/
 /* USER CODE END Header */
-/* Includes ------------------------------------------------------------------*/
+
+/* Includes ----------------------------------------------------------*/
 #include "main.h"
 
 /* Private includes ----------------------------------------------------------*/
@@ -73,8 +72,8 @@ typedef struct {
 
 #define TAU 6.28318530717958647692f
 
-// 32 samples per half-buffer
-#define I2S_DMA_BUFFER_SAMPLES 32
+// 64 samples per half-buffer (~1.33ms window prevents DMA starvation during USB/UART tasks)
+#define I2S_DMA_BUFFER_SAMPLES 64
 
 // Stereo (2 channels) * 2 half-buffers (Ping-Pong) * Samples
 #define I2S_DMA_BUFFER_SIZE (2 * 2 * I2S_DMA_BUFFER_SAMPLES)
@@ -126,7 +125,7 @@ static const float MIDI_NOTE_TO_FREQ[128] = {
 };
 
 int16_t i2s_dma_buffer[I2S_DMA_BUFFER_SIZE];
-int16_t *dma_buffer_to_fill = NULL; // Deferred buffer processing pointer
+volatile int16_t *dma_buffer_to_fill = NULL; // Deferred buffer processing pointer (volatile for ISR safety)
 
 synth_voice_t voices[MAX_VOICES] = { 0 };
 enum wave_t global_wave_type = TRIANGLE_WAVE; // Sounds best when recording
@@ -147,11 +146,11 @@ static float lpf_state = 0.0f;
 static float lpf_alpha = 0.15f;
 
 void synth_set_cutoff(float cutoff_hz) {
-    if (cutoff_hz > (SAMPLE_FREQ / 2.0f))
-        cutoff_hz = SAMPLE_FREQ / 2.0f;
-    float dt = 1.0f / (float) SAMPLE_FREQ;
-    float rc = 1.0f / (2.0f * (float) M_PI * cutoff_hz);
-    lpf_alpha = dt / (rc + dt);
+    float nyquist = (float) SAMPLE_FREQ * 0.5f;
+    if (cutoff_hz > nyquist)
+        cutoff_hz = nyquist;
+    float w0 = TAU * cutoff_hz;
+    lpf_alpha = w0 / (w0 + (float) SAMPLE_FREQ);
 }
 
 void synth_set_master_volume(float vol) {
@@ -229,7 +228,7 @@ void process_buffer(int16_t *out_buffer) {
 
             case ENVELOPE_RELEASE:
                 voice->env_level -= global_adsr.release_rate;
-                if (voice->env_level <= 0.0001f) {
+                if (voice->env_level <= 0.0f) {
                     voice->env_level = 0.0f;
                     voice->env_stage = ENVELOPE_IDLE;
                     voice->active = 0;
@@ -244,7 +243,7 @@ void process_buffer(int16_t *out_buffer) {
                 float sample = 0.0f;
                 switch (voice->wave_type) {
                 case SINE_WAVE:
-                    sample = arm_cos_f32(voice->angle);
+                    sample = arm_sin_f32(voice->angle);
                     break;
 
                 case SAW_RIGHT_WAVE: {
@@ -275,7 +274,7 @@ void process_buffer(int16_t *out_buffer) {
                 mix_buffer[i] += sample * voice->velocity_gain * voice->env_level;
 
                 voice->angle += voice->angle_change;
-                if (voice->angle >= TAU) {
+                while (voice->angle >= TAU) {
                     voice->angle -= TAU;
                 }
             }
@@ -290,7 +289,7 @@ void process_buffer(int16_t *out_buffer) {
 
         float raw_val = mix_buffer[i] * master_gain;
 
-        // Apply Low-Pass Filter
+        // Smooth IIR Low-Pass Filter without harsh instant state resets
         lpf_state += lpf_alpha * (raw_val - lpf_state);
 
         float val = lpf_state;
@@ -306,7 +305,7 @@ void process_buffer(int16_t *out_buffer) {
     }
 }
 
-/* Deferred ISR Callbacks - Correctly dynamic for buffer size */
+/* Deferred ISR Callbacks Correctly dynamic for buffer size */
 void HAL_I2S_TxHalfCpltCallback(I2S_HandleTypeDef *hi2s) {
     if (hi2s->Instance == SPI2) {
         dma_buffer_to_fill = &i2s_dma_buffer[0];
@@ -326,6 +325,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 }
 
 void synth_note_off(uint8_t note) {
+    printf("Off: %d\n", note);
     for (int i = 0; i < MAX_VOICES; i++) {
         if (voices[i].active && voices[i].note == note && voices[i].env_stage != ENVELOPE_RELEASE) {
             voices[i].env_stage = ENVELOPE_RELEASE;
@@ -342,6 +342,7 @@ void synth_all_notes_off(void) {
 }
 
 void synth_note_on(uint8_t note, uint8_t velocity) {
+    printf("On : %d\n", note);
     if (note > 127 || velocity == 0) {
         synth_note_off(note);
         return;
@@ -374,9 +375,17 @@ void synth_note_on(uint8_t note, uint8_t velocity) {
     voices[slot].angle_change = MIDI_NOTE_TO_FREQ[note] * (TAU / SAMPLE_FREQ);
     voices[slot].wave_type = global_wave_type;
 
-    // Reset phase & envelope level to prevent zero-crossing clicks when starting a note
-    voices[slot].angle = 0.0f;
-    voices[slot].env_level = 0.0f;
+    // Set zero-crossing starting phases depending on waveform type to prevent attack clicks
+    if (!voices[slot].active) {
+        if (global_wave_type == TRIANGLE_WAVE) {
+            voices[slot].angle = TAU * 0.25f; // Zero crossing for triangle
+        } else if (global_wave_type == SAW_RIGHT_WAVE || global_wave_type == SAW_LEFT_WAVE) {
+            voices[slot].angle = TAU * 0.50f; // Zero crossing for sawtooth
+        } else {
+            voices[slot].angle = 0.0f; // Sine and Square start at 0
+        }
+        voices[slot].env_level = 0.0f;
+    }
 
     voices[slot].env_stage = ENVELOPE_ATTACK;
     voices[slot].active = 1;
@@ -398,7 +407,6 @@ void tud_midi_rx_cb(uint8_t itf)
         switch (msg_type)
         {
         case 0x90: // Note On
-            printf("On : %d\n", data1);
             if (data2 > 0) {
                 synth_note_on(data1, data2);
             } else {
@@ -407,7 +415,6 @@ void tud_midi_rx_cb(uint8_t itf)
             break;
 
         case 0x80: // Note Off
-            printf("Off: %d\n", data1);
             synth_note_off(data1);
             break;
 
@@ -427,10 +434,10 @@ void tud_midi_rx_cb(uint8_t itf)
 
 /* USER CODE END 0 */
 
-/**
- * @brief  The application entry point.
- * @retval int
- */
+/*----------------------------------------------------------------------------
+ | @brief  The application entry point.
+ | @retval int
+ ----------------------------------------------------------------------------*/
 int main(void)
 {
 
@@ -475,7 +482,7 @@ int main(void)
     // Initialize TinyUSB Device stack
     tusb_init();
 
-    synth_set_cutoff(2400.0f);
+    synth_set_cutoff(8000.0f);
     synth_set_master_volume(0.5f);
 
     /* USER CODE END 2 */
@@ -492,7 +499,7 @@ int main(void)
 
         // Process audio buffer IMMEDIATELY when requested by ISR
         if (dma_buffer_to_fill != NULL) {
-            int16_t *buf = dma_buffer_to_fill;
+            int16_t *buf = (int16_t*) dma_buffer_to_fill;
             dma_buffer_to_fill = NULL; // Clear flag before processing to prevent double-fills
             process_buffer(buf);
         }
@@ -529,21 +536,21 @@ int main(void)
     /* USER CODE END 3 */
 }
 
-/**
- * @brief System Clock Configuration
- * @retval None
- */
+/*----------------------------------------------------------------------------
+ | @brief System Clock Configuration
+ | @retval None
+ ----------------------------------------------------------------------------*/
 void SystemClock_Config(void)
 {
     RCC_OscInitTypeDef RCC_OscInitStruct = { 0 };
     RCC_ClkInitTypeDef RCC_ClkInitStruct = { 0 };
 
-    /** Configure the main internal regulator output voltage
+    /* Configure the main internal regulator output voltage
      */
     __HAL_RCC_PWR_CLK_ENABLE();
     __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
 
-    /** Initializes the RCC Oscillators according to the specified parameters
+    /* Initializes the RCC Oscillators according to the specified parameters
      * in the RCC_OscInitTypeDef structure.
      */
     RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
@@ -559,7 +566,7 @@ void SystemClock_Config(void)
         Error_Handler();
     }
 
-    /** Initializes the CPU, AHB and APB buses clocks
+    /* Initializes the CPU, AHB and APB buses clocks
      */
     RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK
             | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
@@ -574,11 +581,11 @@ void SystemClock_Config(void)
     }
 }
 
-/**
- * @brief I2S2 Initialization Function
- * @param None
- * @retval None
- */
+/*----------------------------------------------------------------------------
+ | @brief I2S2 Initialization Function
+ | @param None
+ | @retval None
+ ----------------------------------------------------------------------------*/
 static void MX_I2S2_Init(void)
 {
 
@@ -608,11 +615,11 @@ static void MX_I2S2_Init(void)
 
 }
 
-/**
- * @brief TIM6 Initialization Function
- * @param None
- * @retval None
- */
+/*----------------------------------------------------------------------------
+ | @brief TIM6 Initialization Function
+ | @param None
+ | @retval None
+ ----------------------------------------------------------------------------*/
 static void MX_TIM6_Init(void)
 {
 
@@ -646,11 +653,11 @@ static void MX_TIM6_Init(void)
 
 }
 
-/**
- * @brief USART1 Initialization Function
- * @param None
- * @retval None
- */
+/*----------------------------------------------------------------------------
+ | @brief USART1 Initialization Function
+ | @param None
+ | @retval None
+ ----------------------------------------------------------------------------*/
 static void MX_USART1_UART_Init(void)
 {
 
@@ -679,11 +686,11 @@ static void MX_USART1_UART_Init(void)
 
 }
 
-/**
- * @brief USB_OTG_FS Initialization Function
- * @param None
- * @retval None
- */
+/*----------------------------------------------------------------------------
+ | @brief USB_OTG_FS Initialization Function
+ | @param None
+ | @retval None
+ ----------------------------------------------------------------------------*/
 static void MX_USB_OTG_FS_PCD_Init(void)
 {
 
@@ -714,9 +721,9 @@ static void MX_USB_OTG_FS_PCD_Init(void)
 
 }
 
-/**
- * Enable DMA controller clock
- */
+/*----------------------------------------------------------------------------
+ | Enable DMA controller clock
+ ----------------------------------------------------------------------------*/
 static void MX_DMA_Init(void)
 {
 
@@ -730,11 +737,11 @@ static void MX_DMA_Init(void)
 
 }
 
-/**
- * @brief GPIO Initialization Function
- * @param None
- * @retval None
- */
+/*----------------------------------------------------------------------------
+ | @brief GPIO Initialization Function
+ | @param None
+ | @retval None
+ ----------------------------------------------------------------------------*/
 static void MX_GPIO_Init(void)
 {
     GPIO_InitTypeDef GPIO_InitStruct = { 0 };
@@ -777,10 +784,10 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE END 4 */
 
-/**
- * @brief  This function is executed in case of error occurrence.
- * @retval None
- */
+/*----------------------------------------------------------------------------
+ | @brief  This function is executed in case of error occurrence.
+ | @retval None
+ ----------------------------------------------------------------------------*/
 void Error_Handler(void)
 {
     /* USER CODE BEGIN Error_Handler_Debug */
@@ -791,14 +798,15 @@ void Error_Handler(void)
     }
     /* USER CODE END Error_Handler_Debug */
 }
+
 #ifdef USE_FULL_ASSERT
-/**
-  * @brief  Reports the name of the source file and the source line number
-  *         where the assert_param error has occurred.
-  * @param  file: pointer to the source file name
-  * @param  line: assert_param error line source number
-  * @retval None
-  */
+/*----------------------------------------------------------------------------
+ | @brief  Reports the name of the source file and the source line number
+ |         where the assert_param error has occurred.
+ | @param  file: pointer to the source file name
+ | @param  line: assert_param error line source number
+ | @retval None
+ ----------------------------------------------------------------------------*/
 void assert_failed(uint8_t *file, uint32_t line)
 {
   /* USER CODE BEGIN 6 */
