@@ -116,10 +116,12 @@ static void MX_TIM6_Init(void);
 int __io_putchar(int ch) {
     if (ch == '\n') {
         HAL_UART_Transmit(&huart1, (uint8_t*) "\r", 1, HAL_MAX_DELAY);
+        ITM_SendChar('\r');
     }
     if (HAL_UART_Transmit(&huart1, (uint8_t*) &ch, 1, HAL_MAX_DELAY) != HAL_OK) {
         return -1;
     }
+    ITM_SendChar(ch);
     return ch;
 }
 
