@@ -58,17 +58,14 @@ static void MX_USART1_UART_Init(void);
 /* USER CODE BEGIN 0 */
 
 // Send printf to uart1
-int _write(int fd, char *ptr, int len) {
-    HAL_StatusTypeDef hstatus;
-
-    if (fd == 1 || fd == 2) {
-        hstatus = HAL_UART_Transmit(&huart1, (uint8_t*) ptr, len, HAL_MAX_DELAY);
-        if (hstatus == HAL_OK)
-            return len;
-        else
-            return -1;
+int __io_putchar(int ch) {
+    if (ch == '\n') {
+        HAL_UART_Transmit(&huart1, (uint8_t*) "\r", 1, HAL_MAX_DELAY);
     }
-    return -1;
+    if (HAL_UART_Transmit(&huart1, (uint8_t*) &ch, 1, HAL_MAX_DELAY) != HAL_OK) {
+        return -1;
+    }
+    return ch;
 }
 
 /* USER CODE END 0 */
@@ -105,7 +102,7 @@ int main(void)
     MX_USART1_UART_Init();
     /* USER CODE BEGIN 2 */
 
-    printf("\r\n\r\n\r\n\r\n--------\r\nStarting\r\n");
+    printf("\n\n\n\n--------\nStarting\n");
 
     /* USER CODE END 2 */
 
@@ -116,8 +113,7 @@ int main(void)
 
     while (1) {
 
-        //now = uwTick;
-        now = HAL_GetTick();
+        now = uwTick;
 
         if (now >= next_blink) {
             HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
@@ -126,7 +122,7 @@ int main(void)
 
         if (now >= next_tick) {
 
-            printf("Tick %lu (loop = %lu)\r\n", now / 1000, loop_cnt);
+            printf("Tick %lu (loop = %lu)\n", now / 1000, loop_cnt);
 
             loop_cnt = 0;
             next_tick = now + 1000;
