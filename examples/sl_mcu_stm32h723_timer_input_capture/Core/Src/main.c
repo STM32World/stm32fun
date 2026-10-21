@@ -52,7 +52,6 @@ UART_HandleTypeDef huart1;
 
 // Define some test pwm values - first column is prescaler value for pwm and second row is duty cycle (of 1000)
 const uint32_t pwm_vals[][2] = {
-        //{ 0, 50 },
         { 20000 - 1, 55 },
         { 20000 - 1, 275 },
         { 20000 - 1, 495 },
@@ -80,12 +79,6 @@ const uint32_t pwm_vals[][2] = {
         { 50 - 1, 55 },
         { 50 - 1, 275 },
         { 50 - 1, 495 },
-        { 10 - 1, 55 },
-        { 10 - 1, 275 },
-        { 10 - 1, 495 },
-        { 5 - 1, 55 },
-        { 5 - 1, 275 },
-        { 5 - 1, 495 },
 };
 
 // Used to cycle around the pwm values
@@ -335,7 +328,7 @@ static void MX_TIM2_Init(void)
     htim2.Init.Prescaler = 0;
     htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
     htim2.Init.Period = 4294967295;
-    htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+    htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV2;
     htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
     if (HAL_TIM_Base_Init(&htim2) != HAL_OK)
             {
