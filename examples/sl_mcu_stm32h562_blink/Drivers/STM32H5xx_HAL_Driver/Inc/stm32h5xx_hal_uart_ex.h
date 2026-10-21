@@ -201,7 +201,8 @@ HAL_UART_RxEventTypeTypeDef HAL_UARTEx_GetRxEventType(const UART_HandleTypeDef *
   * @param  __CLOCKSOURCE__ output variable.
   * @retval UART clocking source, written in __CLOCKSOURCE__.
   */
-#if (defined(STM32H573xx) || defined(STM32H563xx) || defined(STM32H562xx))
+#if defined(STM32H573xx) || defined(STM32H563xx) || defined(STM32H562xx) \
+ || defined(STM32H5E4xx) || defined(STM32H5E5xx) || defined(STM32H5F4xx) || defined(STM32H5F5xx)
 #define UART_GETCLOCKSOURCE(__HANDLE__,__CLOCKSOURCE__)           \
   do {                                                            \
     if((__HANDLE__)->Instance == USART1)                          \
@@ -297,6 +298,50 @@ HAL_UART_RxEventTypeTypeDef HAL_UARTEx_GetRxEventType(const UART_HandleTypeDef *
       (__CLOCKSOURCE__) = 0U;                                     \
     }                                                             \
   } while(0U)
+#elif (defined(STM32H553xx) || defined(STM32H543xx))
+#define UART_GETCLOCKSOURCE(__HANDLE__,__CLOCKSOURCE__)           \
+  do {                                                            \
+    if((__HANDLE__)->Instance == USART1)                          \
+    {                                                             \
+      (__CLOCKSOURCE__) = (uint32_t)RCC_PERIPHCLK_USART1;         \
+    }                                                             \
+    else if((__HANDLE__)->Instance == USART2)                     \
+    {                                                             \
+      (__CLOCKSOURCE__) = (uint32_t)RCC_PERIPHCLK_USART2;         \
+    }                                                             \
+    else if((__HANDLE__)->Instance == USART3)                     \
+    {                                                             \
+      (__CLOCKSOURCE__) = (uint32_t)RCC_PERIPHCLK_USART3;         \
+    }                                                             \
+    else if((__HANDLE__)->Instance == UART4)                      \
+    {                                                             \
+      (__CLOCKSOURCE__) = (uint32_t)RCC_PERIPHCLK_UART4;          \
+    }                                                             \
+    else if((__HANDLE__)->Instance == UART5)                      \
+    {                                                             \
+      (__CLOCKSOURCE__) = (uint32_t)RCC_PERIPHCLK_UART5;          \
+    }                                                             \
+    else if((__HANDLE__)->Instance == USART6)                     \
+    {                                                             \
+      (__CLOCKSOURCE__) = (uint32_t)RCC_PERIPHCLK_USART6;         \
+    }                                                             \
+    else if((__HANDLE__)->Instance == UART7)                      \
+    {                                                             \
+      (__CLOCKSOURCE__) = (uint32_t)RCC_PERIPHCLK_UART7;          \
+    }                                                             \
+    else if((__HANDLE__)->Instance == UART8)                      \
+    {                                                             \
+      (__CLOCKSOURCE__) = (uint32_t)RCC_PERIPHCLK_UART8;          \
+    }                                                             \
+    else if((__HANDLE__)->Instance == LPUART1)                    \
+    {                                                             \
+      (__CLOCKSOURCE__) = (uint32_t)RCC_PERIPHCLK_LPUART1;        \
+    }                                                             \
+    else                                                          \
+    {                                                             \
+      (__CLOCKSOURCE__) = 0U;                                     \
+    }                                                             \
+  } while(0U)
 #else
 #define UART_GETCLOCKSOURCE(__HANDLE__,__CLOCKSOURCE__)           \
   do {                                                            \
@@ -321,7 +366,9 @@ HAL_UART_RxEventTypeTypeDef HAL_UARTEx_GetRxEventType(const UART_HandleTypeDef *
       (__CLOCKSOURCE__) = 0U;                                     \
     }                                                             \
   } while(0U)
-#endif /* (defined(STM32H573xx) || defined(STM32H563xx) || defined(STM32H562xx) */
+#endif /* defined(STM32H573xx) || defined(STM32H563xx) || defined(STM32H562xx) ||
+        * defined(STM32H5E4xx) || defined(STM32H5E5xx) || defined(STM32H5F4xx) || defined(STM32H5F5xx)
+        */
 
 
 /** @brief  Report the UART mask to apply to retrieve the received data
