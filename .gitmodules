@@ -22,3 +22,7 @@
 	path = CMSIS-DSP
 	url = git@github.com:ARM-software/CMSIS-DSP.git
 	branch = main
+[submodule "ioLibrary_Driver"]
+	path = ioLibrary_Driver
+	url = git@github.com:Wiznet/ioLibrary_Driver.git
+	branch = master
