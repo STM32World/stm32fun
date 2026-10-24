@@ -14,7 +14,6 @@ void W5500_HardwareReset(void) {
     HAL_GPIO_WritePin(W5500_RST_GPIO_Port, W5500_RST_Pin, GPIO_PIN_SET);
     HAL_Delay(50);
 #else
-    // Software reset via PHY control if no HW reset pin mapped
     wizchip_sw_reset();
 #endif
 }
@@ -29,16 +28,18 @@ void W5500_Unselect(void) {
 
 uint8_t W5500_ReadByte(void) {
     uint8_t rx_data = 0;
-    uint8_t tx_data = 0xFF; // Dummy byte to generate SPI clock
+    uint8_t tx_data = 0xFF;
     HAL_SPI_TransmitReceive(&hspi1, &tx_data, &rx_data, 1, HAL_MAX_DELAY);
     return rx_data;
 }
 
 void W5500_WriteByte(uint8_t byte) {
-    HAL_SPI_Transmit(&hspi1, &byte, 1, HAL_MAX_DELAY);
+    uint8_t dummy_rx;
+    HAL_SPI_TransmitReceive(&hspi1, &byte, &dummy_rx, 1, HAL_MAX_DELAY);
 }
 
 void W5500_ReadBurst(uint8_t *pBuf, uint16_t len) {
+    // HAL_SPI_Receive automatically handles transmit clocking on STM32H7
     HAL_SPI_Receive(&hspi1, pBuf, len, HAL_MAX_DELAY);
 }
 

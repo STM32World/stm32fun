@@ -1,17 +1,17 @@
 /* USER CODE BEGIN Header */
 /**
  ******************************************************************************
- * @file           : main.c
- * @brief          : Main program body
+- @file           : main.c
+- @brief          : Main program body
  ******************************************************************************
- * @attention
+- @attention
  *
- * Copyright (c) 2026 STM32World <lth@stm32world.com>
- * All rights reserved.
+- Copyright (c) 2026 STM32World <lth@stm32world.com>
+- All rights reserved.
  *
- * This software is licensed under terms that can be found in the LICENSE file
- * in the root directory of this software component.
- * If no LICENSE file comes with this software, it is provided AS-IS.
+- This software is licensed under terms that can be found in the LICENSE file
+- in the root directory of this software component.
+- If no LICENSE file comes with this software, it is provided AS-IS.
  *
  ******************************************************************************
  */
@@ -26,6 +26,8 @@
 #include "socket.h"
 #include "w5500_spi.h"
 #include "dhcp.h"
+#include "socket.h"
+//#include "W5500/w5500.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -36,6 +38,8 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 #define DHCP_SOCKET  0  // W5500 Socket 0 reserved for DHCP process
+#define nist_socket      1
+#define nist_port        13
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -70,6 +74,9 @@ static wiz_NetInfo g_net_info = {
         .dhcp = NETINFO_DHCP
 };
 
+// NIST Time Server: time.nist.gov (132.163.96.1)
+static uint8_t nist_server_ip[4] = { 132, 163, 96, 1 };
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -81,14 +88,25 @@ static void MX_CRC_Init(void);
 static void MX_SPI1_Init(void);
 static void MX_TIM4_Init(void);
 /* USER CODE BEGIN PFP */
-
+void Print_Network_Info(void);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
+void Print_Network_Info(void) {
+    wiz_NetInfo netInfo;
+    wizchip_getnetinfo(&netInfo);
+    printf("\n--- Network Configured via DHCP ---\n");
+    printf("IP : %d.%d.%d.%d\n", netInfo.ip[0], netInfo.ip[1], netInfo.ip[2], netInfo.ip[3]);
+    printf("SN : %d.%d.%d.%d\n", netInfo.sn[0], netInfo.sn[1], netInfo.sn[2], netInfo.sn[3]);
+    printf("GW : %d.%d.%d.%d\n", netInfo.gw[0], netInfo.gw[1], netInfo.gw[2], netInfo.gw[3]);
+    printf("DNS: %d.%d.%d.%d\n", netInfo.dns[0], netInfo.dns[1], netInfo.dns[2], netInfo.dns[3]);
+    printf("----------------------------------\n\n");
+}
+
 /**
- * @brief Callback invoked when DHCP successfully retrieves an IP address
+- @brief Callback invoked when DHCP successfully retrieves an IP address
  */
 void Callback_IPAssigned(void) {
     // Retrieve acquired network parameters from DHCP engine
@@ -102,17 +120,20 @@ void Callback_IPAssigned(void) {
     wizchip_setnetinfo(&g_net_info);
 
     dhcp_allocated = 1;
+    printf("[DHCP SUCCESS] IP Address Lease Acquired!\n");
+    Print_Network_Info();
 }
 
 /**
- * @brief Callback invoked if IP conflict is detected on network
+- @brief Callback invoked if IP conflict is detected on network
  */
 void Callback_IPConflict(void) {
     dhcp_allocated = 0;
+    printf("[DHCP ERROR] IP Conflict Detected!\n");
 }
 
 /**
- * @brief Timer Callback - Handles 1-second ticks required by DHCP engine
+- @brief Timer Callback - Handles 1-second ticks required by DHCP engine
  */
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
     if (htim->Instance == TIM4) {
@@ -120,11 +141,64 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
     }
 }
 
+// NIST Time Server: time.nist.gov (132.163.96.1)
+void fetch_nist_daytime(void) {
+    uint8_t rx_buf[128];
+    uint32_t timeout;
+
+    // 1. Ensure socket is closed before starting
+    close(nist_socket);
+
+    // 2. Open TCP socket
+    if (socket(nist_socket, Sn_MR_TCP, 8000, 0) != nist_socket) {
+        printf("[TIME] Failed to open socket\n");
+        return;
+    }
+
+    // 3. Connect to NIST server
+    connect(nist_socket, nist_server_ip, nist_port);
+
+    // 4. Wait for connection to establish (timeout after 2 seconds)
+    timeout = uwTick + 2000;
+    while (getSn_SR(nist_socket) != SOCK_ESTABLISHED) {
+        if (uwTick >= timeout) {
+            printf("[TIME] Connection timeout\n");
+            close(nist_socket);
+            return;
+        }
+    }
+
+    // 5. Wait for NIST server to send daytime payload (timeout after 2 seconds)
+    timeout = uwTick + 2000;
+    while (getSn_RX_RSR(nist_socket) == 0) {
+        if (uwTick >= timeout) {
+            printf("[TIME] Receive timeout\n");
+            close(nist_socket);
+            return;
+        }
+    }
+
+    // 6. Read received time string
+    uint16_t len = getSn_RX_RSR(nist_socket);
+    if (len > sizeof(rx_buf) - 1)
+        len = sizeof(rx_buf) - 1;
+
+    recv(nist_socket, rx_buf, len);
+    rx_buf[len] = '\0';
+
+    printf("[NIST TIME] %s", rx_buf);
+
+    // 7. Clean disconnect and close
+    disconnect(nist_socket);
+    close(nist_socket);
+}
+
 /* USER CODE END 0 */
 
 /**
- * @brief  The application entry point.
- * @retval int
+- @brief  The application entry point.
+- @
+retval int
  */
 int main(void)
 {
@@ -165,32 +239,59 @@ int main(void)
     MX_TIM4_Init();
     /* USER CODE BEGIN 2 */
 
-    printf("\n\n\nStart\n");
+    printf("\n\n\nStart W5500 DHCP Client\n");
 
     // Start 1-second timer interrupt for DHCP timer ticks
     HAL_TIM_Base_Start_IT(&htim4);
+    printf("[SYS] TIM4 started.\n");
 
     // 1. Initialize W5500 hardware and SPI callbacks
     if (W5500_Init(&g_net_info) != 0) {
+        printf("[ERROR] W5500 Init Failed!\n");
         Error_Handler(); // Initialization failed
     }
+
+    printf("[W5500] Init OK. Version Register: 0x%02X\n", getVERSIONR());
 
     // 2. Initialize DHCP Client module
     DHCP_init(DHCP_SOCKET, dhcp_buffer);
 
     // 3. Register DHCP Callbacks
     reg_dhcp_cbfunc(Callback_IPAssigned, Callback_IPAssigned, Callback_IPConflict);
+    printf("[DHCP] Starting DHCP State Machine...\n");
 
     /* USER CODE END 2 */
 
     /* Infinite loop */
     /* USER CODE BEGIN WHILE */
 
-    uint32_t now, loop_cnt = 0, next_blink = 500, next_tick = 1000;
+    uint32_t now, loop_cnt = 0, next_blink = 500, next_tick = 1000, next_time_poll = 10000;
+    uint8_t dhcp_state = 0, last_dhcp_state = 0xFF;
 
     while (1) {
 
         now = uwTick;
+
+        /* Run DHCP state machine: every loop until IP is acquired, then once per second for lease maintenance */
+        if (!dhcp_allocated || (now >= next_tick)) {
+            dhcp_state = DHCP_run();
+
+            if (dhcp_state != last_dhcp_state) {
+                switch (dhcp_state) {
+                case DHCP_RUNNING:
+                    printf("[DHCP] Discovering/Requesting IP...\n");
+                    break;
+                case DHCP_IP_ASSIGN:
+                case DHCP_IP_CHANGED:
+                case DHCP_IP_LEASED:
+                    break;
+                case DHCP_FAILED:
+                    printf("[DHCP] Request Failed!\n");
+                    break;
+                }
+                last_dhcp_state = dhcp_state;
+            }
+        }
 
         if (now >= next_blink) {
             HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
@@ -198,10 +299,16 @@ int main(void)
         }
 
         if (now >= next_tick) {
-            printf("Tick %lu (loop=%lu)\n", now / 1000, loop_cnt);
+            printf("Tick %lu (loop=%lu, dhcp_allocated=%d)\n", now / 1000, loop_cnt, dhcp_allocated);
 
             loop_cnt = 0;
             next_tick = now + 1000;
+        }
+
+        if (dhcp_allocated && (now >= next_time_poll)) {
+            printf("[TIME] Polling NIST Daytime server...\n");
+            fetch_nist_daytime();
+            next_time_poll = now + 10000;
         }
 
         ++loop_cnt;
@@ -214,8 +321,9 @@ int main(void)
 }
 
 /**
- * @brief System Clock Configuration
- * @retval None
+- @brief System Clock Configuration
+- @
+retval None
  */
 void SystemClock_Config(void)
 {
@@ -234,7 +342,7 @@ void SystemClock_Config(void)
     }
 
     /** Initializes the RCC Oscillators according to the specified parameters
-     * in the RCC_OscInitTypeDef structure.
+- in the RCC_OscInitTypeDef structure.
      */
     RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
     RCC_OscInitStruct.HSEState = RCC_HSE_ON;
@@ -273,9 +381,11 @@ void SystemClock_Config(void)
 }
 
 /**
- * @brief CRC Initialization Function
- * @param None
- * @retval None
+- @brief CRC Initialization Function
+- @
+param None
+- @
+retval None
  */
 static void MX_CRC_Init(void)
 {
@@ -304,9 +414,11 @@ static void MX_CRC_Init(void)
 }
 
 /**
- * @brief SPI1 Initialization Function
- * @param None
- * @retval None
+- @brief SPI1 Initialization Function
+- @
+param None
+- @
+retval None
  */
 static void MX_SPI1_Init(void)
 {
@@ -331,7 +443,7 @@ static void MX_SPI1_Init(void)
     hspi1.Init.TIMode = SPI_TIMODE_DISABLE;
     hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
     hspi1.Init.CRCPolynomial = 0x0;
-    hspi1.Init.NSSPMode = SPI_NSS_PULSE_ENABLE;
+    hspi1.Init.NSSPMode = SPI_NSS_PULSE_DISABLE;
     hspi1.Init.NSSPolarity = SPI_NSS_POLARITY_LOW;
     hspi1.Init.FifoThreshold = SPI_FIFO_THRESHOLD_01DATA;
     hspi1.Init.TxCRCInitializationPattern = SPI_CRC_INITIALIZATION_ALL_ZERO_PATTERN;
@@ -352,9 +464,11 @@ static void MX_SPI1_Init(void)
 }
 
 /**
- * @brief TIM4 Initialization Function
- * @param None
- * @retval None
+- @brief TIM4 Initialization Function
+- @
+param None
+- @
+retval None
  */
 static void MX_TIM4_Init(void)
 {
@@ -397,9 +511,11 @@ static void MX_TIM4_Init(void)
 }
 
 /**
- * @brief USART1 Initialization Function
- * @param None
- * @retval None
+- @brief USART1 Initialization Function
+- @
+param None
+- @
+retval None
  */
 static void MX_USART1_UART_Init(void)
 {
@@ -445,9 +561,11 @@ static void MX_USART1_UART_Init(void)
 }
 
 /**
- * @brief GPIO Initialization Function
- * @param None
- * @retval None
+- @brief GPIO Initialization Function
+- @
+param None
+- @
+retval None
  */
 static void MX_GPIO_Init(void)
 {
@@ -463,10 +581,10 @@ static void MX_GPIO_Init(void)
     __HAL_RCC_GPIOB_CLK_ENABLE();
 
     /*Configure GPIO pin Output Level */
-    HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);
+    HAL_GPIO_WritePin(GPIOC, LED_Pin | W5500_RST_Pin, GPIO_PIN_SET);
 
     /*Configure GPIO pin Output Level */
-    HAL_GPIO_WritePin(W5500_RST_GPIO_Port, W5500_RST_Pin, GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(W5500_CS_GPIO_Port, W5500_CS_Pin, GPIO_PIN_SET);
 
     /*Configure GPIO pin : LED_Pin */
     GPIO_InitStruct.Pin = LED_Pin;
@@ -477,8 +595,9 @@ static void MX_GPIO_Init(void)
 
     /*Configure GPIO pin : W5500_CS_Pin */
     GPIO_InitStruct.Pin = W5500_CS_Pin;
-    GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
     HAL_GPIO_Init(W5500_CS_GPIO_Port, &GPIO_InitStruct);
 
     /*Configure GPIO pin : W5500_INT_Pin */
@@ -548,8 +667,9 @@ void MPU_Config(void)
 }
 
 /**
- * @brief  This function is executed in case of error occurrence.
- * @retval None
+- @brief  This function is executed in case of error occurrence.
+- @
+retval None
  */
 void Error_Handler(void)
 {
@@ -563,11 +683,14 @@ void Error_Handler(void)
 }
 #ifdef USE_FULL_ASSERT
 /**
-  * @brief  Reports the name of the source file and the source line number
-  *         where the assert_param error has occurred.
-  * @param  file: pointer to the source file name
-  * @param  line: assert_param error line source number
-  * @retval None
+- @brief  Reports the name of the source file and the source line number
+-         where the assert_param error has occurred.
+- @
+param  file: pointer to the source file name
+- @
+param  line: assert_param error line source number
+- @
+retval None
   */
 void assert_failed(uint8_t *file, uint32_t line)
 {
