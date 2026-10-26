@@ -36,19 +36,20 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-#pragma pack(push, 1)
+
 typedef struct {
     uint32_t magic;          // 4 bytes: Magic identifier (e.g. 0x4150504B / "KAPP")
     uint32_t payload_len;    // 4 bytes: Size of binary firmware in bytes
     uint8_t  signature[64];  // 64 bytes: ECDSA raw signature (32-byte R + 32-byte S)
     uint8_t  reserved[56];   // 56 bytes: Zero padding to align header to 128 bytes
 } Header128_t;
-#pragma pack(pop)
+
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 #define CHUNK_SIZE 512
+#define DFU_BOOT_FLAG 0xDEADBEEF
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -64,6 +65,10 @@ UART_HandleTypeDef huart1;
 PCD_HandleTypeDef hpcd_USB_OTG_FS;
 
 /* USER CODE BEGIN PV */
+
+extern int _bflag;
+uint32_t *dfu_boot_flag;
+
 W25QXX_HandleTypeDef w25qxx;
 
 static uint32_t dfu_bytes_received = 0;
@@ -282,6 +287,12 @@ void tud_dfu_manifest_cb(uint8_t alt) {
     if (verify_flash_firmware_stream(sizeof(Header128_t), header.payload_len, header.signature)) {
         printf("[DFU] SUCCESS: Firmware signature VALID!\n\n");
         tud_dfu_finish_flashing(DFU_STATUS_OK);
+
+        // Reboot into bootloader
+        HAL_Delay(1000);
+        *dfu_boot_flag = DFU_BOOT_FLAG;
+        HAL_NVIC_SystemReset();
+
     } else {
         printf("[DFU] ERROR: Firmware signature INVALID!\n\n");
         tud_dfu_finish_flashing(DFU_STATUS_ERR_VERIFY);
@@ -301,7 +312,7 @@ void tud_dfu_runtime_reboot_to_dfu_cb(void) {
 int main(void)
 {
     /* USER CODE BEGIN 1 */
-
+    dfu_boot_flag = (uint32_t*) (&_bflag); // set in linker script
     /* USER CODE END 1 */
 
     /* MCU Configuration--------------------------------------------------------*/
@@ -327,7 +338,7 @@ int main(void)
 
     /* USER CODE BEGIN 2 */
 
-    printf("\n\n\n\n--------\nApplication\n");
+    printf("\n\n\n\n--------\nApplication test 2\n");
 
     if (w25qxx_init(&w25qxx, &hspi1, SPI1_CS_GPIO_Port, SPI1_CS_Pin) != W25QXX_Ok) {
         printf("W25QXX Error");

@@ -92,6 +92,8 @@
      anywhere in Flash or Sram, else the vector table is kept at the automatic
      remap of boot address selected */
 /* #define USER_VECT_TAB_ADDRESS */
+#define USER_VECT_TAB_ADDRESS
+#define FLASH_BASE 0x8008000
 
 #if defined(USER_VECT_TAB_ADDRESS)
 /*!< Uncomment the following line if you need to relocate your vector Table
