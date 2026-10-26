@@ -1,17 +1,17 @@
 /* USER CODE BEGIN Header */
 /**
  ******************************************************************************
-- @file           : main.c
-- @brief          : Main program body
+ - @file           : main.c
+ - @brief          : Main program body
  ******************************************************************************
-- @attention
+ - @attention
  *
-- Copyright (c) 2026 STM32World <lth@stm32world.com>
-- All rights reserved.
+ - Copyright (c) 2026 STM32World <lth@stm32world.com>
+ - All rights reserved.
  *
-- This software is licensed under terms that can be found in the LICENSE file
-- in the root directory of this software component.
-- If no LICENSE file comes with this software, it is provided AS-IS.
+ - This software is licensed under terms that can be found in the LICENSE file
+ - in the root directory of this software component.
+ - If no LICENSE file comes with this software, it is provided AS-IS.
  *
  ******************************************************************************
  */
@@ -77,6 +77,8 @@ static wiz_NetInfo g_net_info = {
 // NIST Time Server: time.nist.gov (132.163.96.1)
 static uint8_t nist_server_ip[4] = { 132, 163, 96, 1 };
 
+extern uint8_t HOST_NAME[]; // Reference the array inside dhcp.c
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -106,7 +108,7 @@ void Print_Network_Info(void) {
 }
 
 /**
-- @brief Callback invoked when DHCP successfully retrieves an IP address
+ - @brief Callback invoked when DHCP successfully retrieves an IP address
  */
 void Callback_IPAssigned(void) {
     // Retrieve acquired network parameters from DHCP engine
@@ -125,7 +127,7 @@ void Callback_IPAssigned(void) {
 }
 
 /**
-- @brief Callback invoked if IP conflict is detected on network
+ - @brief Callback invoked if IP conflict is detected on network
  */
 void Callback_IPConflict(void) {
     dhcp_allocated = 0;
@@ -133,7 +135,7 @@ void Callback_IPConflict(void) {
 }
 
 /**
-- @brief Timer Callback - Handles 1-second ticks required by DHCP engine
+ - @brief Timer Callback - Handles 1-second ticks required by DHCP engine
  */
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
     if (htim->Instance == TIM4) {
@@ -196,9 +198,9 @@ void fetch_nist_daytime(void) {
 /* USER CODE END 0 */
 
 /**
-- @brief  The application entry point.
-- @
-retval int
+ - @brief  The application entry point.
+ - @
+ retval int
  */
 int main(void)
 {
@@ -245,7 +247,7 @@ int main(void)
     HAL_TIM_Base_Start_IT(&htim4);
     printf("[SYS] TIM4 started.\n");
 
-    // 1. Initialize W5500 hardware and SPI callbacks
+    // Initialize W5500 hardware and SPI callbacks
     if (W5500_Init(&g_net_info) != 0) {
         printf("[ERROR] W5500 Init Failed!\n");
         Error_Handler(); // Initialization failed
@@ -253,10 +255,10 @@ int main(void)
 
     printf("[W5500] Init OK. Version Register: 0x%02X\n", getVERSIONR());
 
-    // 2. Initialize DHCP Client module
+    // Initialize DHCP Client module
     DHCP_init(DHCP_SOCKET, dhcp_buffer);
 
-    // 3. Register DHCP Callbacks
+    // Register DHCP Callbacks
     reg_dhcp_cbfunc(Callback_IPAssigned, Callback_IPAssigned, Callback_IPConflict);
     printf("[DHCP] Starting DHCP State Machine...\n");
 
@@ -282,8 +284,8 @@ int main(void)
                     printf("[DHCP] Discovering/Requesting IP...\n");
                     break;
                 case DHCP_IP_ASSIGN:
-                case DHCP_IP_CHANGED:
-                case DHCP_IP_LEASED:
+                    case DHCP_IP_CHANGED:
+                    case DHCP_IP_LEASED:
                     break;
                 case DHCP_FAILED:
                     printf("[DHCP] Request Failed!\n");
@@ -321,9 +323,9 @@ int main(void)
 }
 
 /**
-- @brief System Clock Configuration
-- @
-retval None
+ - @brief System Clock Configuration
+ - @
+ retval None
  */
 void SystemClock_Config(void)
 {
@@ -342,7 +344,7 @@ void SystemClock_Config(void)
     }
 
     /** Initializes the RCC Oscillators according to the specified parameters
-- in the RCC_OscInitTypeDef structure.
+     - in the RCC_OscInitTypeDef structure.
      */
     RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
     RCC_OscInitStruct.HSEState = RCC_HSE_ON;
@@ -381,11 +383,11 @@ void SystemClock_Config(void)
 }
 
 /**
-- @brief CRC Initialization Function
-- @
-param None
-- @
-retval None
+ - @brief CRC Initialization Function
+ - @
+ param None
+ - @
+ retval None
  */
 static void MX_CRC_Init(void)
 {
@@ -414,11 +416,11 @@ static void MX_CRC_Init(void)
 }
 
 /**
-- @brief SPI1 Initialization Function
-- @
-param None
-- @
-retval None
+ - @brief SPI1 Initialization Function
+ - @
+ param None
+ - @
+ retval None
  */
 static void MX_SPI1_Init(void)
 {
@@ -464,11 +466,11 @@ static void MX_SPI1_Init(void)
 }
 
 /**
-- @brief TIM4 Initialization Function
-- @
-param None
-- @
-retval None
+ - @brief TIM4 Initialization Function
+ - @
+ param None
+ - @
+ retval None
  */
 static void MX_TIM4_Init(void)
 {
@@ -511,11 +513,11 @@ static void MX_TIM4_Init(void)
 }
 
 /**
-- @brief USART1 Initialization Function
-- @
-param None
-- @
-retval None
+ - @brief USART1 Initialization Function
+ - @
+ param None
+ - @
+ retval None
  */
 static void MX_USART1_UART_Init(void)
 {
@@ -561,11 +563,11 @@ static void MX_USART1_UART_Init(void)
 }
 
 /**
-- @brief GPIO Initialization Function
-- @
-param None
-- @
-retval None
+ - @brief GPIO Initialization Function
+ - @
+ param None
+ - @
+ retval None
  */
 static void MX_GPIO_Init(void)
 {
@@ -667,9 +669,9 @@ void MPU_Config(void)
 }
 
 /**
-- @brief  This function is executed in case of error occurrence.
-- @
-retval None
+ - @brief  This function is executed in case of error occurrence.
+ - @
+ retval None
  */
 void Error_Handler(void)
 {
