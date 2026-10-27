@@ -37,7 +37,7 @@
 ENTRY(Reset_Handler)
 
 /* Highest address of the user mode stack.
- * Some of the arm libraries requie 8 byte allignment - hence 8 even though we only need 4.  
+ * Some of the arm libraries requie 8 byte alignment - hence 8 even though we only need 4.  
  */
 _bflag = ORIGIN(RAM) + LENGTH(RAM) - 8; /* end of "RAM" Ram type memory */
 _estack = _bflag;
@@ -49,8 +49,8 @@ _Min_Stack_Size = 0x400; /* required amount of stack */
 MEMORY
 {
   CCMRAM    (xrw)    : ORIGIN = 0x10000000,   LENGTH = 64K
-  RAM    (xrw)    : ORIGIN = 0x20000000,   LENGTH = 128K
-  FLASH    (rx)    : ORIGIN = 0x8008000,   LENGTH = 480K
+  RAM       (xrw)    : ORIGIN = 0x20000000,   LENGTH = 128K
+  FLASH     (rx)     : ORIGIN = 0x8008000,    LENGTH = 480K
 }
 
 /* Sections */

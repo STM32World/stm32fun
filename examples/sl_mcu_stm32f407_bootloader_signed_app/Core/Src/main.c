@@ -67,12 +67,14 @@ PCD_HandleTypeDef hpcd_USB_OTG_FS;
 /* USER CODE BEGIN PV */
 
 extern int _bflag;
-uint32_t *dfu_boot_flag;
+volatile static uint32_t *dfu_boot_flag;
 
 W25QXX_HandleTypeDef w25qxx;
 
 static uint32_t dfu_bytes_received = 0;
 static uint32_t last_erased_sector_addr = 0xFFFFFFFF;
+
+static uint8_t do_boot = 0;
 
 static const char *PUBLIC_KEY_PEM =
     "-----BEGIN PUBLIC KEY-----\n"
@@ -289,9 +291,7 @@ void tud_dfu_manifest_cb(uint8_t alt) {
         tud_dfu_finish_flashing(DFU_STATUS_OK);
 
         // Reboot into bootloader
-        HAL_Delay(1000);
-        *dfu_boot_flag = DFU_BOOT_FLAG;
-        HAL_NVIC_SystemReset();
+        do_boot = 1;
 
     } else {
         printf("[DFU] ERROR: Firmware signature INVALID!\n\n");
@@ -368,6 +368,16 @@ int main(void)
     while (1) {
 
         now = uwTick;
+
+        if (do_boot) {
+            // Wait a bit until the dfu usb is finished
+            uint32_t wait_end = uwTick + 1500;
+            while (uwTick <= wait_end) { tud_task(); }
+
+            // Boot into the bootloader
+            *dfu_boot_flag = DFU_BOOT_FLAG;
+            HAL_NVIC_SystemReset();
+        }
 
         if (now >= next_blink) {
             HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
