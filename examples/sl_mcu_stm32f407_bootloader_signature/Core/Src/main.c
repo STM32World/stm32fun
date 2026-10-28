@@ -293,7 +293,7 @@ void tud_dfu_manifest_cb(uint8_t alt) {
         printf("[DFU] ERROR: Firmware signature INVALID!\n\n");
         tud_dfu_finish_flashing(DFU_STATUS_ERR_VERIFY);
     }
-    
+
 }
 
 void tud_dfu_runtime_reboot_to_dfu_cb(void) {
@@ -334,7 +334,7 @@ int main(void)
 
     /* USER CODE BEGIN 2 */
 
-    printf("\n\n\n\n--------\nApplication\n");
+    printf("\n\n\n\n--------\nApplication Standalone\n");
 
     if (w25qxx_init(&w25qxx, &hspi1, SPI1_CS_GPIO_Port, SPI1_CS_Pin) != W25QXX_Ok) {
         printf("W25QXX Error");
