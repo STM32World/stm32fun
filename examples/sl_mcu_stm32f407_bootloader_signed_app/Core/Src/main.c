@@ -40,8 +40,8 @@
 typedef struct {
     uint32_t magic;          // 4 bytes: Magic identifier (e.g. 0x4150504B / "KAPP")
     uint32_t payload_len;    // 4 bytes: Size of binary firmware in bytes
-    uint8_t  signature[64];  // 64 bytes: ECDSA raw signature (32-byte R + 32-byte S)
-    uint8_t  reserved[56];   // 56 bytes: Zero padding to align header to 128 bytes
+    uint8_t signature[64];  // 64 bytes: ECDSA raw signature (32-byte R + 32-byte S)
+    uint8_t reserved[56];   // 56 bytes: Zero padding to align header to 128 bytes
 } Header128_t;
 
 /* USER CODE END PTD */
@@ -77,10 +77,10 @@ static uint32_t last_erased_sector_addr = 0xFFFFFFFF;
 static uint8_t do_boot = 0;
 
 static const char *PUBLIC_KEY_PEM =
-    "-----BEGIN PUBLIC KEY-----\n"
-    "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE/TvaaBFk8lA2UK6vEFBSNEIluTsx\n"
-    "vgLjSyEFtuQmGuPXHu4Qaa7d4DkQgQ1cXTG1jOtfXUym4S4ddeaSyJtTGg==\n"
-    "-----END PUBLIC KEY-----\n";
+        "-----BEGIN PUBLIC KEY-----\n"
+                "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE/TvaaBFk8lA2UK6vEFBSNEIluTsx\n"
+                "vgLjSyEFtuQmGuPXHu4Qaa7d4DkQgQ1cXTG1jOtfXUym4S4ddeaSyJtTGg==\n"
+                "-----END PUBLIC KEY-----\n";
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -120,7 +120,7 @@ static size_t raw_sig_to_der(const uint8_t *raw_sig, uint8_t *der_buf, size_t de
     mbedtls_mpi_init(&s);
 
     if (mbedtls_mpi_read_binary(&r, raw_sig, 32) == 0 &&
-        mbedtls_mpi_read_binary(&s, raw_sig + 32, 32) == 0) {
+            mbedtls_mpi_read_binary(&s, raw_sig + 32, 32) == 0) {
 
         MBEDTLS_ASN1_CHK_ADD(len, mbedtls_asn1_write_mpi(&p, der_buf, &s));
         MBEDTLS_ASN1_CHK_ADD(len, mbedtls_asn1_write_mpi(&p, der_buf, &r));
@@ -162,8 +162,10 @@ bool verify_flash_firmware_stream(uint32_t flash_payload_addr, size_t payload_le
 
     do {
         const mbedtls_md_info_t *md_info = mbedtls_md_info_from_type(MBEDTLS_MD_SHA256);
-        if ((ret = mbedtls_md_setup(&md_ctx, md_info, 0)) != 0) break;
-        if ((ret = mbedtls_md_starts(&md_ctx)) != 0) break;
+        if ((ret = mbedtls_md_setup(&md_ctx, md_info, 0)) != 0)
+            break;
+        if ((ret = mbedtls_md_starts(&md_ctx)) != 0)
+            break;
 
         size_t bytes_remaining = payload_len;
         uint32_t current_flash_addr = flash_payload_addr;
@@ -173,16 +175,19 @@ bool verify_flash_firmware_stream(uint32_t flash_payload_addr, size_t payload_le
 
             w25qxx_read(&w25qxx, current_flash_addr, ram_buffer, bytes_to_read);
 
-            if ((ret = mbedtls_md_update(&md_ctx, ram_buffer, bytes_to_read)) != 0) break;
+            if ((ret = mbedtls_md_update(&md_ctx, ram_buffer, bytes_to_read)) != 0)
+                break;
 
             current_flash_addr += bytes_to_read;
             bytes_remaining -= bytes_to_read;
         }
-        if (ret != 0) break;
+        if (ret != 0)
+            break;
 
-        if ((ret = mbedtls_md_finish(&md_ctx, hash)) != 0) break;
+        if ((ret = mbedtls_md_finish(&md_ctx, hash)) != 0)
+            break;
 
-        ret = mbedtls_pk_parse_public_key(&pk_ctx, (const uint8_t *)PUBLIC_KEY_PEM, strlen(PUBLIC_KEY_PEM) + 1);
+        ret = mbedtls_pk_parse_public_key(&pk_ctx, (const uint8_t*) PUBLIC_KEY_PEM, strlen(PUBLIC_KEY_PEM) + 1);
         if (ret != 0) {
             printf("[VERIFY] Public key parse failed: -0x%04X\n", -ret);
             break;
@@ -338,7 +343,7 @@ int main(void)
 
     /* USER CODE BEGIN 2 */
 
-    printf("\n\n\n\n--------\nApplication test 2\n");
+    printf("\n\n\n\n--------\nApplication test\n");
 
     if (w25qxx_init(&w25qxx, &hspi1, SPI1_CS_GPIO_Port, SPI1_CS_Pin) != W25QXX_Ok) {
         printf("W25QXX Error");
@@ -372,7 +377,9 @@ int main(void)
         if (do_boot) {
             // Wait a bit until the dfu usb is finished
             uint32_t wait_end = uwTick + 1500;
-            while (uwTick <= wait_end) { tud_task(); }
+            while (uwTick <= wait_end) {
+                tud_task();
+            }
 
             // Boot into the bootloader
             *dfu_boot_flag = DFU_BOOT_FLAG;
@@ -424,7 +431,7 @@ void SystemClock_Config(void)
     RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
     RCC_OscInitStruct.PLL.PLLQ = 7;
     if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
-    {
+            {
         Error_Handler();
     }
 
@@ -436,7 +443,7 @@ void SystemClock_Config(void)
     RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
 
     if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_5) != HAL_OK)
-    {
+            {
         Error_Handler();
     }
 }
@@ -461,7 +468,7 @@ static void MX_SPI1_Init(void)
     hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
     hspi1.Init.CRCPolynomial = 10;
     if (HAL_SPI_Init(&hspi1) != HAL_OK)
-    {
+            {
         Error_Handler();
     }
 }
@@ -482,7 +489,7 @@ static void MX_USART1_UART_Init(void)
     huart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
     huart1.Init.OverSampling = UART_OVERSAMPLING_8;
     if (HAL_UART_Init(&huart1) != HAL_OK)
-    {
+            {
         Error_Handler();
     }
 }
@@ -505,7 +512,7 @@ static void MX_USB_OTG_FS_PCD_Init(void)
     hpcd_USB_OTG_FS.Init.vbus_sensing_enable = DISABLE;
     hpcd_USB_OTG_FS.Init.use_dedicated_ep1 = DISABLE;
     if (HAL_PCD_Init(&hpcd_USB_OTG_FS) != HAL_OK)
-    {
+            {
         Error_Handler();
     }
 }

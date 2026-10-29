@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>sl_mcu_stm32f407_w5500_ping</name>
+	<name>sl_mcu_stm32h723_mbedtls</name>
 	<comment></comment>
 	<projects>
 	</projects>
