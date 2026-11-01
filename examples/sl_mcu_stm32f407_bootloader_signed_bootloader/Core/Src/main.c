@@ -44,9 +44,13 @@ typedef void (*pFunction)(void);
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+
+// #define printf(...)      // Nuke printf to save space
+
 #define DFU_BOOT_FLAG 0xDEADBEEF
 #define APP_ADDRESS 0x08008000
 #define CHUNK_SIZE 512
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -168,7 +172,8 @@ int main(void)
             JumpToApplication = (pFunction) JumpAddress;
 
             /* Initialize user application's Stack Pointer */
-            __set_MSP(*(__IO uint32_t*) APP_ADDRESS);
+            //__set_MSP(*(__IO uint32_t*) APP_ADDRESS); // Shouldn't be necessary as it is already correct
+
             JumpToApplication();
         }
 
@@ -239,6 +244,7 @@ int main(void)
 
             printf("[BOOT] Firmware update complete. Rebooting MCU...\n");
             HAL_NVIC_SystemReset();
+
         } else {
             printf("[BOOT] ERROR: Failed to write internal flash!\n");
         }
