@@ -297,6 +297,7 @@ void tud_dfu_manifest_cb(uint8_t alt) {
 }
 
 void tud_dfu_runtime_reboot_to_dfu_cb(void) {
+
 }
 
 /* USER CODE END 0 */
