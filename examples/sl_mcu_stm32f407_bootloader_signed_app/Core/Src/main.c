@@ -50,6 +50,7 @@ typedef struct {
 /* USER CODE BEGIN PD */
 #define CHUNK_SIZE 512
 #define DFU_BOOT_FLAG 0xDEADBEEF
+#define FIRMWARE_MAGIC 0x4150504B
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -220,9 +221,20 @@ void tud_dfu_download_cb(uint8_t alt, uint16_t block_num, uint8_t const *data, u
         dfu_bytes_received = 0;
         last_erased_sector_addr = 0xFFFFFFFF;
         printf("\n[DFU] Download started...\n");
+
+        // Since first block - let's check the magic marker is as expected or fail immediately
+        if (length > 0) {
+            uint32_t *magic = (uint32_t*) data;
+            if (*magic != FIRMWARE_MAGIC) {
+                printf("Magic failed = 0x%lx\n", *magic);
+                tud_dfu_finish_flashing(DFU_STATUS_ERR_VERIFY);
+            }
+        }
+
     }
 
     if (length > 0) {
+
         uint32_t current_sector = flash_addr & ~(w25qxx.sector_size - 1);
 
         if (current_sector != last_erased_sector_addr) {
@@ -343,7 +355,7 @@ int main(void)
 
     /* USER CODE BEGIN 2 */
 
-    printf("\n\n\n\n--------\nApplication test 2\n");
+    printf("\n\n\n\n--------\nApplication test\n");
 
     if (w25qxx_init(&w25qxx, &hspi1, SPI1_CS_GPIO_Port, SPI1_CS_Pin) != W25QXX_Ok) {
         printf("W25QXX Error");
