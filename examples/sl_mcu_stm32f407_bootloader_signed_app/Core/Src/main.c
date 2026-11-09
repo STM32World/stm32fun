@@ -343,7 +343,7 @@ int main(void)
 
     /* USER CODE BEGIN 2 */
 
-    printf("\n\n\n\n--------\nApplication test\n");
+    printf("\n\n\n\n--------\nApplication test 2\n");
 
     if (w25qxx_init(&w25qxx, &hspi1, SPI1_CS_GPIO_Port, SPI1_CS_Pin) != W25QXX_Ok) {
         printf("W25QXX Error");

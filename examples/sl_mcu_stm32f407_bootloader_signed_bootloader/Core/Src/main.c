@@ -172,7 +172,7 @@ int main(void)
             JumpToApplication = (pFunction) JumpAddress;
 
             /* Initialize user application's Stack Pointer */
-            //__set_MSP(*(__IO uint32_t*) APP_ADDRESS); // Shouldn't be necessary as it is already correct
+            __set_MSP(*(__IO uint32_t*) APP_ADDRESS);
 
             JumpToApplication();
         }
