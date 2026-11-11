@@ -65,6 +65,7 @@ int __io_putchar(int ch) {
     if (HAL_UART_Transmit(&huart1, (uint8_t*) &ch, 1, HAL_MAX_DELAY) != HAL_OK) {
         return -1;
     }
+    ITM_SendChar(ch);
     return ch;
 }
 
