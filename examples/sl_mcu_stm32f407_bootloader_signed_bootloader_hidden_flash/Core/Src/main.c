@@ -47,7 +47,10 @@ typedef void (*pFunction)(void);
 // #define printf(...)      // Nuke printf to save space
 #define DFU_BOOT_FLAG 0xDEADBEEF
 #define APP_ADDRESS 0x08008000
-#define CHUNK_SIZE 512
+#define FIRMWARE_MAGIC 0x4150504B
+#define STAGING_ADDRESS 0x08080000              // Sector 8 - start of the hidden upper 512 kB
+#define STAGING_SECTOR FLASH_SECTOR_8
+#define APP_MAX_SIZE (480 * 1024)               // Sectors 2-7
 
 /* USER CODE END PD */
 
@@ -60,8 +63,6 @@ typedef void (*pFunction)(void);
 UART_HandleTypeDef huart1;
 
 /* USER CODE BEGIN PV */
-W25QXX_HandleTypeDef w25qxx;
-
 extern int _bflag;
 uint32_t *dfu_boot_flag;
 pFunction JumpToApplication;
@@ -75,7 +76,8 @@ static void MX_GPIO_Init(void);
 static void MX_USART1_UART_Init(void);
 /* USER CODE BEGIN PFP */
 
-static bool flash_stm32_app(uint32_t src_flash_addr, uint32_t dst_stm32_addr, uint32_t length);
+static bool flash_stm32_app(uint32_t src_addr, uint32_t dst_addr, uint32_t length);
+static bool erase_staging(void);
 
 /* USER CODE END PFP */
 
@@ -94,53 +96,62 @@ int __io_putchar(int ch) {
 }
 
 /**
- * @brief Erases STM32 internal flash sectors and programs payload from external W25Qxx SPI flash
+ * @brief Erases the application sectors (2-7) and copies the payload from the hidden staging area
  */
-static bool flash_stm32_app(uint32_t src_flash_addr, uint32_t dst_stm32_addr, uint32_t length) {
-    uint8_t buffer[CHUNK_SIZE];
-    uint32_t bytes_written = 0;
+static bool flash_stm32_app(uint32_t src_addr, uint32_t dst_addr, uint32_t length) {
 
     HAL_FLASH_Unlock();
 
-    // Erase STM32 internal Flash sectors for Application space (Sector 2 through 11 for STM32F407 1MB)
+    // Erase application sectors only (2-7) - sectors 8-11 hold the staged image
     FLASH_EraseInitTypeDef EraseInitStruct;
     uint32_t SectorError = 0;
 
     EraseInitStruct.TypeErase = FLASH_TYPEERASE_SECTORS;
     EraseInitStruct.VoltageRange = FLASH_VOLTAGE_RANGE_3;
     EraseInitStruct.Sector = FLASH_SECTOR_2; // Sector 2 starts at 0x08008000
-    EraseInitStruct.NbSectors = 10;            // Erase all upper sectors allocated for app
+    EraseInitStruct.NbSectors = 6;           // Sectors 2-7, up to 0x0807FFFF
 
-    printf("[BOOT] Erasing STM32 internal Flash starting at Sector 2...\n");
+    printf("[BOOT] Erasing STM32 internal Flash sectors 2-7...\n");
     if (HAL_FLASHEx_Erase(&EraseInitStruct, &SectorError) != HAL_OK) {
         printf("[BOOT] Error erasing internal flash sector %lu!\n", SectorError);
         HAL_FLASH_Lock();
         return false;
     }
-    printf("[BOOT] STM32 internal Flash erased successfully.\n");
 
-    // Copy payload from SPI Flash to STM32 Internal Flash
-    printf("[BOOT] Copying firmware to internal Flash (Address 0x%08lX, %lu bytes)...\n", dst_stm32_addr, length);
-    while (bytes_written < length) {
-        uint32_t chunk_len = (length - bytes_written < CHUNK_SIZE) ? (length - bytes_written) : CHUNK_SIZE;
-
-        w25qxx_read(&w25qxx, src_flash_addr + bytes_written, buffer, chunk_len);
-
-        for (uint32_t i = 0; i < chunk_len; i++) {
-            uint32_t target_addr = dst_stm32_addr + bytes_written + i;
-            if (HAL_FLASH_Program(FLASH_TYPEPROGRAM_BYTE, target_addr, buffer[i]) != HAL_OK) {
-                printf("[BOOT] Programming failed at 0x%08lX!\n", target_addr);
-                HAL_FLASH_Lock();
-                return false;
-            }
+    // Both source and destination are memory mapped, so copy word by word.
+    // Rounding up to a whole word is harmless - the staging sector is erased beyond the payload.
+    printf("[BOOT] Copying firmware 0x%08lX -> 0x%08lX (%lu bytes)...\n", src_addr, dst_addr, length);
+    for (uint32_t offset = 0; offset < length; offset += 4) {
+        uint32_t word = *(__IO uint32_t*) (src_addr + offset);
+        if (HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, dst_addr + offset, word) != HAL_OK) {
+            printf("[BOOT] Programming failed at 0x%08lX!\n", dst_addr + offset);
+            HAL_FLASH_Lock();
+            return false;
         }
-
-        bytes_written += chunk_len;
     }
 
     HAL_FLASH_Lock();
     printf("[BOOT] Internal Flash programming complete!\n");
     return true;
+}
+
+/**
+ * @brief Erases the staging sector so the image is not flashed again on next boot
+ */
+static bool erase_staging(void) {
+    FLASH_EraseInitTypeDef EraseInitStruct;
+    uint32_t SectorError = 0;
+
+    EraseInitStruct.TypeErase = FLASH_TYPEERASE_SECTORS;
+    EraseInitStruct.VoltageRange = FLASH_VOLTAGE_RANGE_3;
+    EraseInitStruct.Sector = STAGING_SECTOR;
+    EraseInitStruct.NbSectors = 1;
+
+    HAL_FLASH_Unlock();
+    HAL_StatusTypeDef status = HAL_FLASHEx_Erase(&EraseInitStruct, &SectorError);
+    HAL_FLASH_Lock();
+
+    return status == HAL_OK;
 }
 
 /* USER CODE END 0 */
@@ -201,24 +212,18 @@ int main(void)
 
     printf("\n\n\n\n--------\nBootloader\n");
 
-    // Read 128-byte header from external SPI Flash
-    Header128_t header;
-    w25qxx_read(&w25qxx, 0x00000000, (uint8_t*) &header, sizeof(Header128_t));
+    // The staged image header sits at the start of the hidden flash
+    const Header128_t *header = (const Header128_t*) STAGING_ADDRESS;
 
-    // Check if valid firmware exists in external SPI flash
-    if (header.magic == 0x4150504B && header.payload_len > 0) {
-        printf("[BOOT] New valid firmware found in SPI flash (%lu bytes).\n", header.payload_len);
+    if (header->magic == FIRMWARE_MAGIC && header->payload_len > 0 && header->payload_len <= APP_MAX_SIZE) {
+        printf("[BOOT] New firmware found in hidden flash (%lu bytes).\n", header->payload_len);
 
-        // Flash firmware to STM32 internal Flash starting at offset 128 (payload area)
-        if (flash_stm32_app(sizeof(Header128_t), APP_ADDRESS, header.payload_len)) {
+        if (flash_stm32_app(STAGING_ADDRESS + sizeof(Header128_t), APP_ADDRESS, header->payload_len)) {
 
-            printf("[BOOT] Nuking magic marker...\n");
-
-            // Invalidate magic in SPI flash header so we don't re-flash on next reboot
-            uint32_t invalid_magic = 0xFFFFFFFF;
-
-            w25qxx_erase(&w25qxx, 0x00000000, sizeof(invalid_magic));
-            w25qxx_write(&w25qxx, 0x00000000, (uint8_t*) &invalid_magic, sizeof(invalid_magic));
+            printf("[BOOT] Erasing staging sector...\n");
+            if (!erase_staging()) {
+                printf("[BOOT] ERROR: Failed to erase staging sector!\n");
+            }
 
             printf("[BOOT] Firmware update complete. Rebooting MCU...\n");
             HAL_NVIC_SystemReset();
@@ -227,7 +232,7 @@ int main(void)
             printf("[BOOT] ERROR: Failed to write internal flash!\n");
         }
     } else {
-        printf("[BOOT] No valid firmware magic found in SPI flash.\n");
+        printf("[BOOT] No valid firmware found in hidden flash.\n");
     }
 
     /* USER CODE END 2 */
