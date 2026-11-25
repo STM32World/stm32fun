@@ -14,6 +14,8 @@ Wiki: https://stm32world.com/wiki/STM32_Polyphonic_MIDI_MiniMoog
 - `tools/record_demos.sh` - resets the board, plays each demo while recording
   the line input and writes `samples/<demo>.mp3`
 - `tools/make_midis.py` - writes the demos as MIDI files to `midi/`
+- `tools/lmms2mid.py` - converts an LMMS project into a MIDI file with a
+  MiniMoog patch per track, see [midi/README.md](midi/README.md#converting-lmms-projects)
 
 ## Demo MIDI files
 

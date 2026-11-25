@@ -30,3 +30,24 @@ Recordings of the same demos are in [../samples](../samples).
 The files are made from the sequences in `tools/demos.py`:
 
     tools/make_midis.py
+
+## Converting LMMS projects
+
+`tools/lmms2mid.py` turns an LMMS project (`.mmpz` or `.mmp`) into a MIDI
+file for the synth:
+
+    tools/lmms2mid.py ~/lmms/projects/Popcorn2.mmpz      # writes midi/popcorn2.mid
+
+- Every instrument track gets its own MIDI channel (1-9, 15, 16) and a
+  MiniMoog patch chosen from the track's General MIDI program (bass, organ,
+  pad, brass, reed, lead, pluck). Track volume and pan go into the patch.
+- A drum track (sound font bank 128) is split by drum into kick, snare, hats,
+  cymbals and toms on channels 10-14, each with a drum patch made from the
+  noise source and the self-oscillating filter.
+- Volume automation becomes CC 7. The patches go out one channel at a time in
+  the first second, then the song starts.
+- Tracks that need a specific sound can be given one in `SONGS` in the
+  script, by project name and track name.
+
+The synth has 8 voices, so dense songs steal voices. Popcorn2 peaks at 8
+voices and 60% CPU.
