@@ -53,12 +53,13 @@ PATCHES = {
     'lead': dict(osc1_range="8'", osc1_wave='saw', osc2_range="8'", osc2_wave='square', osc2_detune=0.06,
                  osc2_level=0.6, cutoff=1800, emphasis=0.35, contour=0.3, kbd=2, f_decay=0.6, f_sustain=0.6,
                  l_attack=0.01, l_decay=0.5, l_sustain=0.9, decay_sw=1),
-    # The original Popcorn was a Moog: a resonant filter snapped shut by a very fast
-    # contour makes the "pop", the loudness dies away almost as quickly
-    'popcorn': dict(osc1_range="8'", osc1_wave='square', osc2_range="8'", osc2_wave='narrow', osc2_detune=0.03,
-                    osc1_level=0.9, osc2_level=0.3, cutoff=350, emphasis=0.75, contour=0.75, kbd=3,
-                    f_attack=0.001, f_decay=0.06, f_sustain=0.0, l_attack=0.001, l_decay=0.14, l_sustain=0.0,
-                    decay_sw=1, drive=0.3, volume=1.0),
+    # The original Popcorn was a Moog. Measured from the record: each note is a ~45 ms
+    # blip, ~12 ms attack then -20 dB 25 ms later, a square with weak even harmonics
+    # through a filter at ~3.5x the note (3rd harmonic -14 dB, 5th -26 dB), no sweep.
+    'popcorn': dict(osc1_range="8'", osc1_wave='square', osc2_range="8'", osc2_wave='saw', osc2_detune=0.0,
+                    osc1_level=0.9, osc2_level=0.25, cutoff=950, emphasis=0.1, contour=0.1, kbd=3,
+                    f_attack=0.001, f_decay=0.03, f_sustain=0.0, l_attack=0.012, l_decay=0.035, l_sustain=0.0,
+                    decay_sw=1, volume=1.0),
 }
 
 # Drum kit: each kind of drum on its own channel, (patch, note or None to keep the note)
