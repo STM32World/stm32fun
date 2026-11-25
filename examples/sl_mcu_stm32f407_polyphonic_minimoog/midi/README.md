@@ -10,6 +10,7 @@ its own sound no matter what the synth was doing before.
 | `pad.mid` | 1 | Five note chords with high emphasis and a filter sweep |
 | `lead.mid` | 1 | Lead with glide, vibrato from oscillator 3 on the mod wheel |
 | `multi.mid` | 1, 2, 3 | Bass, pad (left) and resonant pluck arpeggio (right) at once |
+| `popcorn2.mid` | 1-8, 10-14 | Popcorn, converted from an LMMS project with `tools/lmms2mid.py` (2:34) |
 
 ## Playing them
 
