@@ -23,15 +23,38 @@ Recording the demos (Linux, needs python3, parecord, sox and lame):
 ![Web panel](web/screenshot.png)
 
 `web/index.html` is a Minimoog style panel with a keyboard. It talks to the
-synth directly with Web MIDI (Chrome, Edge, Opera or Firefox), so no server
-software is needed on the synth side. Web MIDI only works on a secure origin,
-so serve it locally:
+synth directly with Web MIDI, so the only connection needed is the synth's USB
+MIDI port.
 
-    cd web
-    python3 -m http.server 8000
+### Running the web panel
 
-and open http://localhost:8000, allow MIDI access and pick "STM32World
-MiniMoog" as the synth (it is selected automatically when found).
+Web MIDI only works on a secure origin (`https://` or `http://localhost`), so
+opening `index.html` straight from disk (`file://`) does not work. Serve the
+`web` folder with any local web server, for example the one built into Python:
+
+1. Connect the synth over USB.
+2. Start the server in the `web` folder:
+
+       cd examples/sl_mcu_stm32f407_polyphonic_minimoog/web
+       python3 -m http.server 8000
+
+   On Windows use `py -m http.server 8000`. Any other static server works too,
+   for example `npx http-server -p 8000`.
+3. Open http://localhost:8000 in Chrome, Edge or Opera. Firefox works as well
+   but first asks you to install a small site permission add-on for MIDI.
+4. Allow MIDI access when the browser asks. The **Synth** dropdown selects
+   "STM32World MiniMoog" automatically and the dot next to it turns green.
+5. Stop the server with Ctrl+C when done.
+
+If the Synth dropdown stays on "No MIDI output":
+
+- Check that MIDI access is allowed for the page (site settings icon in the
+  address bar) and reload.
+- Make sure the synth is connected and shows up as a MIDI device.
+- On Windows, close other programs (DAWs) that have the synth's MIDI port
+  open, Windows only lets one program use a MIDI port at a time.
+
+### Using the web panel
 
 - Each of the 16 channel buttons shows that channel's patch; the page keeps all
   16 in the browser's local storage and sends the patch when you switch channel
