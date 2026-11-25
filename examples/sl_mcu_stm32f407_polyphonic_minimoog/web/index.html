@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>STM32World MiniMoog</title>
+<link rel="stylesheet" href="minimoog.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">STM32World <b>MiniMoog</b></div>
+
+  <label class="field">
+    <span>Synth</span>
+    <select id="midi-out"><option value="">No MIDI output</option></select>
+  </label>
+  <span id="midi-status" class="status" title="MIDI status"></span>
+
+  <label class="field">
+    <span>Keyboard in</span>
+    <select id="midi-in"><option value="">None</option></select>
+  </label>
+
+  <div class="channels" id="channels" role="radiogroup" aria-label="MIDI channel"></div>
+
+  <div class="actions">
+    <button id="btn-send" title="Send every panel setting of this channel to the synth">Send</button>
+    <button id="btn-init" title="Reset this channel to the default patch">Init</button>
+    <button id="btn-save" title="Download this channel's patch">Save</button>
+    <button id="btn-load" title="Load a patch into this channel">Load</button>
+    <input id="file-load" type="file" accept=".json,application/json" hidden>
+  </div>
+</header>
+
+<main class="instrument">
+  <div class="cheek left"></div>
+
+  <div class="body">
+    <section class="panel" id="panel">
+      <div class="section" id="sec-controllers"><h2>Controllers</h2><div class="grid"></div></div>
+      <div class="section" id="sec-oscillators"><h2>Oscillator bank</h2><div class="grid osc-grid"></div></div>
+      <div class="section" id="sec-mixer"><h2>Mixer</h2><div class="grid"></div></div>
+      <div class="section" id="sec-modifiers"><h2>Modifiers</h2><div class="grid"></div></div>
+      <div class="section" id="sec-output"><h2>Output</h2><div class="grid"></div></div>
+    </section>
+
+    <section class="keybed">
+      <div class="left-controls">
+        <div class="left-col">
+          <div class="switch-row" id="perf-switches"></div>
+          <div class="octave">
+            <button id="oct-down" aria-label="Octave down">&minus;</button>
+            <span id="oct-label">C2</span>
+            <button id="oct-up" aria-label="Octave up">+</button>
+          </div>
+          <label class="hold"><input type="checkbox" id="sustain"> Sustain</label>
+        </div>
+        <div class="wheels">
+          <div class="wheel-wrap"><div class="wheel" id="wheel-bend"><div class="wheel-thumb"></div></div><span>Pitch</span></div>
+          <div class="wheel-wrap"><div class="wheel" id="wheel-mod"><div class="wheel-thumb"></div></div><span>Mod</span></div>
+        </div>
+      </div>
+      <div class="keyboard" id="keyboard" aria-label="Keyboard"></div>
+    </section>
+  </div>
+
+  <div class="cheek right"></div>
+</main>
+
+<footer class="hint">
+  Drag knobs up and down (shift for fine), scroll wheel works too, double-click resets.
+  Play with the mouse or the computer keyboard: <kbd>Z</kbd>&ndash;<kbd>M</kbd> and <kbd>Q</kbd>&ndash;<kbd>I</kbd>.
+  Each MIDI channel has its own patch.
+</footer>
+
+<script src="minimoog.js"></script>
+</body>
+</html>
