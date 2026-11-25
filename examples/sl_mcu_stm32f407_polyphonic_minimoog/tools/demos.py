@@ -37,8 +37,19 @@ def expo(x, lo, hi): return max(0, min(127, round(math.log(x / lo) / math.log(hi
 def exp14(x, lo, hi): return max(0, min(16383, round(math.log(x / lo) / math.log(hi / lo) * 16383)))
 def bip14(x, lo, hi): return max(0, min(16383, round(8192 + (2 * (x - lo) / (hi - lo) - 1) * 8191)))
 
+# The firmware's default patch (synth.c), in the units patch() takes
+DEFAULTS = dict(osc1_range="8'", osc1_wave='saw', osc2_range="8'", osc2_wave='saw', osc2_detune=0.07,
+                osc3_range="16'", osc3_wave='square', osc3_detune=0.0, osc3_kbd=1,
+                osc1_level=0.8, osc2_level=0.8, osc3_level=0.5, noise_level=0.5,
+                osc1_on=1, osc2_on=1, osc3_on=0, noise_on=0, noise_pink=0, drive=0.0,
+                cutoff=800, emphasis=0.3, contour=0.5, kbd=1,
+                f_attack=0.005, f_decay=0.4, f_sustain=0.3, l_attack=0.005, l_decay=0.3, l_sustain=0.8, decay_sw=1,
+                glide_time=0.1, glide=0, mod_mix=0.0, osc_mod=0, filter_mod=0, volume=0.8, pan=0.0)
+
+
 def patch(ch, **p):
-    """Panel settings in real units -> list of (status, cc, value) events."""
+    """Complete panel in real units (defaults + p) -> list of (status, cc, value) events."""
+    p = {**DEFAULTS, **p}
     ev = []
     def cc(name, v): ev.append((0xB0 | ch, CC[name], v))
     for k, v in p.items():

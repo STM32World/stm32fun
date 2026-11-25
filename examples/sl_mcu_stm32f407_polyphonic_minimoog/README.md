@@ -7,11 +7,30 @@ DAC Streamline blade.
 Wiki: https://stm32world.com/wiki/STM32_Polyphonic_MIDI_MiniMoog
 
 - `synth/` - the synth engine, MIDI CC map and MIDI handling
+- `midi/` - demo MIDI files that set up their own patches, see [midi/README.md](midi/README.md)
 - `samples/` - short demo recordings from the line out
 - `web/` - HTML5 panel and keyboard that talks to the synth over Web MIDI
 - `tools/demos.py` - plays the demo sequences (patches as CCs) into the synth over raw MIDI
 - `tools/record_demos.sh` - resets the board, plays each demo while recording
   the line input and writes `samples/<demo>.mp3`
+- `tools/make_midis.py` - writes the demos as MIDI files to `midi/`
+
+## Demo MIDI files
+
+The `midi` folder has four demos as Standard MIDI Files: `bass.mid`,
+`pad.mid`, `lead.mid` and `multi.mid` (three channels at once). Each file
+first sends the complete patch for every channel it uses, so it sounds the
+same whatever the synth was set to.
+
+On Linux play them with aplaymidi (alsa-utils):
+
+    aplaymidi -l                                         # find the synth's port
+    aplaymidi -p "STM32World MiniMoog" midi/bass.mid
+
+Elsewhere import them into a DAW and set the MIDI output to "STM32World
+MiniMoog". See [midi/README.md](midi/README.md) for details.
+
+## Recording the demos
 
 Recording the demos (Linux, needs python3, parecord, sox and lame):
 
