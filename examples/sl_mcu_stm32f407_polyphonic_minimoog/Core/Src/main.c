@@ -95,13 +95,42 @@ uint32_t dwt_cycles(void) {
     return DWT->CYCCNT;
 }
 
+/*
+ * Non-blocking printf: characters go into a ring buffer that the USART1 TXE
+ * interrupt empties, so debug output never stalls audio rendering. When the
+ * buffer is full, characters are dropped rather than waiting.
+ */
+#define UART_TX_BUFFER_SIZE 2048
+
+static volatile uint8_t uart_tx_buffer[UART_TX_BUFFER_SIZE];
+static volatile uint16_t uart_tx_head = 0;
+static volatile uint16_t uart_tx_tail = 0;
+
+static void uart_put(uint8_t c) {
+    uint16_t next = (uart_tx_head + 1) % UART_TX_BUFFER_SIZE;
+    if (next == uart_tx_tail)
+        return; // Full, drop
+    uart_tx_buffer[uart_tx_head] = c;
+    uart_tx_head = next;
+    SET_BIT(USART1->CR1, USART_CR1_TXEIE);
+}
+
+// Called from USART1_IRQHandler (stm32f4xx_it.c)
+void uart_tx_irq(void) {
+    if ((USART1->SR & USART_SR_TXE) && (USART1->CR1 & USART_CR1_TXEIE)) {
+        if (uart_tx_tail != uart_tx_head) {
+            USART1->DR = uart_tx_buffer[uart_tx_tail];
+            uart_tx_tail = (uart_tx_tail + 1) % UART_TX_BUFFER_SIZE;
+        } else {
+            CLEAR_BIT(USART1->CR1, USART_CR1_TXEIE);
+        }
+    }
+}
+
 int __io_putchar(int ch) {
-    if (ch == '\n') {
-        HAL_UART_Transmit(&huart1, (uint8_t*) "\r", 1, HAL_MAX_DELAY);
-    }
-    if (HAL_UART_Transmit(&huart1, (uint8_t*) &ch, 1, HAL_MAX_DELAY) != HAL_OK) {
-        return -1;
-    }
+    if (ch == '\n')
+        uart_put('\r');
+    uart_put((uint8_t) ch);
     return ch;
 }
 
@@ -167,6 +196,10 @@ int main(void)
   /* USER CODE BEGIN 2 */
 
     printf("\n\n\nStarting USB MIDI Synth (Deferred Execution Model)\n");
+
+    // UART TX interrupt for the non-blocking printf
+    HAL_NVIC_SetPriority(USART1_IRQn, 6, 0);
+    HAL_NVIC_EnableIRQ(USART1_IRQn);
 
     // Enable USB IRQ for TinyUSB event handling
     HAL_NVIC_SetPriority(OTG_FS_IRQn, 5, 0);

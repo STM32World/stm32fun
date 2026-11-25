@@ -247,4 +247,12 @@ void OTG_FS_IRQHandler(void)
 
 /* USER CODE BEGIN 1 */
 
+// USART1 is only used for the non-blocking printf (see main.c). Not enabled in
+// CubeMX, so the handler lives here.
+void uart_tx_irq(void);
+
+void USART1_IRQHandler(void) {
+    uart_tx_irq();
+}
+
 /* USER CODE END 1 */
