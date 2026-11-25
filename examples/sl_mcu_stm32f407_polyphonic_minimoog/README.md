@@ -20,6 +20,8 @@ Recording the demos (Linux, needs python3, parecord, sox and lame):
 
 ## Web panel
 
+![Web panel](web/screenshot.png)
+
 `web/index.html` is a Minimoog style panel with a keyboard. It talks to the
 synth directly with Web MIDI (Chrome, Edge, Opera or Firefox), so no server
 software is needed on the synth side. Web MIDI only works on a secure origin,
